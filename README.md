@@ -18,7 +18,7 @@ In Claude Desktop, or any MCP Client, you can use natural language to:
 
 ### API Token Requirement
 
-**Important:** You need an API token to use this MCP server. Set it using the API_TOKEN environment variable.
+**Important:** You need an API token to use this MCP server. Set it using the AIR_API_TOKEN environment variable.
 
 ## Installation
 
