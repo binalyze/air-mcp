@@ -7,6 +7,8 @@ import {
 import { z } from 'zod';
 import { config } from './config';
 import { assetTools, ListAssetsArgsSchema } from './tools/assets';
+import { acquisitionTools, ListAcquisitionProfilesArgsSchema } from './tools/acquisitions';
+import { organizationTools, ListOrganizationsArgsSchema } from './tools/organizations';
 
 const server = new Server({
   name: 'air-mcp',
@@ -35,6 +37,33 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: [],
         },
       },
+      {
+        name: 'list_acquisition_profiles',
+        description: 'List all acquisition profiles in the system',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            organizationIds: {
+              type: 'string',
+              description: 'Organization IDs to filter acquisition profiles by. Leave empty to use default (0).',
+            },
+            allOrganizations: {
+              type: 'boolean',
+              description: 'Whether to include profiles from all organizations. Defaults to true.',
+            },
+          },
+          required: [],
+        },
+      },
+      {
+        name: 'list_organizations',
+        description: 'List all organizations in the system',
+        inputSchema: {
+          type: 'object',
+          properties: {},
+          required: [],
+        },
+      },
     ],
   };
 });
@@ -44,14 +73,20 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   const { name, arguments: args } = request.params;
 
   try {
+    // Validate API token only when a tool is actually called - lazy loading
+    if (!config.apiToken || config.apiToken.trim() === '') {
+      throw new Error('API_TOKEN environment variable not set. Please set this variable to use the AIR API.');
+    }
+    
     if (name === 'list_assets') {
-      // Validate API token only when the tool is actually called
-      if (!config.apiToken || config.apiToken.trim() === '') {
-        throw new Error('API_TOKEN environment variable not set. Please set this variable to use the Assets API.');
-      }
-      
       const parsedArgs = ListAssetsArgsSchema.parse(args);
       return await assetTools.listAssets(parsedArgs);
+    } else if (name === 'list_acquisition_profiles') {
+      const parsedArgs = ListAcquisitionProfilesArgsSchema.parse(args);
+      return await acquisitionTools.listAcquisitionProfiles(parsedArgs);
+    } else if (name === 'list_organizations') {
+      const parsedArgs = ListOrganizationsArgsSchema.parse(args);
+      return await organizationTools.listOrganizations();
     } else {
       throw new Error(`Unknown tool: ${name}`);
     }
