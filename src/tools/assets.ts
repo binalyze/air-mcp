@@ -4,15 +4,20 @@ import { api, Asset, AssetsResponse } from '../api/Assets/Assets';
 
 // Schema for list assets arguments
 export const ListAssetsArgsSchema = z.object({
-  organizationIds: z.union([z.string(), z.array(z.string())]).optional(),
+  organizationIds: z.union([
+    z.string(),
+    z.array(z.string())
+  ]).optional().describe('Organization IDs to filter assets by. Use "0" for all organizations or specific IDs like "123" or ["123", "456"]'),
 });
 
 // Schema for get asset details arguments
+// TODO: This will be used for get asset by id
 export const GetAssetArgsSchema = z.object({
   id: z.string(),
 });
 
 // Format asset for display
+// TODO: This will be used for get asset by i
 function formatAsset(asset: Asset): string {
   return `
 Asset: ${asset.name} (${asset._id})
@@ -37,7 +42,10 @@ export const assetTools = {
   // List all assets
   async listAssets(args: z.infer<typeof ListAssetsArgsSchema>) {
     try {
-      const response = await api.getAssets(args.organizationIds);
+      const orgIds = args.organizationIds === undefined || args.organizationIds === "" 
+        ? "0" 
+        : args.organizationIds;
+      const response = await api.getAssets(orgIds);
       
       if (!response.success) {
         return {
