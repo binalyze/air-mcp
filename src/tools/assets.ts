@@ -1,6 +1,6 @@
 // src/tools/assets.ts
 import { z } from 'zod';
-import { api, Asset, AssetsResponse } from '../api/Assets/Assets';
+import { api, Asset, AssetsResponse } from '../api/assets/assets';
 
 // Schema for list assets arguments
 export const ListAssetsArgsSchema = z.object({
