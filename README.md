@@ -29,7 +29,7 @@ In Claude Desktop, or any MCP Client, you can use natural language to:
    ```json
    {
      "mcpServers": {
-       "assets": {
+       "air-mcp": {
          "command": "npx",
          "args": ["-y", "air-mcp"],
          "env": {
