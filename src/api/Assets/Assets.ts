@@ -66,7 +66,7 @@ export const api = {
     try {
       const orgIds = Array.isArray(organizationIds) ? organizationIds.join(',') : organizationIds;
       const response = await axios.get(
-        `http://${config.apiHost}:${config.apiPort}/api/public/assets`,
+        `${config.airHost}/api/public/assets`,
         {
           params: {
             'filter[organizationIds]': orgIds
