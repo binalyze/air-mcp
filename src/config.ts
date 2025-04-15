@@ -3,7 +3,6 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 export const config = {
-  apiHost: process.env.API_HOST || 'localhost',
-  apiPort: process.env.API_PORT || '8000',
-  apiToken: process.env.API_TOKEN || '',
+  airHost: process.env.AIR_HOST || 'localhost',
+  apiToken: process.env.AIR_API_TOKEN || ''
 };
