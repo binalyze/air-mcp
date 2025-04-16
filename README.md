@@ -19,6 +19,7 @@ A Node.js server implementing **Model Context Protocol (MCP)** for Binalyze AIR,
 - **Case Management** - List cases in your organization.
 - **Policy Management** - See security policies across your organization.
 - **Task Management** - Track forensic collection tasks and their statuses.
+- **Triage Rules** - View YARA, Osquery and Sigma rules for threat detection.
 
 ## Overview
 
@@ -123,6 +124,7 @@ In Claude Desktop, or any MCP Client, you can use natural language commands:
 | `List all cases` | Displays cases with status and creation time |
 | `List all policies` | Shows security and collection policies |
 | `List all tasks` | Lists all tasks with their statuses |
+| `List all triage rules` | Shows YARA and Sigma rules for threat detection |
 
 ### Filtering by Organization
 
@@ -133,6 +135,7 @@ List all assets for organization 123
 Show me all cases for organization 456
 Get policies for organization 789
 List tasks for organization 123
+List triage rules for organization 123
 ```
 
 ## Response Example
@@ -143,3 +146,7 @@ a1b2c3d4: Win10-Workstation1 (Windows - Windows 10 Pro)
 e5f6g7h8: Ubuntu-Server1 (Linux - Ubuntu 20.04)
 i9j0k1l2: MacBook-Pro (macOS - macOS 12.3)
 ```
+Found 3 triage rules:
+corewebshell_detection: core.webshell_detection (Engine: yara, Search In: both)
+fireeye-sunburst-countermeasures: FireEye Sunburst Countermeasures (Engine: yara, Search In: both)
+fireeye-red-team-tools-countermeasures: FireEye Red Team Tools Countermeasures (Engine: yara, Search In: both)
