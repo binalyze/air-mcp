@@ -7,10 +7,10 @@ import {
   ListToolsRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js';
 import { z } from 'zod';
-import { config } from './config';
 import { assetTools, ListAssetsArgsSchema } from './tools/assets';
 import { acquisitionTools, ListAcquisitionProfilesArgsSchema } from './tools/acquisitions';
-import { organizationTools, ListOrganizationsArgsSchema } from './tools/organizations';
+import { organizationTools } from './tools/organizations';
+import { caseTools, ListCasesArgsSchema } from './tools/cases';
 import { validateAirApiToken } from './utils/validation';
 
 const server = new Server({
@@ -68,6 +68,20 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: [],
         },
       },
+      {
+        name: 'list_cases',
+        description: 'List all cases in the system',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            organizationIds: {
+              type: 'string',
+              description: 'Organization IDs to filter cases by. Leave empty to use default (0).',
+            },
+          },
+          required: [],
+        },
+      },
     ],
   };
 });
@@ -88,6 +102,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     } else if (name === 'list_organizations') {
       validateAirApiToken();
       return await organizationTools.listOrganizations();
+    } else if (name === 'list_cases') {
+      validateAirApiToken();
+      const parsedArgs = ListCasesArgsSchema.parse(args);
+      return await caseTools.listCases(parsedArgs);
     } else {
       throw new Error(`Unknown tool: ${name}`);
     }
