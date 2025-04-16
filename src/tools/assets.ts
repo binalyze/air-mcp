@@ -7,7 +7,7 @@ export const ListAssetsArgsSchema = z.object({
   organizationIds: z.union([
     z.string(),
     z.array(z.string())
-  ]).optional().describe('Organization IDs to filter assets by. Use "0" for all organizations or specific IDs like "123" or ["123", "456"]'),
+  ]).optional().describe('Organization IDs to filter assets by. Defaults to "0" or specific IDs like "123" or ["123", "456"]'),
 });
 
 // Schema for get asset details arguments

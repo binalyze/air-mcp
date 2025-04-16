@@ -6,7 +6,7 @@ export const ListAcquisitionProfilesArgsSchema = z.object({
   organizationIds: z.union([
     z.string(),
     z.array(z.string())
-  ]).optional().describe('Organization IDs to filter acquisition profiles by. Use "0" for all organizations or specific IDs like "123" or ["123", "456"]'),
+  ]).optional().describe('Organization IDs to filter acquisition profiles by. Defaults to "0" or specific IDs like "123" or ["123", "456"]'),
   allOrganizations: z.boolean().optional().describe('Whether to include profiles from all organizations. Defaults to true.'),
 });
 
