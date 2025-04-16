@@ -135,7 +135,7 @@ Get policies for organization 789
 List tasks for organization 123
 ```
 
-## 📊 Response Example
+## Response Example
 
 ```
 Found 3 assets:
