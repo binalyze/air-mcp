@@ -55,7 +55,7 @@ export const api = {
         {
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${config.apiToken}`
+            'Authorization': `Bearer ${config.airApiToken}`
           }
         }
       );
