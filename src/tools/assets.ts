@@ -1,6 +1,6 @@
 // src/tools/assets.ts
 import { z } from 'zod';
-import { api, Asset, AssetsResponse } from '../api/assets/assets';
+import { api, Asset} from '../api/assets/assets';
 
 // Schema for list assets arguments
 export const ListAssetsArgsSchema = z.object({
@@ -58,7 +58,7 @@ export const assetTools = {
         };
       }
       
-      const assetList = response.result.entities.map(asset => 
+      const assetList = response.result.entities.map((asset: Asset) => 
         `${asset._id}: ${asset.name} (${asset.platform} - ${asset.os})`
       ).join('\n');
       
