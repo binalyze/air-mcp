@@ -17,7 +17,7 @@ import { validateAirApiToken } from './utils/validation';
 
 const server = new Server({
   name: 'air-mcp',
-  version: '1.4.0'
+  version: '1.5.0'
 }, {
   capabilities: {
     tools: {}
