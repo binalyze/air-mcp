@@ -9,10 +9,12 @@ Supports:
 - Asset Management
 - Acquisition Profiles Management
 - Organization Management
+- Case Management
+- Policy Management
 
 ## Overview
 
-This MCP server allows LLMs to interact with your AIR through natural language, providing tools to list assets, acquisition profiles, and organizations in your system.
+This MCP server allows LLMs to interact with your AIR through natural language, providing tools to list assets, acquisition profiles, organizations, cases, and policies in your system.
 
 ## How to Use
 
@@ -21,6 +23,14 @@ In Claude Desktop, or any MCP Client, you can use natural language to:
 - `List all assets in the system`
 - `List all acquisition profiles in the system`
 - `List all organizations in the system`
+- `List all cases in the system`
+- `List all policies in the system`
+
+You can also filter by organization ID:
+
+- `List all assets for organization 123`
+- `Show me all cases for organization 456`
+- `Get policies for organization 789`
 
 ### API Token Requirement
 

@@ -11,6 +11,7 @@ import { assetTools, ListAssetsArgsSchema } from './tools/assets';
 import { acquisitionTools, ListAcquisitionProfilesArgsSchema } from './tools/acquisitions';
 import { organizationTools } from './tools/organizations';
 import { caseTools, ListCasesArgsSchema } from './tools/cases';
+import { policyTools, ListPoliciesArgsSchema } from './tools/policies';
 import { validateAirApiToken } from './utils/validation';
 
 const server = new Server({
@@ -82,6 +83,20 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: [],
         },
       },
+      {
+        name: 'list_policies',
+        description: 'List all policies in the system',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            organizationIds: {
+              type: 'string',
+              description: 'Organization IDs to filter policies by. Leave empty to use default (0).',
+            },
+          },
+          required: [],
+        },
+      },
     ],
   };
 });
@@ -106,6 +121,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       validateAirApiToken();
       const parsedArgs = ListCasesArgsSchema.parse(args);
       return await caseTools.listCases(parsedArgs);
+    } else if (name === 'list_policies') {
+      validateAirApiToken();
+      const parsedArgs = ListPoliciesArgsSchema.parse(args);
+      return await policyTools.listPolicies(parsedArgs);
     } else {
       throw new Error(`Unknown tool: ${name}`);
     }
