@@ -11,6 +11,7 @@ import { config } from './config';
 import { assetTools, ListAssetsArgsSchema } from './tools/assets';
 import { acquisitionTools, ListAcquisitionProfilesArgsSchema } from './tools/acquisitions';
 import { organizationTools, ListOrganizationsArgsSchema } from './tools/organizations';
+import { validateAirApiToken } from './utils/validation';
 
 const server = new Server({
   name: 'air-mcp',
@@ -77,21 +78,15 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
   try {    
     if (name === 'list_assets') {
-      if (!config.airApiToken || config.airApiToken.trim() === '') {
-        throw new Error('AIR_API_TOKEN not provided. Please configure the MCP server with a valid airApiToken to execute tools.');
-      }
+      validateAirApiToken();
       const parsedArgs = ListAssetsArgsSchema.parse(args);
       return await assetTools.listAssets(parsedArgs);
     } else if (name === 'list_acquisition_profiles') {
-      if (!config.airApiToken || config.airApiToken.trim() === '') {
-        throw new Error('AIR_API_TOKEN not provided. Please configure the MCP server with a valid airApiToken to execute tools.');
-      }
+      validateAirApiToken();
       const parsedArgs = ListAcquisitionProfilesArgsSchema.parse(args);
       return await acquisitionTools.listAcquisitionProfiles(parsedArgs);
     } else if (name === 'list_organizations') {
-      if (!config.airApiToken || config.airApiToken.trim() === '') {
-        throw new Error('AIR_API_TOKEN not provided. Please configure the MCP server with a valid airApiToken to execute tools.');
-      }
+      validateAirApiToken();
       return await organizationTools.listOrganizations();
     } else {
       throw new Error(`Unknown tool: ${name}`);
