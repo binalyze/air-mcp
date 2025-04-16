@@ -14,7 +14,7 @@ import { organizationTools, ListOrganizationsArgsSchema } from './tools/organiza
 
 const server = new Server({
   name: 'air-mcp',
-  version: '0.0.1'
+  version: '1.0.1'
 }, {
   capabilities: {
     tools: {}
