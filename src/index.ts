@@ -14,11 +14,12 @@ import { caseTools, ListCasesArgsSchema } from './tools/cases';
 import { policyTools, ListPoliciesArgsSchema } from './tools/policies';
 import { taskTools, ListTasksArgsSchema } from './tools/tasks';
 import { triageTools, ListTriageRulesArgsSchema } from './tools/triages';
+import { userTools, ListUsersArgsSchema } from './tools/users';
 import { validateAirApiToken } from './utils/validation';
 
 const server = new Server({
   name: 'air-mcp',
-  version: '1.6.0'
+  version: '1.7.0'
 }, {
   capabilities: {
     tools: {}
@@ -127,6 +128,20 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: [],
         },
       },
+      {
+        name: 'list_users',
+        description: 'List all users in the system',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            organizationIds: {
+              type: 'string',
+              description: 'Organization IDs to filter users by. Leave empty to use default (0).',
+            },
+          },
+          required: [],
+        },
+      },
     ],
   };
 });
@@ -163,6 +178,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       validateAirApiToken();
       const parsedArgs = ListTriageRulesArgsSchema.parse(args);
       return await triageTools.listTriageRules(parsedArgs);
+    } else if (name === 'list_users') {
+      validateAirApiToken();
+      const parsedArgs = ListUsersArgsSchema.parse(args);
+      return await userTools.listUsers(parsedArgs);
     } else {
       throw new Error(`Unknown tool: ${name}`);
     }
