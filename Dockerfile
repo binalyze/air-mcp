@@ -1,26 +1,19 @@
 FROM node:lts-alpine
 
 # Create app directory
-WORKDIR /app
+WORKDIR /usr/src/app
 
-# Install app dependencies
-COPY package.json package-lock.json ./
-RUN npm install
+# Copy package.json and package-lock.json
+COPY package*.json ./
 
-# Bundle app source
+# Install dependencies without triggering any unwanted scripts
+RUN npm install --ignore-scripts
+
+
 COPY . .
 
-# Build the project
+# Build the application
 RUN npm run build
 
-# Set production environment
-ENV NODE_ENV=production
-
-# Clean up dev dependencies
-RUN npm ci --ignore-scripts --omit=dev
-
-# Expose port if needed by Smithery
-EXPOSE 3000
-
-# Run the server
-ENTRYPOINT ["node", "build/index.js"]
+# Command to run the server
+CMD [ "node", "build/index.js" ]
