@@ -1,5 +1,7 @@
 # Binalyze AIR MCP Server
 
+[![smithery badge](https://smithery.ai/badge/@binalyze/air-mcp)](https://smithery.ai/server/@binalyze/air-mcp)
+
 A Node.js server implementing Model Context Protocol (MCP) for Binalyze AIR.
 
 Supports:
