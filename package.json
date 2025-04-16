@@ -1,6 +1,6 @@
 {
   "name": "@binalyze/air-mcp",
-  "version": "1.7.0",
+  "version": "1.7.1",
   "description": "Binalyze AIR MCP Server",
   "main": "build/index.js",
   "bin": {
