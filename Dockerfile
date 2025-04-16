@@ -1,23 +1,26 @@
-FROM node:22-alpine as builder
+FROM node:lts-alpine
 
-COPY . /app
-
+# Create app directory
 WORKDIR /app
 
+# Install app dependencies
+COPY package.json package-lock.json ./
 RUN npm install
 
+# Bundle app source
+COPY . .
+
+# Build the project
 RUN npm run build
 
-FROM node:22-alpine AS release
-
-COPY --from=builder /app/build /app/build
-COPY --from=builder /app/package.json /app/package.json
-COPY --from=builder /app/package-lock.json /app/package-lock.json
-
+# Set production environment
 ENV NODE_ENV=production
 
-WORKDIR /app
+# Clean up dev dependencies
+RUN npm ci --ignore-scripts --omit=dev
 
-RUN npm ci --ignore-scripts --omit-dev
+# Expose port if needed by Smithery
+EXPOSE 3000
 
+# Run the server
 ENTRYPOINT ["node", "build/index.js"]
