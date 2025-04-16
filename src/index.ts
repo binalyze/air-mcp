@@ -12,6 +12,7 @@ import { acquisitionTools, ListAcquisitionProfilesArgsSchema } from './tools/acq
 import { organizationTools } from './tools/organizations';
 import { caseTools, ListCasesArgsSchema } from './tools/cases';
 import { policyTools, ListPoliciesArgsSchema } from './tools/policies';
+import { taskTools, ListTasksArgsSchema } from './tools/tasks';
 import { validateAirApiToken } from './utils/validation';
 
 const server = new Server({
@@ -97,6 +98,20 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: [],
         },
       },
+      {
+        name: 'list_tasks',
+        description: 'List all tasks in the system',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            organizationIds: {
+              type: 'string',
+              description: 'Organization IDs to filter tasks by. Leave empty to use default (0).',
+            },
+          },
+          required: [],
+        },
+      },
     ],
   };
 });
@@ -125,6 +140,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       validateAirApiToken();
       const parsedArgs = ListPoliciesArgsSchema.parse(args);
       return await policyTools.listPolicies(parsedArgs);
+    } else if (name === 'list_tasks') {
+      validateAirApiToken();
+      const parsedArgs = ListTasksArgsSchema.parse(args);
+      return await taskTools.listTasks(parsedArgs);
     } else {
       throw new Error(`Unknown tool: ${name}`);
     }
