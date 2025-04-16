@@ -1,59 +1,93 @@
-# Binalyze AIR MCP Server
+# 🛡️ Binalyze AIR MCP Server
 
 [![smithery badge](https://smithery.ai/badge/@binalyze/air-mcp)](https://smithery.ai/server/@binalyze/air-mcp)
+[![Node.js](https://img.shields.io/badge/Node.js-18+-green)](https://nodejs.org/)
+[![MCP](https://img.shields.io/badge/MCP-Protocol-blue)](https://modelcontextprotocol.ai/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-A Node.js server implementing Model Context Protocol (MCP) for Binalyze AIR.
+<p align="center">
+  <img src="src/assets/bi-logo.png" alt="AIR Logo" width="180"/>
+</p>
 
-Supports:
+A Node.js server implementing **Model Context Protocol (MCP)** for Binalyze AIR, enabling natural language interaction with AIR's digital forensics and incident response capabilities.
 
-- Asset Management
-- Acquisition Profiles Management
-- Organization Management
-- Case Management
-- Policy Management
+## ✨ Features
 
-## Overview
+- **Asset Management** - List assets in your organization.
+- **Acquisition Profiles** - List acquisition profiles.
+- **Organization Management** - List organizations.
+- **Case Management** - List cases in your organization.
+- **Policy Management** - See security policies across your organization.
+- **Task Management** - Track forensic collection tasks and their statuses.
 
-This MCP server allows LLMs to interact with your AIR through natural language, providing tools to list assets, acquisition profiles, organizations, cases, and policies in your system.
+## 🔍 Overview
+
+This MCP server creates a bridge between **Large Language Models (LLMs)** and Binalyze AIR, allowing interaction through natural language. Retrieve information about your digital forensics environment without writing code or learning complex APIs.
 
 ## How to Use
 
-In Claude Desktop, or any MCP Client, you can use natural language to:
+In Claude Desktop, or any MCP Client, you can use natural language commands:
 
-- `List all assets in the system`
-- `List all acquisition profiles in the system`
-- `List all organizations in the system`
-- `List all cases in the system`
-- `List all policies in the system`
+| Command | Description |
+|---------|-------------|
+| `List all assets in the system` | Shows all managed/unmanaged endpoints with OS, platform info |
+| `List all acquisition profiles` | Displays available acquisition profiles |
+| `List all organizations` | Shows all organizations in environments |
+| `List all cases` | Displays cases with status and creation time |
+| `List all policies` | Shows security and collection policies |
+| `List all tasks` | Lists all tasks with their statuses |
 
-You can also filter by organization ID:
+### Filtering by Organization
 
-- `List all assets for organization 123`
-- `Show me all cases for organization 456`
-- `Get policies for organization 789`
+You can filter results by organization ID:
 
-### API Token Requirement
+```
+List all assets for organization 123
+Show me all cases for organization 456
+Get policies for organization 789
+List tasks for organization 123
+```
 
-**Important:** You need an API token to use this MCP server. Set it using the AIR_API_TOKEN environment variable.
+### 🔑 API Token Requirement
 
-## Installation
+> **Important:** An API token is required for authentication. Set it using the `AIR_API_TOKEN` environment variable.
 
-### Local Build
+## 📦 Installation
 
-1. Clone the repository
-   ```bash
-   git clone https://github.com/binalyze/air-mcp
-   ```
+### Local Development
 
-2. Change to the project directory
-   ```bash
-   cd air-mcp
-   ```
+```bash
+# Clone the repository
+git clone https://github.com/binalyze/air-mcp
 
-3. Build the project
-   ```bash
-   npm build
-   ```
+# Change to the project directory
+cd air-mcp
+
+# Install dependencies
+npm install
+
+# Build the project
+npm run build
+```
+
+### Usage with Claude Desktop
+
+Add the following configuration to your Claude Desktop config file:
+
+```json
+{
+  "mcpServers": {
+    "air-mcp": {
+      "command": "npx",
+      "args": ["-y", "@binalyze/air-mcp"],
+      "env": {
+        "AIR_HOST": "your-api-host.com",
+        "AIR_API_TOKEN": "your-api-token"
+      }
+    }
+  }
+}
+```
 
 ### Usage with Cursor
 
@@ -74,20 +108,38 @@ You can also filter by organization ID:
    }
    ```
 
-### Usage with Claude Desktop
+## 🧩 Usage with Smithery
 
-Add the following configuration to your Claude Desktop config file:
-```json
-{
-  "mcpServers": {
-    "air-mcp": {
-      "command": "node",
-      "args": ["/path/to/your/air-mcp/build/index.js"],
-      "env": {
-        "AIR_HOST": "your-api-host.com",
-        "AIR_API_TOKEN": "your-api-token"
-      }
-    }
-  }
-}
+> **Note:** Don't forget to activate Agent mode in your editor.
+
+### One-Line Installation Commands
+
+#### Claude
+```bash
+npx -y @smithery/cli@latest install @binalyze/air-mcp --client claude --key {smithery_key}
+```
+
+#### Cursor
+```bash
+npx -y @smithery/cli@latest install @binalyze/air-mcp --client cursor --key {smithery_key}
+```
+
+#### Windsurf
+```bash
+npx -y @smithery/cli@latest install@rapidappio/rapidapp-mcp --client windsurf --key {smithery_key}
+```
+
+#### VSCode
+```bash
+npx -y @smithery/cli@latest install @binalyze/air-mcp --client vscode --key {smithery_key}
+```
+Or use the Magic Link option in VSCode.
+
+## 📊 Response Example
+
+```
+Found 3 assets:
+a1b2c3d4: Win10-Workstation1 (Windows - Windows 10 Pro)
+e5f6g7h8: Ubuntu-Server1 (Linux - Ubuntu 20.04)
+i9j0k1l2: MacBook-Pro (macOS - macOS 12.3)
 ```
