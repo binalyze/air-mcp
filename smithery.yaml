@@ -1,0 +1,25 @@
+startCommand:
+  type: stdio
+  configSchema:
+    # JSON Schema defining the configuration options for the MCP.
+    type: object
+    required:
+      - airHost
+      - airApiToken
+    properties:
+      airHost:
+        type: string
+        description: The host URL for the Binalyze AIR API (e.g., https://air-xyz.binalyze.com)
+      airApiToken:
+        type: string
+        description: The API token for accessing the Binalyze AIR API. You can generate one through the AIR console.
+  commandFunction:
+    |-
+    (config) => ({
+      command: 'node',
+      args: ['build/index.js'],
+      env: {
+        AIR_HOST: config.airHost,
+        AIR_API_TOKEN: config.airApiToken,
+      },
+    })
