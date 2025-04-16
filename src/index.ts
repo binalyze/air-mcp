@@ -23,6 +23,7 @@ const server = new Server({
 
 // List available tools
 server.setRequestHandler(ListToolsRequestSchema, async () => {
+  console.error('Listing tools');
   return {
     tools: [
       {
@@ -74,20 +75,23 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
   const { name, arguments: args } = request.params;
 
-  try {
-    // Validate API token only when a tool is actually called - lazy loading
-    if (!config.apiToken || config.apiToken.trim() === '') {
-      throw new Error('API_TOKEN environment variable not set. Please set this variable to use the AIR API.');
-    }
-    
+  try {    
     if (name === 'list_assets') {
+      if (!config.airApiToken || config.airApiToken.trim() === '') {
+        throw new Error('AIR_API_TOKEN not provided. Please configure the MCP server with a valid airApiToken to execute tools.');
+      }
       const parsedArgs = ListAssetsArgsSchema.parse(args);
       return await assetTools.listAssets(parsedArgs);
     } else if (name === 'list_acquisition_profiles') {
+      if (!config.airApiToken || config.airApiToken.trim() === '') {
+        throw new Error('AIR_API_TOKEN not provided. Please configure the MCP server with a valid airApiToken to execute tools.');
+      }
       const parsedArgs = ListAcquisitionProfilesArgsSchema.parse(args);
       return await acquisitionTools.listAcquisitionProfiles(parsedArgs);
     } else if (name === 'list_organizations') {
-      const parsedArgs = ListOrganizationsArgsSchema.parse(args);
+      if (!config.airApiToken || config.airApiToken.trim() === '') {
+        throw new Error('AIR_API_TOKEN not provided. Please configure the MCP server with a valid airApiToken to execute tools.');
+      }
       return await organizationTools.listOrganizations();
     } else {
       throw new Error(`Unknown tool: ${name}`);
