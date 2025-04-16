@@ -6,7 +6,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 <p align="center">
-  <img src="src/assets/bi-logo.png" alt="AIR Logo" width="180"/>
+  <img src="./src/assets/bi-logo.png" alt="AIR Logo" width="180"/>
 </p>
 
 A Node.js server implementing **Model Context Protocol (MCP)** for Binalyze AIR, enabling natural language interaction with AIR's digital forensics and incident response capabilities.
