@@ -45,9 +45,6 @@ In Claude Desktop, or any MCP Client, you can use natural language to:
 
 ### Usage with Cursor
 
-
-## TODO: NOT READY FOR NPX FOR NOW
-
 1. Navigate to Cursor Settings > MCP
 2. Add new MCP server with the following configuration:
    ```json
