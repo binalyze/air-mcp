@@ -1,4 +1,4 @@
-# 🛡️ Binalyze AIR MCP Server
+# Binalyze AIR MCP Server
 
 [![smithery badge](https://smithery.ai/badge/@binalyze/air-mcp)](https://smithery.ai/server/@binalyze/air-mcp)
 [![Node.js](https://img.shields.io/badge/Node.js-18+-green)](https://nodejs.org/)
@@ -20,33 +20,9 @@ A Node.js server implementing **Model Context Protocol (MCP)** for Binalyze AIR,
 - **Policy Management** - See security policies across your organization.
 - **Task Management** - Track forensic collection tasks and their statuses.
 
-## 🔍 Overview
+## Overview
 
 This MCP server creates a bridge between **Large Language Models (LLMs)** and Binalyze AIR, allowing interaction through natural language. Retrieve information about your digital forensics environment without writing code or learning complex APIs.
-
-## How to Use
-
-In Claude Desktop, or any MCP Client, you can use natural language commands:
-
-| Command | Description |
-|---------|-------------|
-| `List all assets in the system` | Shows all managed/unmanaged endpoints with OS, platform info |
-| `List all acquisition profiles` | Displays available acquisition profiles |
-| `List all organizations` | Shows all organizations in environments |
-| `List all cases` | Displays cases with status and creation time |
-| `List all policies` | Shows security and collection policies |
-| `List all tasks` | Lists all tasks with their statuses |
-
-### Filtering by Organization
-
-You can filter results by organization ID:
-
-```
-List all assets for organization 123
-Show me all cases for organization 456
-Get policies for organization 789
-List tasks for organization 123
-```
 
 ### 🔑 API Token Requirement
 
@@ -134,6 +110,30 @@ npx -y @smithery/cli@latest install@rapidappio/rapidapp-mcp --client windsurf --
 npx -y @smithery/cli@latest install @binalyze/air-mcp --client vscode --key {smithery_key}
 ```
 Or use the Magic Link option in VSCode.
+
+## How to Use
+
+In Claude Desktop, or any MCP Client, you can use natural language commands:
+
+| Command | Description |
+|---------|-------------|
+| `List all assets in the system` | Shows all managed/unmanaged endpoints with OS, platform info |
+| `List all acquisition profiles` | Displays available acquisition profiles |
+| `List all organizations` | Shows all organizations in environments |
+| `List all cases` | Displays cases with status and creation time |
+| `List all policies` | Shows security and collection policies |
+| `List all tasks` | Lists all tasks with their statuses |
+
+### Filtering by Organization
+
+You can filter results by organization ID:
+
+```
+List all assets for organization 123
+Show me all cases for organization 456
+Get policies for organization 789
+List tasks for organization 123
+```
 
 ## 📊 Response Example
 
