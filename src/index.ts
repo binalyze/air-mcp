@@ -15,11 +15,12 @@ import { policyTools, ListPoliciesArgsSchema } from './tools/policies';
 import { taskTools, ListTasksArgsSchema } from './tools/tasks';
 import { triageTools, ListTriageRulesArgsSchema } from './tools/triages';
 import { userTools, ListUsersArgsSchema } from './tools/users';
+import { droneAnalyzerTools, ListDroneAnalyzersArgsSchema } from './tools/droneAnalyzers';
 import { validateAirApiToken } from './utils/validation';
 
 const server = new Server({
   name: 'air-mcp',
-  version: '1.7.1'
+  version: '1.8.0'
 }, {
   capabilities: {
     tools: {}
@@ -28,7 +29,6 @@ const server = new Server({
 
 // List available tools
 server.setRequestHandler(ListToolsRequestSchema, async () => {
-  console.error('Listing tools');
   return {
     tools: [
       {
@@ -142,6 +142,15 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: [],
         },
       },
+      {
+        name: 'list_drone_analyzers',
+        description: 'List all drone analyzers in the system',
+        inputSchema: {
+          type: 'object',
+          properties: {},
+          required: [],
+        },
+      },
     ],
   };
 });
@@ -182,6 +191,9 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       validateAirApiToken();
       const parsedArgs = ListUsersArgsSchema.parse(args);
       return await userTools.listUsers(parsedArgs);
+    } else if (name === 'list_drone_analyzers') {
+      validateAirApiToken();
+      return await droneAnalyzerTools.listDroneAnalyzers();
     } else {
       throw new Error(`Unknown tool: ${name}`);
     }
@@ -201,7 +213,6 @@ async function main() {
   try {
     const transport = new StdioServerTransport();
     await server.connect(transport);
-    console.error('Binalyze AIR MCP server started');
   } catch (error) {
     console.error('Error during startup:', error);
     process.exit(1);
