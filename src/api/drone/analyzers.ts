@@ -16,7 +16,7 @@ export interface DroneAnalyzer {
   Id: string;
   Name: string;
   DefaultEnabled: boolean;
-  OSes: string[];
+  Platforms: string[];
 }
 
 export const api = {

@@ -7,13 +7,15 @@ export const ListDroneAnalyzersArgsSchema = z.object({
 }).optional();
 
 // Format the supported operating systems for display
-function formatOSList(osList: string[]): string {
-  return osList.map(os => {
-    switch(os) {
+function formatOSList(platformList: string[]): string {
+  return platformList.map(platform => {
+    switch(platform) {
       case 'windows': return 'Windows';
       case 'linux': return 'Linux';
       case 'darwin': return 'macOS';
-      default: return os;
+      case 'gws-parselet': return 'Google Workspace';
+      case 'o365-parselet': return 'Microsoft 365';
+      default: return platform;
     }
   }).join(', ');
 }
@@ -24,19 +26,20 @@ export const droneAnalyzerTools = {
     try {
       const response = await api.getDroneAnalyzers();
       
-      if (!response || response.length === 0) {
+      // More robust check: ensure response is an array before mapping
+      if (!Array.isArray(response) || response.length === 0) {
         return {
           content: [
             {
               type: 'text',
-              text: 'No drone analyzers found.'
+              text: Array.isArray(response) ? 'No drone analyzers found.' : 'Received invalid data format for drone analyzers.'
             }
           ]
         };
       }
       
       const analyzersList = response.map(analyzer => 
-        `${analyzer.Id}: ${analyzer.Name} (Supported OS: ${formatOSList(analyzer.OSes)}, Default Enabled: ${analyzer.DefaultEnabled ? 'Yes' : 'No'})`
+        `${analyzer.Id}: ${analyzer.Name} (Supported Platforms: ${formatOSList(analyzer.Platforms)}, Default Enabled: ${analyzer.DefaultEnabled ? 'Yes' : 'No'})`
       ).join('\n');
       
       return {
