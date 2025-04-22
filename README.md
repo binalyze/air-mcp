@@ -5,6 +5,10 @@
 [![MCP](https://img.shields.io/badge/MCP-Protocol-blue)](https://modelcontextprotocol.ai/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
+<a href="https://glama.ai/mcp/servers/@binalyze/air-mcp">
+  <img width="380" height="200" src="https://glama.ai/mcp/servers/@binalyze/air-mcp/badge" alt="Binalyze AIR Server MCP server" />
+</a>
+
 <p align="center">
   <img src="./src/assets/bi-logo.png" alt="AIR Logo" width="180"/>
 </p>
