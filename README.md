@@ -15,6 +15,7 @@ A Node.js server implementing **Model Context Protocol (MCP)** for Binalyze AIR,
 
 - **Asset Management** - List assets in your organization.
 - **Acquisition Profiles** - List acquisition profiles.
+- **Acquisition Tasks** - Assign evidence acquisition tasks to endpoints.
 - **Organization Management** - List organizations.
 - **Case Management** - List cases in your organization.
 - **Policy Management** - See security policies across your organization.
@@ -122,6 +123,7 @@ In Claude Desktop, or any MCP Client, you can use natural language commands:
 |---------|-------------|
 | `List all assets in the system` | Shows all managed/unmanaged endpoints with OS, platform info |
 | `List all acquisition profiles` | Displays available acquisition profiles |
+| `Assign an acquisition task to endpoint 123abc using profile "full" for case "C-2022-0001"` | Assigns an evidence acquisition task to specified endpoint(s) |
 | `List all organizations` | Shows all organizations in environments |
 | `List all cases` | Displays cases with status and creation time |
 | `List all policies` | Shows security and collection policies |
@@ -143,6 +145,15 @@ List triage rules for organization 123
 List users for organization 123
 ```
 
+### Assigning Acquisition Tasks
+
+You can assign evidence acquisition tasks to specific endpoints:
+
+```
+Assign an acquisition task to endpoint "0ccbb181-685c-4f1e-982a-6f7c7e88eadd" using profile "full" for case "C-2022-0001"
+Start an acquisition on endpoints ["id1", "id2"] with profile "memory" for case "C-2023-0045" with analyzers ["bha", "wsa"]
+```
+
 ## Response Example
 
 ```
@@ -162,3 +173,7 @@ DtmrCWrK1o7m0bqVasdzg6Ia: demo@binalyze.com (demo@binalyze.com)
 Found 20 drone analyzers:
 bha: Browser History Analyzer (Supported OS: Windows, Default Enabled: Yes)
 wsa: Generic WebShell Analyzer (Supported OS: Windows, Linux, macOS, Default Enabled: Yes)
+```
+
+Successfully assigned 1 acquisition task(s):
+3c801542-d58e-4237-84b9-37651b455a38: Example Case Acquisition 003 (Organization: 0)

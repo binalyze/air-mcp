@@ -1,5 +1,12 @@
 import { z } from 'zod';
-import { api, AcquisitionProfile } from '../api/acquisitions/acquisitions';
+import { 
+  api, 
+  AcquisitionProfile, 
+  AcquisitionTaskRequest, 
+  DroneConfig, 
+  FilterConfig, 
+  TaskConfig 
+} from '../api/acquisitions/acquisitions';
 
 // Schema for list acquisition profiles arguments
 export const ListAcquisitionProfilesArgsSchema = z.object({
@@ -8,6 +15,20 @@ export const ListAcquisitionProfilesArgsSchema = z.object({
     z.array(z.string())
   ]).optional().describe('Organization IDs to filter acquisition profiles by. Defaults to "0" or specific IDs like "123" or ["123", "456"]'),
   allOrganizations: z.boolean().optional().describe('Whether to include profiles from all organizations. Defaults to true.'),
+});
+
+// Schema for assign acquisition task arguments
+export const AssignAcquisitionTaskArgsSchema = z.object({
+  caseId: z.string().describe('The case ID to associate the acquisition with'),
+  acquisitionProfileId: z.string().describe('The acquisition profile ID to use for the task'),
+  endpointIds: z.array(z.string()).describe('Array of endpoint IDs to collect evidence from'),
+  organizationIds: z.array(z.number()).optional().describe('Array of organization IDs to filter by. Defaults to [0]'),
+  analyzers: z.array(z.string()).optional().describe('Array of analyzer IDs to use (e.g. ["bha", "wsa"])'),
+  keywords: z.array(z.string()).optional().describe('Array of keywords to search for'),
+  cpuLimit: z.number().optional().describe('CPU usage limit percentage (1-100). Defaults to 80'),
+  enableCompression: z.boolean().optional().describe('Whether to enable compression. Defaults to true'),
+  enableEncryption: z.boolean().optional().describe('Whether to enable encryption. Defaults to false'),
+  encryptionPassword: z.string().optional().describe('Password for encryption if enabled'),
 });
 
 // Format acquisition profile for display
@@ -61,6 +82,138 @@ export const acquisitionTools = {
           {
             type: 'text',
             text: `Failed to fetch acquisition profiles: ${errorMessage}`
+          }
+        ]
+      };
+    }
+  },
+
+  // Assign evidence acquisition task by filter
+  async assignAcquisitionTask(args: z.infer<typeof AssignAcquisitionTaskArgsSchema>) {
+    try {
+      // Create default configurations
+      const droneConfig: DroneConfig = {
+        autoPilot: false,
+        enabled: false,
+        analyzers: args.analyzers || ['bha', 'wsa'],
+        keywords: args.keywords || []
+      };
+
+      // Create default task configuration with standard paths
+      const taskConfig: TaskConfig = {
+        choice: 'use-custom-options',
+        saveTo: {
+          windows: {
+            location: 'local',
+            useMostFreeVolume: true,
+            repositoryId: null,
+            path: 'Binalyze\\AIR\\',
+            volume: 'C:',
+            tmp: 'Binalyze\\AIR\\tmp',
+            directCollection: false
+          },
+          linux: {
+            location: 'local',
+            useMostFreeVolume: true,
+            repositoryId: null,
+            path: 'opt/binalyze/air',
+            tmp: 'opt/binalyze/air/tmp',
+            directCollection: false
+          },
+          macos: {
+            location: 'local',
+            useMostFreeVolume: false,
+            repositoryId: null,
+            path: 'opt/binalyze/air',
+            volume: '/',
+            tmp: 'opt/binalyze/air/tmp',
+            directCollection: false
+          },
+          aix: {
+            location: 'local',
+            useMostFreeVolume: true,
+            repositoryId: null,
+            path: 'opt/binalyze/air',
+            volume: '/',
+            tmp: 'opt/binalyze/air/tmp',
+            directCollection: false
+          }
+        },
+        cpu: {
+          limit: args.cpuLimit || 80
+        },
+        compression: {
+          enabled: args.enableCompression !== undefined ? args.enableCompression : true,
+          encryption: {
+            enabled: args.enableEncryption || false,
+            password: args.encryptionPassword || ''
+          }
+        }
+      };
+
+      // Create filter configuration
+      const filter: FilterConfig = {
+        searchTerm: '',
+        name: '',
+        ipAddress: '',
+        groupId: '',
+        groupFullPath: '',
+        managedStatus: ['managed'],
+        isolationStatus: [],
+        platform: [],
+        issue: '',
+        onlineStatus: [],
+        tags: [],
+        version: '',
+        policy: '',
+        includedEndpointIds: args.endpointIds,
+        excludedEndpointIds: [],
+        organizationIds: args.organizationIds || [0]
+      };
+
+      // Create the full acquisition task request
+      const request: AcquisitionTaskRequest = {
+        caseId: args.caseId,
+        droneConfig,
+        taskConfig,
+        acquisitionProfileId: args.acquisitionProfileId,
+        filter
+      };
+
+      // Send the request to the API
+      const response = await api.assignAcquisitionTask(request);
+
+      if (!response.success) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Error assigning acquisition task: ${response.errors.join(', ')}`
+            }
+          ]
+        };
+      }
+
+      // Format successful response
+      const taskList = response.result.map(task => 
+        `${task._id}: ${task.name} (Organization: ${task.organizationId})`
+      ).join('\n');
+
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Successfully assigned ${response.result.length} acquisition task(s):\n${taskList}`
+          }
+        ]
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Failed to assign acquisition task: ${errorMessage}`
           }
         ]
       };

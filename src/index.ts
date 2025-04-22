@@ -8,7 +8,7 @@ import {
 } from '@modelcontextprotocol/sdk/types.js';
 import { z } from 'zod';
 import { assetTools, ListAssetsArgsSchema } from './tools/assets';
-import { acquisitionTools, ListAcquisitionProfilesArgsSchema } from './tools/acquisitions';
+import { acquisitionTools, ListAcquisitionProfilesArgsSchema, AssignAcquisitionTaskArgsSchema } from './tools/acquisitions';
 import { organizationTools } from './tools/organizations';
 import { caseTools, ListCasesArgsSchema } from './tools/cases';
 import { policyTools, ListPoliciesArgsSchema } from './tools/policies';
@@ -20,7 +20,7 @@ import { validateAirApiToken } from './utils/validation';
 
 const server = new Server({
   name: 'air-mcp',
-  version: '1.8.1'
+  version: '1.9.0'
 }, {
   capabilities: {
     tools: {}
@@ -61,6 +61,68 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
             },
           },
           required: [],
+        },
+      },
+      {
+        name: 'assign_acquisition_task',
+        description: 'Assign an evidence acquisition task to specific endpoints',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            caseId: {
+              type: 'string',
+              description: 'The case ID to associate the acquisition with',
+            },
+            acquisitionProfileId: {
+              type: 'string',
+              description: 'The acquisition profile ID to use for the task',
+            },
+            endpointIds: {
+              type: 'array',
+              items: {
+                type: 'string'
+              },
+              description: 'Array of endpoint IDs to collect evidence from',
+            },
+            organizationIds: {
+              type: 'array',
+              items: {
+                type: 'number'
+              },
+              description: 'Array of organization IDs to filter by. Defaults to [0]',
+            },
+            analyzers: {
+              type: 'array',
+              items: {
+                type: 'string'
+              },
+              description: 'Array of analyzer IDs to use (e.g. ["bha", "wsa"])',
+            },
+            keywords: {
+              type: 'array',
+              items: {
+                type: 'string'
+              },
+              description: 'Array of keywords to search for',
+            },
+            cpuLimit: {
+              type: 'number',
+              description: 'CPU usage limit percentage (1-100). Defaults to 80',
+            },
+            enableCompression: {
+              type: 'boolean',
+              description: 'Whether to enable compression. Defaults to true',
+            },
+            enableEncryption: {
+              type: 'boolean',
+              description: 'Whether to enable encryption. Defaults to false',
+            },
+            encryptionPassword: {
+              type: 'string',
+              description: 'Password for encryption if enabled',
+            },
+          },
+          required: ['caseId', 'acquisitionProfileId', 'endpointIds'],
         },
       },
       {
@@ -168,6 +230,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       validateAirApiToken();
       const parsedArgs = ListAcquisitionProfilesArgsSchema.parse(args);
       return await acquisitionTools.listAcquisitionProfiles(parsedArgs);
+    } else if (name === 'assign_acquisition_task') {
+      validateAirApiToken();
+      const parsedArgs = AssignAcquisitionTaskArgsSchema.parse(args);
+      return await acquisitionTools.assignAcquisitionTask(parsedArgs);
     } else if (name === 'list_organizations') {
       validateAirApiToken();
       return await organizationTools.listOrganizations();
