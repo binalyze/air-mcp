@@ -8,7 +8,12 @@ import {
 } from '@modelcontextprotocol/sdk/types.js';
 import { z } from 'zod';
 import { assetTools, ListAssetsArgsSchema } from './tools/assets';
-import { acquisitionTools, ListAcquisitionProfilesArgsSchema, AssignAcquisitionTaskArgsSchema } from './tools/acquisitions';
+import { 
+  acquisitionTools, 
+  ListAcquisitionProfilesArgsSchema, 
+  AssignAcquisitionTaskArgsSchema,
+  GetAcquisitionProfileByIdArgsSchema
+} from './tools/acquisitions';
 import { organizationTools } from './tools/organizations';
 import { caseTools, ListCasesArgsSchema } from './tools/cases';
 import { policyTools, ListPoliciesArgsSchema } from './tools/policies';
@@ -20,7 +25,7 @@ import { validateAirApiToken } from './utils/validation';
 
 const server = new Server({
   name: 'air-mcp',
-  version: '1.9.0'
+  version: '1.10.0'
 }, {
   capabilities: {
     tools: {}
@@ -123,6 +128,20 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
             },
           },
           required: ['caseId', 'acquisitionProfileId', 'endpointIds'],
+        },
+      },
+      {
+        name: 'get_acquisition_profile_by_id',
+        description: 'Get details of a specific acquisition profile by its ID',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            profileId: {
+              type: 'string',
+              description: 'The ID of the acquisition profile to retrieve (e.g., "full")',
+            },
+          },
+          required: ['profileId'],
         },
       },
       {
@@ -234,6 +253,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       validateAirApiToken();
       const parsedArgs = AssignAcquisitionTaskArgsSchema.parse(args);
       return await acquisitionTools.assignAcquisitionTask(parsedArgs);
+    } else if (name === 'get_acquisition_profile_by_id') {
+      validateAirApiToken();
+      const parsedArgs = GetAcquisitionProfileByIdArgsSchema.parse(args);
+      return await acquisitionTools.getAcquisitionProfileById(parsedArgs);
     } else if (name === 'list_organizations') {
       validateAirApiToken();
       return await organizationTools.listOrganizations();

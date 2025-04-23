@@ -125,6 +125,44 @@ export interface AcquisitionTaskResponse {
   errors: string[];
 }
 
+// Interface for detailed Acquisition Profile structure
+export interface AcquisitionProfilePlatformDetails {
+  evidenceList: string[];
+  artifactList?: string[]; 
+  customContentProfiles: any[]; 
+  networkCapture?: {
+    enabled: boolean;
+    duration: number;
+    pcap: { enabled: boolean };
+    networkFlow: { enabled: boolean };
+  };
+}
+
+export interface AcquisitionProfileDetails {
+  _id: string;
+  name: string;
+  createdAt: string;
+  updatedAt: string;
+  createdBy: string;
+  organizationIds: string[];
+  deletable: boolean;
+  windows?: AcquisitionProfilePlatformDetails;
+  linux?: AcquisitionProfilePlatformDetails;
+  macos?: AcquisitionProfilePlatformDetails; 
+  aix?: AcquisitionProfilePlatformDetails; 
+  eDiscovery?: { 
+    patterns: any[]; 
+  };
+}
+
+// Interface for the response of getting a single acquisition profile by ID
+export interface AcquisitionProfileDetailsResponse {
+  success: boolean;
+  result: AcquisitionProfileDetails;
+  statusCode: number;
+  errors: string[];
+}
+
 export const api = {
   async getAcquisitionProfiles(organizationIds: string | string[] = '0', allOrganizations: boolean = true): Promise<AcquisitionProfilesResponse> {
     try {
@@ -149,7 +187,26 @@ export const api = {
     }
   },
 
-  // New method for assigning evidence acquisition task by filter
+  // Get Acquisition Profile by ID
+  async getAcquisitionProfileById(profileId: string): Promise<AcquisitionProfileDetailsResponse> {
+    try {
+      const response = await axios.get(
+        `${config.airHost}/api/public/acquisitions/profiles/${profileId}`,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${config.airApiToken}`
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching acquisition profile with ID ${profileId}:`, error);
+      throw error;
+    }
+  },
+
+  // Assigning evidence acquisition task by filter
   async assignAcquisitionTask(request: AcquisitionTaskRequest): Promise<AcquisitionTaskResponse> {
     try {
       const response = await axios.post(

@@ -127,6 +127,7 @@ In Claude Desktop, or any MCP Client, you can use natural language commands:
 |---------|-------------|
 | `List all assets in the system` | Shows all managed/unmanaged endpoints with OS, platform info |
 | `List all acquisition profiles` | Displays available acquisition profiles |
+| `Get acquisition profile details by ID` | Shows detailed information about a specific acquisition profile, including evidence and artifacts |
 | `Assign an acquisition task to endpoint 123abc using profile "full" for case "C-2022-0001"` | Assigns an evidence acquisition task to specified endpoint(s) |
 | `List all organizations` | Shows all organizations in environments |
 | `List all cases` | Displays cases with status and creation time |

@@ -31,6 +31,11 @@ export const AssignAcquisitionTaskArgsSchema = z.object({
   encryptionPassword: z.string().optional().describe('Password for encryption if enabled'),
 });
 
+// Schema for get acquisition profile by ID arguments
+export const GetAcquisitionProfileByIdArgsSchema = z.object({
+  profileId: z.string().describe('The ID of the acquisition profile to retrieve (e.g., "full")'),
+});
+
 // Format acquisition profile for display
 function formatAcquisitionProfile(profile: AcquisitionProfile): string {
   return `
@@ -82,6 +87,78 @@ export const acquisitionTools = {
           {
             type: 'text',
             text: `Failed to fetch acquisition profiles: ${errorMessage}`
+          }
+        ]
+      };
+    }
+  },
+
+  // Get Acquisition Profile by ID
+  async getAcquisitionProfileById(args: z.infer<typeof GetAcquisitionProfileByIdArgsSchema>) {
+    try {
+      const response = await api.getAcquisitionProfileById(args.profileId);
+      
+      if (!response.success) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Error fetching acquisition profile details: ${response.errors.join(', ')}`
+            }
+          ]
+        };
+      }
+
+      const profile = response.result;
+      let detailsText = `
+Profile Details: ${profile.name} (${profile._id})
+Created by: ${profile.createdBy}
+Created at: ${new Date(profile.createdAt).toLocaleString()}
+Updated at: ${new Date(profile.updatedAt).toLocaleString()}
+Deletable: ${profile.deletable ? 'Yes' : 'No'}
+Organization IDs: ${profile.organizationIds.length > 0 ? profile.organizationIds.join(', ') : 'None'}
+`;
+
+      if (profile.windows) {
+        detailsText += `\nWindows Evidence Items: ${profile.windows.evidenceList.length}`;
+        if (profile.windows.artifactList) {
+          detailsText += `\nWindows Artifact Items: ${profile.windows.artifactList.length}`;
+        }
+      }
+      if (profile.linux) {
+        detailsText += `\nLinux Evidence Items: ${profile.linux.evidenceList.length}`;
+        if (profile.linux.artifactList) { 
+          detailsText += `\nLinux Artifact Items: ${profile.linux.artifactList.length}`;
+        }
+      }
+      if (profile.macos) {
+        detailsText += `\nmacOS Evidence Items: ${profile.macos.evidenceList.length}`;
+        if (profile.macos.artifactList) {
+          detailsText += `\nmacOS Artifact Items: ${profile.macos.artifactList.length}`;
+        }
+      }
+       if (profile.aix) {
+        detailsText += `\naix Evidence Items: ${profile.aix.evidenceList.length}`;
+        if (profile.aix.artifactList) {
+          detailsText += `\naix Artifact Items: ${profile.aix.artifactList.length}`;
+        }
+      }
+
+      return {
+        content: [
+          {
+            type: 'text',
+            text: detailsText.trim()
+          }
+        ]
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Failed to fetch acquisition profile details: ${errorMessage}`
           }
         ]
       };
