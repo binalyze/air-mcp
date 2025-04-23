@@ -247,4 +247,28 @@ export const api = {
       throw error; // Re-throw if it's not an Axios error or has no response
     }
   },
+
+  // New function for purge and uninstall
+  async purgeAndUninstallAssetsByFilter(filter: AssetFilter): Promise<UninstallAssetsResponse> { // Reusing UninstallAssetsResponse as structure is likely identical
+    try {
+      const response = await axios.delete(
+        `${config.airHost}/api/public/assets/purge-and-uninstall`,
+        {
+          data: { filter },
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${config.airApiToken}`
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error purging and uninstalling assets:', error);
+      if (axios.isAxiosError(error) && error.response) {
+        // Assuming the error response structure is the same as UninstallAssetsResponse
+        return error.response.data as UninstallAssetsResponse; 
+      }
+      throw error;
+    }
+  },
 };

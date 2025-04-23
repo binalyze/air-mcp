@@ -39,6 +39,7 @@ A Node.js server implementing **Model Context Protocol (MCP)** for Binalyze AIR,
 - **Audit Log Export** - Initiate an export of audit logs.
 - **List Audit Logs** - View audit logs from the system.
 - **Uninstall Assets** - Uninstall specific assets based on filters without purging data.
+- **Purge and Uninstall Assets** - Purge data and uninstall specific assets based on filters.
 
 ## Overview
 
@@ -161,6 +162,7 @@ In Claude Desktop, or any MCP Client, you can use natural language commands:
 | `Export audit logs` | Initiates the export of audit logs. The export runs in the background on the AIR server. |
 | `List audit logs` | Shows audit logs with details like timestamp, user, action, entity |
 | `Uninstall asset with ID "endpoint-id"` | Uninstalls the specified asset without purging data (requires providing `filter.includedEndpointIds`) |
+| `Purge and uninstall asset with ID "endpoint-id"` | Purges data and uninstalls the specified asset (requires providing `filter.includedEndpointIds`) |
 
 ### Filtering by Organization
 
@@ -272,6 +274,15 @@ Uninstall asset with ID "0ccbb181-685c-4f1e-982a-6f7c7e88eadd"
 Uninstall assets with IDs ["id1", "id2"] for organization 0
 ```
 
+### Purging and Uninstalling Assets
+
+You can purge asset data and uninstall assets using filters. You **must** specify the exact IDs of the assets to purge and uninstall via `filter.includedEndpointIds`.
+
+```
+Purge and uninstall asset with ID "0ccbb181-685c-4f1e-982a-6f7c7e88eadd"
+Purge and uninstall assets with IDs ["id1", "id2"] for organization 0
+```
+
 ## Response Example
 
 ```
@@ -327,6 +338,10 @@ Successfully assigned 1 log retrieval task(s):
 Successfully assigned 1 version update task(s):
 cbed8ab3-24d1-4697-8552-6ff6a6c1fae6: Version Update 002 (Organization: 0)
 ```
+
+Successfully initiated uninstall task for assets matching the filter (targeted IDs: 0ccbb181-685c-4f1e-982a-6f7c7e88eadd).
+
+Successfully initiated purge and uninstall task for assets matching the filter (targeted IDs: 0ccbb181-685c-4f1e-982a-6f7c7e88eadd).
 
 ```
 Found 3 tasks for asset with ID bc906dea-f92d-46b3-87f2-a2fc36667f70:

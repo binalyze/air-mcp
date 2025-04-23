@@ -42,6 +42,30 @@ export const UninstallAssetsArgsSchema = z.object({
   }).describe('Filter criteria to select assets for uninstallation without purge. `includedEndpointIds` is the primary way to target specific assets.')
 });
 
+// Schema for purge and uninstall assets arguments
+// It reuses the structure but enforces includedEndpointIds must not be empty.
+export const PurgeAndUninstallAssetsArgsSchema = z.object({
+  filter: z.object({
+    searchTerm: z.string().optional(),
+    name: z.string().optional(),
+    ipAddress: z.string().optional(),
+    groupId: z.string().optional(),
+    groupFullPath: z.string().optional(),
+    managedStatus: z.array(z.string()).optional(),
+    isolationStatus: z.array(z.string()).optional(),
+    platform: z.array(z.string()).optional(),
+    issue: z.string().optional(),
+    onlineStatus: z.array(z.string()).optional(),
+    tagId: z.string().optional(),
+    version: z.string().optional(),
+    policy: z.string().optional(),
+    // Enforce that includedEndpointIds is provided and not empty
+    includedEndpointIds: z.array(z.string()).min(1, { message: "Required: At least one endpoint ID must be included for the purge and uninstall operation." }),
+    excludedEndpointIds: z.array(z.string()).optional(),
+    organizationIds: z.array(z.union([z.number(), z.string()])).optional().default([0]),
+  }).describe('Filter criteria to select assets for purge and uninstallation. `includedEndpointIds` is REQUIRED.')
+});
+
 // Format asset for display
 function formatAsset(asset: Asset): string {
   return `
@@ -242,26 +266,30 @@ export const assetTools = {
   // Uninstall assets by filter without purge
   async uninstallAssets(args: z.infer<typeof UninstallAssetsArgsSchema>) {
     try {
-      // Basic validation: Ensure at least one includedEndpointId is provided
+      // Basic validation: Ensure at least one includedEndpointId is provided, even if schema makes it optional.
+      // The API call itself might implicitly require it based on behavior, despite the optional schema field.
       if (!args.filter.includedEndpointIds || args.filter.includedEndpointIds.length === 0) {
-        return {
-          content: [
-            {
-              type: 'text',
-              text: 'Error: You must provide at least one endpoint ID in `filter.includedEndpointIds` to uninstall.'
-            }
-          ]
-        };
+         // Simplified check: if the array is missing or empty, return an error.
+         return {
+           content: [
+             {
+               type: 'text',
+               text: 'Error: You must provide at least one endpoint ID in `filter.includedEndpointIds` to uninstall.'
+             }
+           ]
+         };
       }
       
       const response = await api.uninstallAssetsByFilter(args.filter);
       
       if (response.success) {
+        // No need to check args.filter.includedEndpointIds again, validation above ensures it exists and is non-empty
+        const targetedIds = args.filter.includedEndpointIds.join(', '); 
         return {
           content: [
             {
               type: 'text',
-              text: `Successfully initiated uninstall task for assets matching the filter (targeted IDs: ${args.filter.includedEndpointIds.join(', ')}).`
+              text: `Successfully initiated uninstall task for assets matching the filter (targeted IDs: ${targetedIds}).`
             }
           ]
         };
@@ -282,6 +310,45 @@ export const assetTools = {
           {
             type: 'text',
             text: `Failed to uninstall assets: ${errorMessage}`
+          }
+        ]
+      };
+    }
+  },
+
+  // Purge and Uninstall assets by filter
+  async purgeAndUninstallAssets(args: z.infer<typeof PurgeAndUninstallAssetsArgsSchema>) {
+    try {
+      // Zod schema already enforces includedEndpointIds.min(1)
+      
+      const response = await api.purgeAndUninstallAssetsByFilter(args.filter);
+      
+      if (response.success) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Successfully initiated purge and uninstall task for assets matching the filter (targeted IDs: ${args.filter.includedEndpointIds.join(', ')}).`
+            }
+          ]
+        };
+      } else {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Error purging and uninstalling assets: ${response.errors.join(', ')} (Status Code: ${response.statusCode})`
+            }
+          ]
+        };
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error during purge and uninstall operation';
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Failed to purge and uninstall assets: ${errorMessage}`
           }
         ]
       };
