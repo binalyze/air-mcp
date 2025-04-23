@@ -29,6 +29,7 @@ A Node.js server implementing **Model Context Protocol (MCP)** for Binalyze AIR,
 - **Triage Rules** - View YARA, Osquery and Sigma rules for threat detection.
 - **User Management** - List users in your organization.
 - **Drone Analyzers** - View available drone analyzers with supported operating systems.
+- **Audit Log Export** - Initiate an export of audit logs.
 
 ## Overview
 
@@ -140,6 +141,7 @@ In Claude Desktop, or any MCP Client, you can use natural language commands:
 | `List all triage rules` | Shows YARA, OSQuery and Sigma rules for threat detection |
 | `List all users` | Shows all users in the system with their details |
 | `List all drone analyzers` | Shows available drone analyzers with supported operating systems |
+| `Export audit logs` | Initiates the export of audit logs. The export runs in the background on the AIR server. |
 
 ### Filtering by Organization
 
@@ -152,6 +154,7 @@ Get policies for organization 789
 List tasks for organization 123
 List triage rules for organization 123
 List users for organization 123
+Export audit logs for organization 0
 ```
 
 ### Assigning Acquisition Tasks

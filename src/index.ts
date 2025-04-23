@@ -22,12 +22,13 @@ import { policyTools, ListPoliciesArgsSchema } from './tools/policies';
 import { taskTools, ListTasksArgsSchema } from './tools/tasks';
 import { triageTools, ListTriageRulesArgsSchema } from './tools/triages';
 import { userTools, ListUsersArgsSchema } from './tools/users';
-import { droneAnalyzerTools, ListDroneAnalyzersArgsSchema } from './tools/droneAnalyzers';
+import { droneAnalyzerTools } from './tools/droneAnalyzers';
+import { auditTools, ExportAuditLogsArgsSchema } from './tools/audit';
 import { validateAirApiToken } from './utils/validation';
 
 const server = new Server({
   name: 'air-mcp',
-  version: '1.11.0'
+  version: '1.12.0'
 }, {
   capabilities: {
     tools: {}
@@ -329,6 +330,20 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: [],
         },
       },
+      {
+        name: 'export_audit_logs',
+        description: 'Initiate an export of audit logs from the AIR system',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            organizationIds: {
+              type: 'string',
+              description: 'Organization IDs to filter audit logs by. Defaults to "0" or specific IDs like "123" or "123,456".',
+            },
+          },
+          required: [],
+        },
+      },
     ],
   };
 });
@@ -388,6 +403,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     } else if (name === 'list_drone_analyzers') {
       validateAirApiToken();
       return await droneAnalyzerTools.listDroneAnalyzers();
+    } else if (name === 'export_audit_logs') {
+      validateAirApiToken();
+      const parsedArgs = ExportAuditLogsArgsSchema.parse(args);
+      return await auditTools.exportAuditLogs(parsedArgs);
     } else {
       throw new Error(`Unknown tool: ${name}`);
     }
