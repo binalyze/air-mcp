@@ -24,11 +24,12 @@ import { triageTools, ListTriageRulesArgsSchema } from './tools/triages';
 import { userTools, ListUsersArgsSchema } from './tools/users';
 import { droneAnalyzerTools } from './tools/droneAnalyzers';
 import { auditTools, ExportAuditLogsArgsSchema, ListAuditLogsArgsSchema } from './tools/audit';
+import { assignTaskTools, AssignRebootTaskArgsSchema, AssignShutdownTaskArgsSchema } from './tools/assign-task';
 import { validateAirApiToken } from './utils/validation';
 
 const server = new Server({
   name: 'air-mcp',
-  version: '2.1.0'
+  version: '2.3.0'
 }, {
   capabilities: {
     tools: {}
@@ -243,6 +244,66 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
         },
       },
       {
+        name: 'assign_reboot_task',
+        description: 'Assign a reboot task to specific endpoints',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            endpointIds: {
+              oneOf: [
+                { type: 'string' },
+                { type: 'array', items: { type: 'string' } }
+              ],
+              description: 'Endpoint ID(s) to reboot. Can be a single ID or an array of IDs.'
+            },
+            organizationIds: {
+              oneOf: [
+                { type: 'number' },
+                { type: 'string' },
+                { type: 'array', items: { oneOf: [{ type: 'number' }, { type: 'string' }] } }
+              ],
+              description: 'Organization ID(s) to filter endpoints by. Defaults to 0.'
+            },
+            managedStatus: {
+              type: 'array',
+              items: { type: 'string' },
+              description: 'Filter endpoints by managed status. Default is ["managed"].'
+            }
+          },
+          required: ['endpointIds'],
+        },
+      },
+      {
+        name: 'assign_shutdown_task',
+        description: 'Assign a shutdown task to specific endpoints',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            endpointIds: {
+              oneOf: [
+                { type: 'string' },
+                { type: 'array', items: { type: 'string' } }
+              ],
+              description: 'Endpoint ID(s) to shutdown. Can be a single ID or an array of IDs.'
+            },
+            organizationIds: {
+              oneOf: [
+                { type: 'number' },
+                { type: 'string' },
+                { type: 'array', items: { oneOf: [{ type: 'number' }, { type: 'string' }] } }
+              ],
+              description: 'Organization ID(s) to filter endpoints by. Defaults to 0.'
+            },
+            managedStatus: {
+              type: 'array',
+              items: { type: 'string' },
+              description: 'Filter endpoints by managed status. Default is ["managed"].'
+            }
+          },
+          required: ['endpointIds'],
+        },
+      },
+      {
         name: 'list_organizations',
         description: 'List all organizations in the system',
         inputSchema: {
@@ -391,6 +452,14 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       validateAirApiToken();
       const parsedArgs = CreateAcquisitionProfileArgsSchema.parse(args);
       return await acquisitionTools.createAcquisitionProfile(parsedArgs);
+    } else if (name === 'assign_reboot_task') {
+      validateAirApiToken();
+      const parsedArgs = AssignRebootTaskArgsSchema.parse(args);
+      return await assignTaskTools.assignRebootTask(parsedArgs);
+    } else if (name === 'assign_shutdown_task') {
+      validateAirApiToken();
+      const parsedArgs = AssignShutdownTaskArgsSchema.parse(args);
+      return await assignTaskTools.assignShutdownTask(parsedArgs);
     } else if (name === 'list_organizations') {
       validateAirApiToken();
       return await organizationTools.listOrganizations();

@@ -22,6 +22,8 @@ A Node.js server implementing **Model Context Protocol (MCP)** for Binalyze AIR,
 - **Acquisition Tasks** - Assign evidence acquisition tasks to endpoints.
 - **Image Acquisition Tasks** - Assign disk image acquisition tasks to endpoints.
 - **Create Acquisition Profiles** - Create new acquisition profiles with specific evidence/artifact/network settings.
+- **Reboot Tasks** - Assign reboot tasks to specific endpoints.
+- **Shutdown Tasks** - Assign shutdown tasks to specific endpoints.
 - **Organization Management** - List organizations.
 - **Case Management** - List cases in your organization.
 - **Policy Management** - See security policies across your organization.
@@ -135,6 +137,8 @@ In Claude Desktop, or any MCP Client, you can use natural language commands:
 | `Assign an acquisition task to endpoint 123abc using profile "full" for case "C-2022-0001"` | Assigns an evidence acquisition task to specified endpoint(s) |
 | `Assign an image acquisition task to endpoint 123abc for volume /dev/sda1 saving to repository 456def` | Assigns a disk image acquisition task to a specific endpoint and volume, saving to a specified repository |
 | `Create an acquisition profile named "My Custom Profile" with windows evidence ["clp"] and linux artifact ["apcl"]` | Creates a new acquisition profile with the specified configuration |
+| `Reboot endpoint 123abc` | Assigns a reboot task to a specific endpoint |
+| `Shutdown endpoint 123abc` | Assigns a shutdown task to a specific endpoint |
 | `List all organizations` | Shows all organizations in environments |
 | `List all cases` | Displays cases with status and creation time |
 | `List all policies` | Shows security and collection policies |
@@ -178,6 +182,24 @@ Assign an image acquisition task to endpoint "7a37cfdb-..." for volume "/dev/dis
 Assign image task for endpoint "ep-id-1" volumes ["/dev/sda1", "/dev/sda2"] and endpoint "ep-id-2" volume "C:" to repository "repo-xyz"
 ```
 
+### Assigning Reboot Tasks
+
+You can assign reboot tasks to specific endpoints:
+
+```
+Reboot endpoint "0ccbb181-685c-4f1e-982a-6f7c7e88eadd"
+Assign a reboot task to endpoints ["id1", "id2"] for organization 123
+```
+
+### Assigning Shutdown Tasks
+
+You can assign shutdown tasks to specific endpoints:
+
+```
+Shutdown endpoint "0ccbb181-685c-4f1e-982a-6f7c7e88eadd"
+Assign a shutdown task to endpoints ["id1", "id2"] for organization 123
+```
+
 ## Response Example
 
 ```
@@ -210,3 +232,9 @@ Successfully assigned 1 image acquisition task(s):
 3c801542-d58e-4237-84b9-37651b455a38: Acquire Image 001 (Organization: 0)
 
 Successfully created acquisition profile: My Custom Profile
+
+Successfully assigned 1 reboot task(s):
+8fe018d3-83de-4a6d-b7f4-bc97ed3b3156: Reboot 002 (Organization: 0)
+
+Successfully assigned 1 shutdown task(s):
+a5f2ee9d-066e-47dd-a436-ba27808d76fb: Shutdown 004 (Organization: 0)
