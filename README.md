@@ -30,6 +30,7 @@ A Node.js server implementing **Model Context Protocol (MCP)** for Binalyze AIR,
 - **User Management** - List users in your organization.
 - **Drone Analyzers** - View available drone analyzers with supported operating systems.
 - **Audit Log Export** - Initiate an export of audit logs.
+- **List Audit Logs** - View audit logs from the system.
 
 ## Overview
 
@@ -142,6 +143,7 @@ In Claude Desktop, or any MCP Client, you can use natural language commands:
 | `List all users` | Shows all users in the system with their details |
 | `List all drone analyzers` | Shows available drone analyzers with supported operating systems |
 | `Export audit logs` | Initiates the export of audit logs. The export runs in the background on the AIR server. |
+| `List audit logs` | Shows audit logs with details like timestamp, user, action, entity |
 
 ### Filtering by Organization
 
@@ -155,6 +157,7 @@ List tasks for organization 123
 List triage rules for organization 123
 List users for organization 123
 Export audit logs for organization 0
+List audit logs for organization 0
 ```
 
 ### Assigning Acquisition Tasks
@@ -195,6 +198,10 @@ Found 20 drone analyzers:
 bha: Browser History Analyzer (Supported OS: Windows, Default Enabled: Yes)
 wsa: Generic WebShell Analyzer (Supported OS: Windows, Linux, macOS, Default Enabled: Yes)
 ```
++
++Found 2 audit logs:
++2024-04-23T10:00:00.000Z | User: demo@binalyze.com | Action: login | Entity: user (DtmrCWrK1o7m0bqVasdzg6Ia) | Org: 0 | Details: {"success":true}
++2024-04-23T10:05:15.123Z | User: admin@binalyze.com | Action: create | Entity: case (C-2024-0001) | Org: 0 | Details: {"name":"New Investigation"}
 
 Successfully assigned 1 acquisition task(s):
 3c801542-d58e-4237-84b9-37651b455a38: Example Case Acquisition 003 (Organization: 0)
