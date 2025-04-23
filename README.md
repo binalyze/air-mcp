@@ -221,9 +221,11 @@ Assign an unisolation task to endpoints ["id1", "id2"] with enabled=false
 You can retrieve logs from specific endpoints:
 
 ```
-Retrieve logs from endpoint "0ccbb181-685c-4f1e-982a-6f7c7e88eadd"
+Retrieve logs from endpoint "0ccbb181-685c-4f1e-982a-6f7c7e88eadd" with organization ID 0
 Assign a log retrieval task to endpoints ["id1", "id2"] for organization 123
 ```
+
+Note: Always specify the organization ID when assigning log retrieval tasks. The endpoint must exist in the specified organization.
 
 ## Response Example
 

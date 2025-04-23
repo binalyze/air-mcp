@@ -356,7 +356,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
                 { type: 'string' },
                 { type: 'array', items: { oneOf: [{ type: 'number' }, { type: 'string' }] } }
               ],
-              description: 'Organization ID(s) to filter endpoints by. Defaults to 0.'
+              description: 'Organization ID(s) to filter endpoints by. This is REQUIRED to identify the correct endpoints. Examples: 0, "123", [0], ["123", "456"]'
             },
             managedStatus: {
               type: 'array',
@@ -364,7 +364,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
               description: 'Filter endpoints by managed status. Default is ["managed"].'
             }
           },
-          required: ['endpointIds'],
+          required: ['endpointIds', 'organizationIds'],
         },
       },
       {

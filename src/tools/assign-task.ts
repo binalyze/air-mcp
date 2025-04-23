@@ -55,7 +55,7 @@ export const AssignLogRetrievalTaskArgsSchema = z.object({
     z.number(),
     z.string(),
     z.array(z.union([z.number(), z.string()]))
-  ]).optional().default(0).describe('Organization ID(s) to filter endpoints by. Defaults to 0.'),
+  ]).describe('Organization ID(s) to filter endpoints by. This is REQUIRED to identify the correct endpoints. Examples: 0, "123", [0], ["123", "456"]'),
   managedStatus: z.array(z.string()).optional().default(['managed']).describe('Filter endpoints by managed status. Default is ["managed"].'),
 });
 
@@ -239,23 +239,33 @@ export const assignTaskTools = {
         managedStatus: args.managedStatus,
       };
       
-      // Handle organization IDs
+      // Handle organization IDs - required for log retrieval
       if (args.organizationIds !== undefined) {
         if (Array.isArray(args.organizationIds)) {
           filter.organizationIds = args.organizationIds.map(id => typeof id === 'string' ? parseInt(id, 10) : id);
         } else {
           filter.organizationIds = [typeof args.organizationIds === 'string' ? parseInt(args.organizationIds, 10) : args.organizationIds];
         }
+      } else {
+        // Default to organization ID 0 if not provided
+        filter.organizationIds = [0];
       }
 
       const response = await assignTaskApi.assignLogRetrievalTask(filter);
       
       if (!response.success) {
+        let errorMessage = response.errors.join(', ');
+        
+        // Provide a more helpful error message for common issues
+        if (errorMessage.includes('No managed endpoint(s) found by provided filter criteria')) {
+          errorMessage = `No managed endpoints found. Make sure the endpoint IDs and organization IDs are correct. The endpoint must exist in the specified organization. Try using the list_assets tool first to verify the endpoints, and ensure you provide the correct organizationIds parameter.`;
+        }
+        
         return {
           content: [
             {
               type: 'text',
-              text: `Error assigning log retrieval task: ${response.errors.join(', ')}`
+              text: `Error assigning log retrieval task: ${errorMessage}`
             }
           ]
         };
