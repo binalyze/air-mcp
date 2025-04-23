@@ -20,6 +20,28 @@ export const GetAssetTasksByIdArgsSchema = z.object({
   id: z.string().describe('The ID of the asset to retrieve tasks for'),
 });
 
+// Schema for uninstall assets arguments, mimicking the AssetFilter structure
+export const UninstallAssetsArgsSchema = z.object({
+  filter: z.object({
+    searchTerm: z.string().optional(),
+    name: z.string().optional(),
+    ipAddress: z.string().optional(),
+    groupId: z.string().optional(),
+    groupFullPath: z.string().optional(),
+    managedStatus: z.array(z.string()).optional(),
+    isolationStatus: z.array(z.string()).optional(),
+    platform: z.array(z.string()).optional(),
+    issue: z.string().optional(),
+    onlineStatus: z.array(z.string()).optional(),
+    tagId: z.string().optional(),
+    version: z.string().optional(),
+    policy: z.string().optional(),
+    includedEndpointIds: z.array(z.string()).optional().describe('Required: At least one endpoint ID must be included for the uninstall operation.'),
+    excludedEndpointIds: z.array(z.string()).optional(),
+    organizationIds: z.array(z.union([z.number(), z.string()])).optional().default([0]),
+  }).describe('Filter criteria to select assets for uninstallation without purge. `includedEndpointIds` is the primary way to target specific assets.')
+});
+
 // Format asset for display
 function formatAsset(asset: Asset): string {
   return `
@@ -211,6 +233,55 @@ export const assetTools = {
           {
             type: 'text',
             text: `Failed to fetch asset tasks: ${errorMessage}`
+          }
+        ]
+      };
+    }
+  },
+
+  // Uninstall assets by filter without purge
+  async uninstallAssets(args: z.infer<typeof UninstallAssetsArgsSchema>) {
+    try {
+      // Basic validation: Ensure at least one includedEndpointId is provided
+      if (!args.filter.includedEndpointIds || args.filter.includedEndpointIds.length === 0) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: 'Error: You must provide at least one endpoint ID in `filter.includedEndpointIds` to uninstall.'
+            }
+          ]
+        };
+      }
+      
+      const response = await api.uninstallAssetsByFilter(args.filter);
+      
+      if (response.success) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Successfully initiated uninstall task for assets matching the filter (targeted IDs: ${args.filter.includedEndpointIds.join(', ')}).`
+            }
+          ]
+        };
+      } else {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Error uninstalling assets: ${response.errors.join(', ')} (Status Code: ${response.statusCode})`
+            }
+          ]
+        };
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error during uninstall operation';
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Failed to uninstall assets: ${errorMessage}`
           }
         ]
       };

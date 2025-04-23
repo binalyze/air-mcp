@@ -38,6 +38,7 @@ A Node.js server implementing **Model Context Protocol (MCP)** for Binalyze AIR,
 - **Drone Analyzers** - View available drone analyzers with supported operating systems.
 - **Audit Log Export** - Initiate an export of audit logs.
 - **List Audit Logs** - View audit logs from the system.
+- **Uninstall Assets** - Uninstall specific assets based on filters without purging data.
 
 ## Overview
 
@@ -159,6 +160,7 @@ In Claude Desktop, or any MCP Client, you can use natural language commands:
 | `List all drone analyzers` | Shows available drone analyzers with supported operating systems |
 | `Export audit logs` | Initiates the export of audit logs. The export runs in the background on the AIR server. |
 | `List audit logs` | Shows audit logs with details like timestamp, user, action, entity |
+| `Uninstall asset with ID "endpoint-id"` | Uninstalls the specified asset without purging data (requires providing `filter.includedEndpointIds`) |
 
 ### Filtering by Organization
 
@@ -259,6 +261,15 @@ You can assign version update tasks to specific endpoints:
 ```
 Update version for endpoint "0ccbb181-685c-4f1e-982a-6f7c7e88eadd"
 Assign a version update task to endpoints ["id1", "id2"] for organization 123
+```
+
+### Uninstalling Assets
+
+You can uninstall assets without purging their data using filters. You **must** specify the exact IDs of the assets to uninstall via `filter.includedEndpointIds`.
+
+```
+Uninstall asset with ID "0ccbb181-685c-4f1e-982a-6f7c7e88eadd"
+Uninstall assets with IDs ["id1", "id2"] for organization 0
 ```
 
 ## Response Example

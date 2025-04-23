@@ -138,6 +138,34 @@ export interface AssetTasksResponse {
   errors: string[];
 }
 
+// Structure for the filter used in uninstalling assets
+export interface AssetFilter {
+  searchTerm?: string;
+  name?: string;
+  ipAddress?: string;
+  groupId?: string;
+  groupFullPath?: string;
+  managedStatus?: string[];
+  isolationStatus?: string[];
+  platform?: string[];
+  issue?: string;
+  onlineStatus?: string[];
+  tagId?: string;
+  version?: string;
+  policy?: string;
+  includedEndpointIds?: string[];
+  excludedEndpointIds?: string[];
+  organizationIds?: (number | string)[];
+}
+
+// Structure for the uninstall operation
+export interface UninstallAssetsResponse {
+  success: boolean;
+  result: null; // Result is typically null for DELETE operations
+  statusCode: number;
+  errors: string[];
+}
+
 export const api = {
   async getAssets(organizationIds: string | string[] = '0'): Promise<AssetsResponse> {
     try {
@@ -194,6 +222,29 @@ export const api = {
     } catch (error) {
       console.error(`Error fetching tasks for asset with ID ${id}:`, error);
       throw error;
+    }
+  },
+
+  async uninstallAssetsByFilter(filter: AssetFilter): Promise<UninstallAssetsResponse> {
+    try {
+      const response = await axios.delete(
+        `${config.airHost}/api/public/assets/uninstall-without-purge`,
+        {
+          data: { filter }, // Send filter object within a data key
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${config.airApiToken}`
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error uninstalling assets:', error);
+      // Attempt to return a standardized error format if possible
+      if (axios.isAxiosError(error) && error.response) {
+        return error.response.data as UninstallAssetsResponse; // Assuming error response follows the same structure
+      }
+      throw error; // Re-throw if it's not an Axios error or has no response
     }
   },
 };

@@ -7,7 +7,7 @@ import {
   ListToolsRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js';
 import { z } from 'zod';
-import { assetTools, ListAssetsArgsSchema, GetAssetByIdArgsSchema, GetAssetTasksByIdArgsSchema } from './tools/assets';
+import { assetTools, ListAssetsArgsSchema, GetAssetByIdArgsSchema, GetAssetTasksByIdArgsSchema, UninstallAssetsArgsSchema } from './tools/assets';
 import { 
   acquisitionTools, 
   ListAcquisitionProfilesArgsSchema, 
@@ -29,7 +29,7 @@ import { validateAirApiToken } from './utils/validation';
 
 const server = new Server({
   name: 'air-mcp',
-  version: '2.8.0'
+  version: '2.9.0'
 }, {
   capabilities: {
     tools: {}
@@ -541,6 +541,39 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: [],
         },
       },
+      {
+        name: 'uninstall_assets',
+        description: 'Uninstall specific assets based on filters without purging data. Requires specifying `filter.includedEndpointIds`.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            filter: {
+              type: 'object',
+              properties: {
+                searchTerm: { type: 'string', description: 'Optional search term.' },
+                name: { type: 'string', description: 'Filter by asset name.' },
+                ipAddress: { type: 'string', description: 'Filter by IP address.' },
+                groupId: { type: 'string', description: 'Filter by group ID.' },
+                groupFullPath: { type: 'string', description: 'Filter by full group path.' },
+                managedStatus: { type: 'array', items: { type: 'string' }, description: 'Filter by managed status (e.g., ["managed"]).' },
+                isolationStatus: { type: 'array', items: { type: 'string' }, description: 'Filter by isolation status (e.g., ["isolated"]).' },
+                platform: { type: 'array', items: { type: 'string' }, description: 'Filter by platform (e.g., ["windows"]).' },
+                issue: { type: 'string', description: 'Filter by issue.' },
+                onlineStatus: { type: 'array', items: { type: 'string' }, description: 'Filter by online status (e.g., ["online"]).' },
+                tagId: { type: 'string', description: 'Filter by tag ID.' },
+                version: { type: 'string', description: 'Filter by agent version.' },
+                policy: { type: 'string', description: 'Filter by policy.' },
+                includedEndpointIds: { type: 'array', items: { type: 'string' }, description: 'REQUIRED: Array of endpoint IDs to uninstall.' },
+                excludedEndpointIds: { type: 'array', items: { type: 'string' }, description: 'Array of endpoint IDs to exclude.' },
+                organizationIds: { type: 'array', items: { oneOf: [{ type: 'number' }, { type: 'string' }] }, description: 'Organization IDs filter. Defaults to [0].' },
+              },
+              required: [],
+              description: 'Filter object to specify which assets to uninstall.'
+            },
+          },
+          required: ['filter'],
+        },
+      },
     ],
   };
 });
@@ -562,6 +595,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       validateAirApiToken();
       const parsedArgs = GetAssetTasksByIdArgsSchema.parse(args);
       return await assetTools.getAssetTasksById(parsedArgs);
+    } else if (name === 'uninstall_assets') {
+      validateAirApiToken();
+      const parsedArgs = UninstallAssetsArgsSchema.parse(args);
+      return await assetTools.uninstallAssets(parsedArgs);
     } else if (name === 'list_acquisition_profiles') {
       validateAirApiToken();
       const parsedArgs = ListAcquisitionProfilesArgsSchema.parse(args);
