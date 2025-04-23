@@ -24,12 +24,12 @@ import { triageTools, ListTriageRulesArgsSchema } from './tools/triages';
 import { userTools, ListUsersArgsSchema } from './tools/users';
 import { droneAnalyzerTools } from './tools/droneAnalyzers';
 import { auditTools, ExportAuditLogsArgsSchema, ListAuditLogsArgsSchema } from './tools/audit';
-import { assignTaskTools, AssignRebootTaskArgsSchema, AssignShutdownTaskArgsSchema } from './tools/assign-task';
+import { assignTaskTools, AssignRebootTaskArgsSchema, AssignShutdownTaskArgsSchema, AssignIsolationTaskArgsSchema } from './tools/assign-task';
 import { validateAirApiToken } from './utils/validation';
 
 const server = new Server({
   name: 'air-mcp',
-  version: '2.3.0'
+  version: '2.4.0'
 }, {
   capabilities: {
     tools: {}
@@ -304,6 +304,40 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
         },
       },
       {
+        name: 'assign_isolation_task',
+        description: 'Assign an isolation task to specific endpoints',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            endpointIds: {
+              oneOf: [
+                { type: 'string' },
+                { type: 'array', items: { type: 'string' } }
+              ],
+              description: 'Endpoint ID(s) to isolate or unisolate. Can be a single ID or an array of IDs.'
+            },
+            enabled: {
+              type: 'boolean',
+              description: 'Whether to enable (isolate) or disable (unisolate) isolation. Defaults to true.'
+            },
+            organizationIds: {
+              oneOf: [
+                { type: 'number' },
+                { type: 'string' },
+                { type: 'array', items: { oneOf: [{ type: 'number' }, { type: 'string' }] } }
+              ],
+              description: 'Organization ID(s) to filter endpoints by. Defaults to 0.'
+            },
+            managedStatus: {
+              type: 'array',
+              items: { type: 'string' },
+              description: 'Filter endpoints by managed status. Default is ["managed"].'
+            }
+          },
+          required: ['endpointIds'],
+        },
+      },
+      {
         name: 'list_organizations',
         description: 'List all organizations in the system',
         inputSchema: {
@@ -460,6 +494,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       validateAirApiToken();
       const parsedArgs = AssignShutdownTaskArgsSchema.parse(args);
       return await assignTaskTools.assignShutdownTask(parsedArgs);
+    } else if (name === 'assign_isolation_task') {
+      validateAirApiToken();
+      const parsedArgs = AssignIsolationTaskArgsSchema.parse(args);
+      return await assignTaskTools.assignIsolationTask(parsedArgs);
     } else if (name === 'list_organizations') {
       validateAirApiToken();
       return await organizationTools.listOrganizations();

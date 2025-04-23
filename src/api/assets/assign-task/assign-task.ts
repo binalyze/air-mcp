@@ -50,6 +50,17 @@ export interface ShutdownTaskResponse {
   errors: string[];
 }
 
+export interface IsolationTaskResponse {
+  success: boolean;
+  result: Array<{
+    _id: string;
+    name: string;
+    organizationId: number;
+  }>;
+  statusCode: number;
+  errors: string[];
+}
+
 export const assignTaskApi = {
   /**
    * Assigns a reboot task to endpoints that match the provided filter
@@ -95,6 +106,31 @@ export const assignTaskApi = {
       return response.data;
     } catch (error) {
       console.error('Error assigning shutdown task:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Assigns an isolation task to endpoints that match the provided filter
+   * @param enabled Whether to enable or disable isolation
+   * @param filter Filter criteria to select endpoints for the isolation task
+   * @returns Response with the created task details
+   */
+  async assignIsolationTask(enabled: boolean, filter: AssetFilter): Promise<IsolationTaskResponse> {
+    try {
+      const response = await axios.post(
+        `${config.airHost}/api/public/assets/tasks/isolation`,
+        { enabled, filter },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${config.airApiToken}`
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error assigning isolation task:', error);
       throw error;
     }
   },
