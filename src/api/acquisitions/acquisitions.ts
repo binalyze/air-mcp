@@ -163,6 +163,31 @@ export interface AcquisitionProfileDetailsResponse {
   errors: string[];
 }
 
+// Interface for endpoint and volume configuration for disk image acquisition
+export interface EndpointVolumeConfig {
+  endpointId: string;
+  volumes: string[];
+}
+
+// Interface for disk image options
+export interface DiskImageOptions {
+  chunkSize: number;
+  chunkCount: number;
+  startOffset: number;
+  endpoints: EndpointVolumeConfig[];
+}
+
+// Interface for the image acquisition task request
+export interface ImageAcquisitionTaskRequest {
+  caseId: string | null;
+  taskConfig: TaskConfig; // Reusing existing TaskConfig, assuming structure is similar enough or adaptable
+  diskImageOptions: DiskImageOptions;
+  filter: FilterConfig; // Reusing existing FilterConfig
+}
+
+// Interface for the image acquisition task response (structure matches AcquisitionTaskResponse)
+export type ImageAcquisitionTaskResponse = AcquisitionTaskResponse;
+
 export const api = {
   async getAcquisitionProfiles(organizationIds: string | string[] = '0', allOrganizations: boolean = true): Promise<AcquisitionProfilesResponse> {
     try {
@@ -222,6 +247,26 @@ export const api = {
       return response.data;
     } catch (error) {
       console.error('Error assigning acquisition task:', error);
+      throw error;
+    }
+  },
+
+  // Assigning image acquisition task by filter
+  async assignImageAcquisitionTask(request: ImageAcquisitionTaskRequest): Promise<ImageAcquisitionTaskResponse> {
+    try {
+      const response = await axios.post(
+        `${config.airHost}/api/public/acquisitions/acquire/image`,
+        request,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${config.airApiToken}`
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error assigning image acquisition task:', error);
       throw error;
     }
   },

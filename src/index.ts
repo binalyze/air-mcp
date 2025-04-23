@@ -12,7 +12,8 @@ import {
   acquisitionTools, 
   ListAcquisitionProfilesArgsSchema, 
   AssignAcquisitionTaskArgsSchema,
-  GetAcquisitionProfileByIdArgsSchema
+  GetAcquisitionProfileByIdArgsSchema,
+  AssignImageAcquisitionTaskArgsSchema
 } from './tools/acquisitions';
 import { organizationTools } from './tools/organizations';
 import { caseTools, ListCasesArgsSchema } from './tools/cases';
@@ -145,6 +146,69 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
         },
       },
       {
+        name: 'assign_image_acquisition_task',
+        description: 'Assign a disk image acquisition task to specific endpoints and volumes',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            caseId: {
+              type: ['string', 'null'],
+              description: 'The case ID to associate the acquisition with (optional)',
+            },
+            repositoryId: {
+              type: 'string',
+              description: 'The repository ID where the image will be saved',
+            },
+            endpoints: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  endpointId: { type: 'string' },
+                  volumes: { type: 'array', items: { type: 'string' } }
+                },
+                required: ['endpointId', 'volumes']
+              },
+              description: 'Array of endpoints and volumes to image (e.g., [{"endpointId": "uuid", "volumes": ["/dev/sda1"]}]). At least one endpoint and one volume per endpoint required.',
+            },
+            organizationIds: {
+              type: 'array',
+              items: { type: 'number' },
+              description: 'Array of organization IDs. Defaults to [0]',
+            },
+            bandwidthLimit: {
+              type: 'number',
+              description: 'Bandwidth limit in KB/s. Defaults to 100000',
+            },
+            enableCompression: {
+              type: 'boolean',
+              description: 'Whether to enable compression. Defaults to true',
+            },
+            enableEncryption: {
+              type: 'boolean',
+              description: 'Whether to enable encryption. Defaults to false',
+            },
+            encryptionPassword: {
+              type: 'string',
+              description: 'Password for encryption if enabled',
+            },
+            chunkSize: {
+              type: 'number',
+              description: 'Chunk size in bytes. Defaults to 1048576',
+            },
+            chunkCount: {
+              type: 'number',
+              description: 'Number of chunks to acquire. Defaults to 0 (acquire until end).'
+            },
+            startOffset: {
+              type: 'number',
+              description: 'Offset in bytes to start acquisition from. Defaults to 0.'
+            },
+          },
+          required: ['repositoryId', 'endpoints'],
+        },
+      },
+      {
         name: 'list_organizations',
         description: 'List all organizations in the system',
         inputSchema: {
@@ -257,6 +321,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       validateAirApiToken();
       const parsedArgs = GetAcquisitionProfileByIdArgsSchema.parse(args);
       return await acquisitionTools.getAcquisitionProfileById(parsedArgs);
+    } else if (name === 'assign_image_acquisition_task') {
+      validateAirApiToken();
+      const parsedArgs = AssignImageAcquisitionTaskArgsSchema.parse(args);
+      return await acquisitionTools.assignImageAcquisitionTask(parsedArgs);
     } else if (name === 'list_organizations') {
       validateAirApiToken();
       return await organizationTools.listOrganizations();

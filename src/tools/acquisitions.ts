@@ -5,7 +5,10 @@ import {
   AcquisitionTaskRequest, 
   DroneConfig, 
   FilterConfig, 
-  TaskConfig 
+  TaskConfig, 
+  ImageAcquisitionTaskRequest,
+  DiskImageOptions,
+  EndpointVolumeConfig
 } from '../api/acquisitions/acquisitions';
 
 // Schema for list acquisition profiles arguments
@@ -29,6 +32,24 @@ export const AssignAcquisitionTaskArgsSchema = z.object({
   enableCompression: z.boolean().optional().describe('Whether to enable compression. Defaults to true'),
   enableEncryption: z.boolean().optional().describe('Whether to enable encryption. Defaults to false'),
   encryptionPassword: z.string().optional().describe('Password for encryption if enabled'),
+});
+
+// Schema for assign image acquisition task arguments
+export const AssignImageAcquisitionTaskArgsSchema = z.object({
+  caseId: z.string().optional().nullable().describe('The case ID to associate the acquisition with (optional)'),
+  repositoryId: z.string().describe('The repository ID where the image will be saved'),
+  endpoints: z.array(z.object({
+    endpointId: z.string(),
+    volumes: z.array(z.string()).min(1, 'At least one volume must be specified per endpoint')
+  })).min(1, 'At least one endpoint must be specified').describe('Array of endpoints and volumes to image (e.g., [{"endpointId": "uuid", "volumes": ["/dev/sda1"]}]'),
+  organizationIds: z.array(z.number()).optional().describe('Array of organization IDs. Defaults to [0]'),
+  bandwidthLimit: z.number().optional().describe('Bandwidth limit in KB/s. Defaults to 100000'),
+  enableCompression: z.boolean().optional().describe('Whether to enable compression. Defaults to true'),
+  enableEncryption: z.boolean().optional().describe('Whether to enable encryption. Defaults to false'),
+  encryptionPassword: z.string().optional().describe('Password for encryption if enabled'),
+  chunkSize: z.number().optional().describe('Chunk size in bytes. Defaults to 1048576'),
+  chunkCount: z.number().int().optional().describe('Number of chunks to acquire. Defaults to 0 (acquire until end).'),
+  startOffset: z.number().int().optional().describe('Offset in bytes to start acquisition from. Defaults to 0.'),
 });
 
 // Schema for get acquisition profile by ID arguments
@@ -291,6 +312,143 @@ Organization IDs: ${profile.organizationIds.length > 0 ? profile.organizationIds
           {
             type: 'text',
             text: `Failed to assign acquisition task: ${errorMessage}`
+          }
+        ]
+      };
+    }
+  },
+
+  // Assign image acquisition task by filter
+  async assignImageAcquisitionTask(args: z.infer<typeof AssignImageAcquisitionTaskArgsSchema>) {
+    try {
+      // Construct TaskConfig with defaults, overriding where specified
+      const taskConfig: TaskConfig = {
+        choice: 'use-custom-options',
+        saveTo: {
+          // Defaulting to repository location using the provided repositoryId
+          windows: {
+            location: 'repository',
+            useMostFreeVolume: true,
+            repositoryId: args.repositoryId,
+            path: 'Binalyze\\AIR',
+            tmp: 'Binalyze\\AIR\\tmp',
+            directCollection: false
+          },
+          linux: {
+            location: 'repository',
+            useMostFreeVolume: false,
+            repositoryId: args.repositoryId,
+            path: 'opt/binalyze/air',
+            tmp: 'opt/binalyze/air/tmp',
+            directCollection: false
+          },
+          macos: {
+            location: 'repository',
+            useMostFreeVolume: false,
+            repositoryId: args.repositoryId,
+            path: 'opt/binalyze/air',
+            tmp: 'opt/binalyze/air/tmp',
+            directCollection: false
+          },
+          // Assuming AIX is not applicable for image acquisition or uses similar defaults
+          aix: {
+            location: 'repository',
+            useMostFreeVolume: true,
+            repositoryId: args.repositoryId,
+            path: 'opt/binalyze/air',
+            volume: '/', // Default added
+            tmp: 'opt/binalyze/air/tmp',
+            directCollection: false
+          }
+        },
+        cpu: { limit: 80 }, // Default CPU limit, not exposed as arg for image task
+        // @ts-ignore - API definition might need update if bandwidth is separate
+        bandwidth: { 
+          limit: args.bandwidthLimit || 100000 
+        },
+        compression: {
+          enabled: args.enableCompression !== undefined ? args.enableCompression : true,
+          encryption: {
+            enabled: args.enableEncryption || false,
+            password: args.encryptionPassword || ''
+          }
+        }
+      };
+
+      // Construct DiskImageOptions
+      const diskImageOptions: DiskImageOptions = {
+        chunkSize: args.chunkSize || 1048576, // Default chunk size 1MB
+        chunkCount: args.chunkCount ?? 0, 
+        startOffset: args.startOffset ?? 0,
+        endpoints: args.endpoints.map(ep => ({
+          endpointId: ep.endpointId,
+          volumes: ep.volumes
+        } as EndpointVolumeConfig))
+      };
+
+      // Construct FilterConfig using endpoint IDs from diskImageOptions
+      const includedEndpointIds = args.endpoints.map(ep => ep.endpointId);
+      const filter: FilterConfig = {
+        searchTerm: '',
+        name: '',
+        ipAddress: '',
+        groupId: '',
+        groupFullPath: '',
+        managedStatus: [], // Defaulting based on example
+        isolationStatus: [],
+        platform: [],
+        issue: '',
+        onlineStatus: [],
+        tags: [],
+        version: '',
+        policy: '',
+        includedEndpointIds: includedEndpointIds,
+        excludedEndpointIds: [],
+        organizationIds: args.organizationIds || [0]
+      };
+
+      // Construct the full request
+      const request: ImageAcquisitionTaskRequest = {
+        caseId: args.caseId ?? null,
+        taskConfig,
+        diskImageOptions,
+        filter
+      };
+
+      // Send the request to the API
+      const response = await api.assignImageAcquisitionTask(request);
+
+      if (!response.success) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Error assigning image acquisition task: ${response.errors.join(', ')}`
+            }
+          ]
+        };
+      }
+
+      // Format successful response
+      const taskList = response.result.map(task => 
+        `${task._id}: ${task.name} (Organization: ${task.organizationId})`
+      ).join('\n');
+
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Successfully assigned ${response.result.length} image acquisition task(s):\n${taskList}`
+          }
+        ]
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Failed to assign image acquisition task: ${errorMessage}`
           }
         ]
       };

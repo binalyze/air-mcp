@@ -20,6 +20,7 @@ A Node.js server implementing **Model Context Protocol (MCP)** for Binalyze AIR,
 - **Asset Management** - List assets in your organization.
 - **Acquisition Profiles** - List acquisition profiles.
 - **Acquisition Tasks** - Assign evidence acquisition tasks to endpoints.
+- **Image Acquisition Tasks** - Assign disk image acquisition tasks to endpoints.
 - **Organization Management** - List organizations.
 - **Case Management** - List cases in your organization.
 - **Policy Management** - See security policies across your organization.
@@ -129,6 +130,7 @@ In Claude Desktop, or any MCP Client, you can use natural language commands:
 | `List all acquisition profiles` | Displays available acquisition profiles |
 | `Get acquisition profile details by ID` | Shows detailed information about a specific acquisition profile, including evidence and artifacts |
 | `Assign an acquisition task to endpoint 123abc using profile "full" for case "C-2022-0001"` | Assigns an evidence acquisition task to specified endpoint(s) |
+| `Assign an image acquisition task to endpoint 123abc for volume /dev/sda1 saving to repository 456def` | Assigns a disk image acquisition task to a specific endpoint and volume, saving to a specified repository |
 | `List all organizations` | Shows all organizations in environments |
 | `List all cases` | Displays cases with status and creation time |
 | `List all policies` | Shows security and collection policies |
@@ -159,6 +161,15 @@ Assign an acquisition task to endpoint "0ccbb181-685c-4f1e-982a-6f7c7e88eadd" us
 Start an acquisition on endpoints ["id1", "id2"] with profile "memory" for case "C-2023-0045" with analyzers ["bha", "wsa"]
 ```
 
+### Assigning Image Acquisition Tasks
+
+You can assign disk image acquisition tasks to specific endpoints and volumes:
+
+```
+Assign an image acquisition task to endpoint "7a37cfdb-..." for volume "/dev/disk3s5" saving to repository "Q2gCVO..." with case ID "C-2024-0123"
+Assign image task for endpoint "ep-id-1" volumes ["/dev/sda1", "/dev/sda2"] and endpoint "ep-id-2" volume "C:" to repository "repo-xyz"
+```
+
 ## Response Example
 
 ```
@@ -182,3 +193,6 @@ wsa: Generic WebShell Analyzer (Supported OS: Windows, Linux, macOS, Default Ena
 
 Successfully assigned 1 acquisition task(s):
 3c801542-d58e-4237-84b9-37651b455a38: Example Case Acquisition 003 (Organization: 0)
+
+Successfully assigned 1 image acquisition task(s):
+3c801542-d58e-4237-84b9-37651b455a38: Acquire Image 001 (Organization: 0)
