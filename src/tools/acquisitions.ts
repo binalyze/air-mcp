@@ -9,9 +9,6 @@ import {
   ImageAcquisitionTaskRequest,
   DiskImageOptions,
   EndpointVolumeConfig,
-  NetworkCaptureConfig,
-  EDiscoveryPattern,
-  AcquisitionProfilePlatformDetails,
   CreateAcquisitionProfileRequest
 } from '../api/acquisitions/acquisitions';
 

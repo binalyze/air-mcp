@@ -25,6 +25,7 @@ A Node.js server implementing **Model Context Protocol (MCP)** for Binalyze AIR,
 - **Reboot Tasks** - Assign reboot tasks to specific endpoints.
 - **Shutdown Tasks** - Assign shutdown tasks to specific endpoints.
 - **Isolation Tasks** - Isolate or unisolate specific endpoints.
+- **Log Retrieval Tasks** - Retrieve logs from specific endpoints.
 - **Organization Management** - List organizations.
 - **Case Management** - List cases in your organization.
 - **Policy Management** - See security policies across your organization.
@@ -142,6 +143,7 @@ In Claude Desktop, or any MCP Client, you can use natural language commands:
 | `Shutdown endpoint 123abc` | Assigns a shutdown task to a specific endpoint |
 | `Isolate endpoint 123abc` | Assigns an isolation task to a specific endpoint |
 | `Unisolate endpoint 123abc` | Removes isolation from a specific endpoint |
+| `Retrieve logs from endpoint 123abc` | Assigns a log retrieval task to a specific endpoint |
 | `List all organizations` | Shows all organizations in environments |
 | `List all cases` | Displays cases with status and creation time |
 | `List all policies` | Shows security and collection policies |
@@ -214,6 +216,15 @@ Unisolate endpoint "0ccbb181-685c-4f1e-982a-6f7c7e88eadd" (by setting enabled=fa
 Assign an unisolation task to endpoints ["id1", "id2"] with enabled=false
 ```
 
+### Assigning Log Retrieval Tasks
+
+You can retrieve logs from specific endpoints:
+
+```
+Retrieve logs from endpoint "0ccbb181-685c-4f1e-982a-6f7c7e88eadd"
+Assign a log retrieval task to endpoints ["id1", "id2"] for organization 123
+```
+
 ## Response Example
 
 ```
@@ -255,3 +266,6 @@ a5f2ee9d-066e-47dd-a436-ba27808d76fb: Shutdown 004 (Organization: 0)
 
 Successfully assigned 1 isolation task(s):
 26aeb2db-9fd0-467c-a3ba-b74c675ef0c8: Isolation 003 (Organization: 0)
+
+Successfully assigned 1 log retrieval task(s):
+517ac6b7-92f1-4401-8f75-79931d73c2c1: Log Retrieval 002 (Organization: 0)
