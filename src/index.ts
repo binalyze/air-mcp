@@ -7,7 +7,7 @@ import {
   ListToolsRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js';
 import { z } from 'zod';
-import { assetTools, ListAssetsArgsSchema } from './tools/assets';
+import { assetTools, ListAssetsArgsSchema, GetAssetByIdArgsSchema } from './tools/assets';
 import { 
   acquisitionTools, 
   ListAcquisitionProfilesArgsSchema, 
@@ -29,7 +29,7 @@ import { validateAirApiToken } from './utils/validation';
 
 const server = new Server({
   name: 'air-mcp',
-  version: '2.6.0'
+  version: '2.7.0'
 }, {
   capabilities: {
     tools: {}
@@ -52,6 +52,20 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
             },
           },
           required: [],
+        },
+      },
+      {
+        name: 'get_asset_by_id',
+        description: 'Get detailed information about a specific asset by its ID',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            id: {
+              type: 'string',
+              description: 'The ID of the asset to retrieve',
+            },
+          },
+          required: ['id'],
         },
       },
       {
@@ -526,6 +540,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       validateAirApiToken();
       const parsedArgs = ListAssetsArgsSchema.parse(args);
       return await assetTools.listAssets(parsedArgs);
+    } else if (name === 'get_asset_by_id') {
+      validateAirApiToken();
+      const parsedArgs = GetAssetByIdArgsSchema.parse(args);
+      return await assetTools.getAssetById(parsedArgs);
     } else if (name === 'list_acquisition_profiles') {
       validateAirApiToken();
       const parsedArgs = ListAcquisitionProfilesArgsSchema.parse(args);

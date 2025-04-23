@@ -18,6 +18,7 @@ A Node.js server implementing **Model Context Protocol (MCP)** for Binalyze AIR,
 ## ✨ Features
 
 - **Asset Management** - List assets in your organization.
+- **Asset Details** - Get detailed information about a specific asset by its ID.
 - **Acquisition Profiles** - List acquisition profiles.
 - **Acquisition Tasks** - Assign evidence acquisition tasks to endpoints.
 - **Image Acquisition Tasks** - Assign disk image acquisition tasks to endpoints.
@@ -135,6 +136,7 @@ In Claude Desktop, or any MCP Client, you can use natural language commands:
 | Command | Description |
 |---------|-------------|
 | `List all assets in the system` | Shows all managed/unmanaged endpoints with OS, platform info |
+| `Get details about asset with ID "abc123"` | Displays detailed information about a specific asset |
 | `List all acquisition profiles` | Displays available acquisition profiles |
 | `Get acquisition profile details by ID` | Shows detailed information about a specific acquisition profile, including evidence and artifacts |
 | `Assign an acquisition task to endpoint 123abc using profile "full" for case "C-2022-0001"` | Assigns an evidence acquisition task to specified endpoint(s) |
@@ -169,6 +171,15 @@ List triage rules for organization 123
 List users for organization 123
 Export audit logs for organization 0
 List audit logs for organization 0
+```
+
+### Getting Asset Details
+
+You can retrieve detailed information about a specific asset:
+
+```
+Get details for asset "bc906dea-f92d-46b3-87f2-a2fc36667f70"
+Show me information about endpoint with ID "bc906dea-f92d-46b3-87f2-a2fc36667f70"
 ```
 
 ### Assigning Acquisition Tasks
@@ -246,22 +257,29 @@ a1b2c3d4: Win10-Workstation1 (Windows - Windows 10 Pro)
 e5f6g7h8: Ubuntu-Server1 (Linux - Ubuntu 20.04)
 i9j0k1l2: MacBook-Pro (macOS - macOS 12.3)
 ```
-Found 3 triage rules:
-corewebshell_detection: core.webshell_detection (Engine: yara, Search In: both)
-fireeye-sunburst-countermeasures: FireEye Sunburst Countermeasures (Engine: yara, Search In: both)
-fireeye-red-team-tools-countermeasures: FireEye Red Team Tools Countermeasures (Engine: yara, Search In: both)
+
 ```
-Found 1 user:
-DtmrCWrK1o7m0bqVasdzg6Ia: demo@binalyze.com (demo@binalyze.com)
+Asset details:
+Asset: Endpoint - 2 (bc906dea-f92d-46b3-87f2-a2fc36667f70)
+OS: Ubuntu
+Platform: windows
+IP Address: 127.0.0.1
+Group: Computers (e5a82e99-868b-4ae5-85f3-06f05b260824)
+Type: Workstation
+Management: Managed
+Last Seen: 5/22/2022, 6:38:38 PM
+Version: 2.9.0 (2009000)
+Registered: 5/22/2022, 6:38:38 PM
+Created: 5/22/2022, 6:38:38 PM
+Updated: 5/22/2022, 6:38:38 PM
+Organization ID: 0
+Online Status: offline
+Isolation Status: unisolated
+Tags: None
+Issues: None
+Waiting For Version Update Fix: No
+Policies: None
 ```
-Found 20 drone analyzers:
-bha: Browser History Analyzer (Supported OS: Windows, Default Enabled: Yes)
-wsa: Generic WebShell Analyzer (Supported OS: Windows, Linux, macOS, Default Enabled: Yes)
-```
-+
-+Found 2 audit logs:
-+2024-04-23T10:00:00.000Z | User: demo@binalyze.com | Action: login | Entity: user (DtmrCWrK1o7m0bqVasdzg6Ia) | Org: 0 | Details: {"success":true}
-+2024-04-23T10:05:15.123Z | User: admin@binalyze.com | Action: create | Entity: case (C-2024-0001) | Org: 0 | Details: {"name":"New Investigation"}
 
 Successfully assigned 1 acquisition task(s):
 3c801542-d58e-4237-84b9-37651b455a38: Example Case Acquisition 003 (Organization: 0)

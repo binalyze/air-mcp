@@ -8,6 +8,7 @@
  * The module includes:
  * - Asset interface: Represents a single endpoint/device in the system
  * - AssetsResponse interface: Represents the API response structure
+ * - AssetResponse interface: Represents the single asset API response structure
  * - api object: Contains methods to interact with the Assets API endpoints
  * 
  * Reference: https://docs.binalyze.com/#728bbaed-0c3e-482e-9756-9f4816e36ba8
@@ -41,6 +42,33 @@ export interface Asset {
   issues: string[];
 }
 
+export interface AssetDetail {
+  _id: string;
+  name: string;
+  os: string;
+  platform: string;
+  ipAddress: string;
+  groupId: string;
+  groupFullPath: string;
+  isServer: boolean;
+  isManaged: boolean;
+  lastSeen: string;
+  version: string;
+  versionNo: number;
+  registeredAt: string;
+  createdAt: string;
+  updatedAt: string;
+  organizationId: number;
+  securityToken: string;
+  onlineStatus: string;
+  issues: string[];
+  isolationStatus: string;
+  tags: string[];
+  label: string | null;
+  waitingForVersionUpdateFix: boolean;
+  policies: any[];
+}
+
 export interface AssetsResponse {
   success: boolean;
   result: {
@@ -57,6 +85,13 @@ export interface AssetsResponse {
     pageSize: number;
     totalPageCount: number;
   };
+  statusCode: number;
+  errors: string[];
+}
+
+export interface AssetResponse {
+  success: boolean;
+  result: AssetDetail;
   statusCode: number;
   errors: string[];
 }
@@ -80,6 +115,24 @@ export const api = {
       return response.data;
     } catch (error) {
       console.error('Error fetching assets:', error);
+      throw error;
+    }
+  },
+
+  async getAssetById(id: string): Promise<AssetResponse> {
+    try {
+      const response = await axios.get(
+        `${config.airHost}/api/public/assets/${id}`,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${config.airApiToken}`
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching asset with ID ${id}:`, error);
       throw error;
     }
   },
