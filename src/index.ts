@@ -7,7 +7,7 @@ import {
   ListToolsRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js';
 import { z } from 'zod';
-import { assetTools, ListAssetsArgsSchema, GetAssetByIdArgsSchema } from './tools/assets';
+import { assetTools, ListAssetsArgsSchema, GetAssetByIdArgsSchema, GetAssetTasksByIdArgsSchema } from './tools/assets';
 import { 
   acquisitionTools, 
   ListAcquisitionProfilesArgsSchema, 
@@ -29,7 +29,7 @@ import { validateAirApiToken } from './utils/validation';
 
 const server = new Server({
   name: 'air-mcp',
-  version: '2.7.0'
+  version: '2.8.0'
 }, {
   capabilities: {
     tools: {}
@@ -63,6 +63,20 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
             id: {
               type: 'string',
               description: 'The ID of the asset to retrieve',
+            },
+          },
+          required: ['id'],
+        },
+      },
+      {
+        name: 'get_asset_tasks_by_id',
+        description: 'Get all tasks associated with a specific asset by its ID',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            id: {
+              type: 'string',
+              description: 'The ID of the asset to retrieve tasks for',
             },
           },
           required: ['id'],
@@ -544,6 +558,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       validateAirApiToken();
       const parsedArgs = GetAssetByIdArgsSchema.parse(args);
       return await assetTools.getAssetById(parsedArgs);
+    } else if (name === 'get_asset_tasks_by_id') {
+      validateAirApiToken();
+      const parsedArgs = GetAssetTasksByIdArgsSchema.parse(args);
+      return await assetTools.getAssetTasksById(parsedArgs);
     } else if (name === 'list_acquisition_profiles') {
       validateAirApiToken();
       const parsedArgs = ListAcquisitionProfilesArgsSchema.parse(args);

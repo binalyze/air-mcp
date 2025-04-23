@@ -19,6 +19,7 @@ A Node.js server implementing **Model Context Protocol (MCP)** for Binalyze AIR,
 
 - **Asset Management** - List assets in your organization.
 - **Asset Details** - Get detailed information about a specific asset by its ID.
+- **Asset Tasks** - Get all tasks associated with a specific asset by its ID.
 - **Acquisition Profiles** - List acquisition profiles.
 - **Acquisition Tasks** - Assign evidence acquisition tasks to endpoints.
 - **Image Acquisition Tasks** - Assign disk image acquisition tasks to endpoints.
@@ -137,6 +138,7 @@ In Claude Desktop, or any MCP Client, you can use natural language commands:
 |---------|-------------|
 | `List all assets in the system` | Shows all managed/unmanaged endpoints with OS, platform info |
 | `Get details about asset with ID "abc123"` | Displays detailed information about a specific asset |
+| `Get tasks for asset with ID "abc123"` | Shows all tasks associated with a specific asset |
 | `List all acquisition profiles` | Displays available acquisition profiles |
 | `Get acquisition profile details by ID` | Shows detailed information about a specific acquisition profile, including evidence and artifacts |
 | `Assign an acquisition task to endpoint 123abc using profile "full" for case "C-2022-0001"` | Assigns an evidence acquisition task to specified endpoint(s) |
@@ -180,6 +182,16 @@ You can retrieve detailed information about a specific asset:
 ```
 Get details for asset "bc906dea-f92d-46b3-87f2-a2fc36667f70"
 Show me information about endpoint with ID "bc906dea-f92d-46b3-87f2-a2fc36667f70"
+```
+
+### Getting Asset Tasks
+
+You can retrieve all tasks associated with a specific asset:
+
+```
+Get tasks for asset "bc906dea-f92d-46b3-87f2-a2fc36667f70"
+Show me the tasks assigned to endpoint with ID "bc906dea-f92d-46b3-87f2-a2fc36667f70"
+What tasks are currently running on asset "bc906dea-f92d-46b3-87f2-a2fc36667f70"
 ```
 
 ### Assigning Acquisition Tasks
@@ -303,3 +315,10 @@ Successfully assigned 1 log retrieval task(s):
 
 Successfully assigned 1 version update task(s):
 cbed8ab3-24d1-4697-8552-6ff6a6c1fae6: Version Update 002 (Organization: 0)
+```
+
+```
+Found 3 tasks for asset with ID bc906dea-f92d-46b3-87f2-a2fc36667f70:
+1e18c426-b00a-44d1-9102-faa80b594fd0: Example Case Acquisition 002 (Type: acquisition, Status: assigned, Progress: 0%)
+dfbcdd26-6c74-4de4-8704-bf5d48b90722: Example Case Acquisition 001 (Type: acquisition, Status: assigned, Progress: 0%)
+45f5bfeb-e503-4123-80f0-422229b1b097: Auto Tagging 003 (Type: auto-tagging, Status: assigned, Progress: 0%)

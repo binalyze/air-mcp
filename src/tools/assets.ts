@@ -1,6 +1,6 @@
 // src/tools/assets.ts
 import { z } from 'zod';
-import { api, Asset, AssetDetail} from '../api/assets/assets';
+import { api, Asset, AssetDetail, AssetTask } from '../api/assets/assets';
 
 // Schema for list assets arguments
 export const ListAssetsArgsSchema = z.object({
@@ -13,6 +13,11 @@ export const ListAssetsArgsSchema = z.object({
 // Schema for get asset by id arguments
 export const GetAssetByIdArgsSchema = z.object({
   id: z.string().describe('The ID of the asset to retrieve'),
+});
+
+// Schema for get asset tasks by id arguments
+export const GetAssetTasksByIdArgsSchema = z.object({
+  id: z.string().describe('The ID of the asset to retrieve tasks for'),
 });
 
 // Format asset for display
@@ -50,6 +55,23 @@ Tags: ${asset.tags.length > 0 ? asset.tags.join(', ') : 'None'}
 Issues: ${asset.issues.length > 0 ? asset.issues.join(', ') : 'None'}
 Waiting For Version Update Fix: ${asset.waitingForVersionUpdateFix ? 'Yes' : 'No'}
 Policies: ${asset.policies.length > 0 ? asset.policies.length : 'None'}
+`;
+}
+
+// Format asset task information
+function formatAssetTask(task: AssetTask): string {
+  return `
+Task: ${task.name} (${task._id})
+Task ID: ${task.taskId}
+Type: ${task.type}
+Endpoint: ${task.endpointName} (${task.endpointId})
+Organization ID: ${task.organizationId}
+Status: ${task.status}
+Progress: ${task.progress}%
+Duration: ${task.duration !== null ? `${task.duration} seconds` : 'N/A'}
+Case IDs: ${task.caseIds ? task.caseIds.join(', ') : 'None'}
+Created: ${new Date(task.createdAt).toLocaleString()}
+Updated: ${new Date(task.updatedAt).toLocaleString()}
 `;
 }
 
@@ -137,6 +159,58 @@ export const assetTools = {
           {
             type: 'text',
             text: `Failed to fetch asset: ${errorMessage}`
+          }
+        ]
+      };
+    }
+  },
+
+  // Get asset tasks by ID
+  async getAssetTasksById(args: z.infer<typeof GetAssetTasksByIdArgsSchema>) {
+    try {
+      const response = await api.getAssetTasksById(args.id);
+      
+      if (!response.success) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Error fetching asset tasks: ${response.errors.join(', ')}`
+            }
+          ]
+        };
+      }
+      
+      if (response.result.entities.length === 0) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `No tasks found for asset with ID ${args.id}`
+            }
+          ]
+        };
+      }
+      
+      const tasksOverview = response.result.entities.map(task => 
+        `${task._id}: ${task.name} (Type: ${task.type}, Status: ${task.status}, Progress: ${task.progress}%)`
+      ).join('\n');
+      
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Found ${response.result.totalEntityCount} tasks for asset with ID ${args.id}:\n${tasksOverview}`
+          }
+        ]
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Failed to fetch asset tasks: ${errorMessage}`
           }
         ]
       };

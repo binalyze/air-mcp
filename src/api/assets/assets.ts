@@ -9,6 +9,8 @@
  * - Asset interface: Represents a single endpoint/device in the system
  * - AssetsResponse interface: Represents the API response structure
  * - AssetResponse interface: Represents the single asset API response structure
+ * - AssetTask interface: Represents a task associated with an asset
+ * - AssetTasksResponse interface: Represents the asset tasks API response structure
  * - api object: Contains methods to interact with the Assets API endpoints
  * 
  * Reference: https://docs.binalyze.com/#728bbaed-0c3e-482e-9756-9f4816e36ba8
@@ -96,6 +98,46 @@ export interface AssetResponse {
   errors: string[];
 }
 
+export interface AssetTask {
+  _id: string;
+  taskId: string;
+  name: string;
+  type: string;
+  endpointId: string;
+  endpointName: string;
+  organizationId: number;
+  status: string;
+  recurrence: string | null;
+  progress: number;
+  duration: number | null;
+  caseIds: string[] | null;
+  createdAt: string;
+  updatedAt: string;
+  response: any | null;
+}
+
+export interface AssetTasksResponse {
+  success: boolean;
+  result: {
+    entities: AssetTask[];
+    filters: Array<{
+      name: string;
+      type: string;
+      options: string[];
+      filterUrl: string | null;
+    }>;
+    sortables: string[];
+    totalEntityCount: number;
+    currentPage: number;
+    pageSize: number;
+    previousPage: number;
+    totalPageCount: number;
+    nextPage: number;
+  };
+  statusCode: number;
+  errors: string[];
+}
+
 export const api = {
   async getAssets(organizationIds: string | string[] = '0'): Promise<AssetsResponse> {
     try {
@@ -133,6 +175,24 @@ export const api = {
       return response.data;
     } catch (error) {
       console.error(`Error fetching asset with ID ${id}:`, error);
+      throw error;
+    }
+  },
+
+  async getAssetTasksById(id: string): Promise<AssetTasksResponse> {
+    try {
+      const response = await axios.get(
+        `${config.airHost}/api/public/assets/${id}/tasks`,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${config.airApiToken}`
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching tasks for asset with ID ${id}:`, error);
       throw error;
     }
   },
