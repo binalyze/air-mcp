@@ -7,7 +7,7 @@ import {
   ListToolsRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js';
 import { z } from 'zod';
-import { assetTools, ListAssetsArgsSchema, GetAssetByIdArgsSchema, GetAssetTasksByIdArgsSchema, UninstallAssetsArgsSchema, PurgeAndUninstallAssetsArgsSchema, AddTagsToAssetsArgsSchema } from './tools/assets';
+import { assetTools, ListAssetsArgsSchema, GetAssetByIdArgsSchema, GetAssetTasksByIdArgsSchema, UninstallAssetsArgsSchema, PurgeAndUninstallAssetsArgsSchema, AddTagsToAssetsArgsSchema, RemoveTagsFromAssetsArgsSchema } from './tools/assets';
 import { 
   acquisitionTools, 
   ListAcquisitionProfilesArgsSchema, 
@@ -29,7 +29,7 @@ import { validateAirApiToken } from './utils/validation';
 
 const server = new Server({
   name: 'air-mcp',
-  version: '2.11.0'
+  version: '2.12.0'
 }, {
   capabilities: {
     tools: {}
@@ -646,6 +646,45 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: ['filter', 'tags'],
         },
       },
+      {
+        name: 'remove_tags_from_assets',
+        description: 'Remove tags from specific assets based on filters. Requires specifying `filter.includedEndpointIds` and `tags`.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            filter: {
+              type: 'object',
+              properties: {
+                searchTerm: { type: 'string', description: 'Optional search term.' },
+                name: { type: 'string', description: 'Filter by asset name.' },
+                ipAddress: { type: 'string', description: 'Filter by IP address.' },
+                groupId: { type: 'string', description: 'Filter by group ID.' },
+                groupFullPath: { type: 'string', description: 'Filter by full group path.' },
+                managedStatus: { type: 'array', items: { type: 'string' }, description: 'Filter by managed status (e.g., ["managed"]).' },
+                isolationStatus: { type: 'array', items: { type: 'string' }, description: 'Filter by isolation status (e.g., ["isolated"]).' },
+                platform: { type: 'array', items: { type: 'string' }, description: 'Filter by platform (e.g., ["windows"]).' },
+                issue: { type: 'string', description: 'Filter by issue.' },
+                onlineStatus: { type: 'array', items: { type: 'string' }, description: 'Filter by online status (e.g., ["online"]).' },
+                tagId: { type: 'string', description: 'Filter by existing tag ID.' },
+                version: { type: 'string', description: 'Filter by agent version.' },
+                policy: { type: 'string', description: 'Filter by policy.' },
+                includedEndpointIds: { type: 'array', items: { type: 'string' }, description: 'REQUIRED: Array of endpoint IDs to remove tags from.' },
+                excludedEndpointIds: { type: 'array', items: { type: 'string' }, description: 'Array of endpoint IDs to exclude.' },
+                organizationIds: { type: 'array', items: { oneOf: [{ type: 'number' }, { type: 'string' }] }, description: 'Organization IDs filter. Defaults to [0].' },
+              },
+              required: ['includedEndpointIds'],
+              description: 'Filter object to specify which assets to remove tags from.'
+            },
+            tags: {
+              type: 'array',
+              items: { type: 'string' },
+              minItems: 1,
+              description: 'REQUIRED: Array of tags to remove from the selected assets.'
+            },
+          },
+          required: ['filter', 'tags'],
+        },
+      },
     ],
   };
 });
@@ -679,6 +718,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       validateAirApiToken();
       const parsedArgs = AddTagsToAssetsArgsSchema.parse(args);
       return await assetTools.addTagsToAssets(parsedArgs);
+    } else if (name === 'remove_tags_from_assets') {
+      validateAirApiToken();
+      const parsedArgs = RemoveTagsFromAssetsArgsSchema.parse(args);
+      return await assetTools.removeTagsFromAssets(parsedArgs);
     } else if (name === 'list_acquisition_profiles') {
       validateAirApiToken();
       const parsedArgs = ListAcquisitionProfilesArgsSchema.parse(args);

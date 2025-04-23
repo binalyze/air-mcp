@@ -303,4 +303,28 @@ export const api = {
       throw error;
     }
   },
+
+  // New function to remove tags from assets by filter
+  async removeTagsFromAssetsByFilter(filter: AssetFilter, tags: string[]): Promise<ModifyTagsResponse> {
+    try {
+      const response = await axios.delete(
+        `${config.airHost}/api/public/assets/tags`,
+        {
+          data: { filter, tags }, // Send filter and tags in the request body
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${config.airApiToken}`
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error removing tags from assets:', error);
+      if (axios.isAxiosError(error) && error.response) {
+        // Assuming the error response structure is the same as ModifyTagsResponse
+        return error.response.data as ModifyTagsResponse;
+      }
+      throw error;
+    }
+  },
 };

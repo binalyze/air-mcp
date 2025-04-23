@@ -41,6 +41,7 @@ A Node.js server implementing **Model Context Protocol (MCP)** for Binalyze AIR,
 - **Uninstall Assets** - Uninstall specific assets based on filters without purging data.
 - **Purge and Uninstall Assets** - Purge data and uninstall specific assets based on filters.
 - **Add Tags to Assets** - Add tags to specific assets based on filters.
+- **Remove Tags from Assets** - Remove tags from specific assets based on filters.
 
 ## Overview
 
@@ -165,6 +166,7 @@ In Claude Desktop, or any MCP Client, you can use natural language commands:
 | `Uninstall asset with ID "endpoint-id"` | Uninstalls the specified asset without purging data (requires providing `filter.includedEndpointIds`) |
 | `Purge and uninstall asset with ID "endpoint-id"` | Purges data and uninstalls the specified asset (requires providing `filter.includedEndpointIds`) |
 | `Add tags ["tag1", "tag2"] to asset with ID "endpoint-id"` | Adds specified tags to the targeted asset(s) (requires providing `filter.includedEndpointIds` and `tags`) |
+| `Remove tags ["tag1"] from asset with ID "endpoint-id"` | Removes specified tags from the targeted asset(s) (requires providing `filter.includedEndpointIds` and `tags`) |
 
 ### Filtering by Organization
 
@@ -294,6 +296,15 @@ Add tags ["important", "review-needed"] to asset with ID "0ccbb181-685c-4f1e-982
 Add tag "critical" to assets with IDs ["id1", "id2"] for organization 0
 ```
 
+### Removing Tags from Assets
+
+You can remove tags from specific assets using filters. You **must** specify the exact IDs of the assets to remove tags from via `filter.includedEndpointIds` and provide at least one tag in the `tags` array.
+
+```
+Remove tags ["obsolete"] from asset with ID "0ccbb181-685c-4f1e-982a-6f7c7e88eadd"
+Remove tag "needs-review" from assets with IDs ["id1", "id2"] for organization 0
+```
+
 ## Response Example
 
 ```
@@ -355,6 +366,8 @@ Successfully initiated uninstall task for assets matching the filter (targeted I
 Successfully initiated purge and uninstall task for assets matching the filter (targeted IDs: 0ccbb181-685c-4f1e-982a-6f7c7e88eadd).
 
 Successfully added tags [tag1] to assets matching the filter (targeted IDs: d169d2ee-aad3-47f0-bd1d-6c1829195201).
+
+Successfully removed tags [obsolete] from assets matching the filter (targeted IDs: 0ccbb181-685c-4f1e-982a-6f7c7e88eadd).
 
 ```
 Found 3 tasks for asset with ID bc906dea-f92d-46b3-87f2-a2fc36667f70:

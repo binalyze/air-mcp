@@ -89,6 +89,29 @@ export const AddTagsToAssetsArgsSchema = z.object({
   tags: z.array(z.string()).min(1, { message: "Required: At least one tag must be provided." }).describe('Array of tags to add to the selected assets.'),
 });
 
+// Schema for removing tags from assets arguments
+export const RemoveTagsFromAssetsArgsSchema = z.object({
+  filter: z.object({
+    searchTerm: z.string().optional(),
+    name: z.string().optional(),
+    ipAddress: z.string().optional(),
+    groupId: z.string().optional(),
+    groupFullPath: z.string().optional(),
+    managedStatus: z.array(z.string()).optional(),
+    isolationStatus: z.array(z.string()).optional(),
+    platform: z.array(z.string()).optional(),
+    issue: z.string().optional(),
+    onlineStatus: z.array(z.string()).optional(),
+    tagId: z.string().optional(), // Filter assets by existing tag ID before removal
+    version: z.string().optional(),
+    policy: z.string().optional(),
+    includedEndpointIds: z.array(z.string()).min(1, { message: "Required: At least one endpoint ID must be included to remove tags." }),
+    excludedEndpointIds: z.array(z.string()).optional(),
+    organizationIds: z.array(z.union([z.number(), z.string()])).optional().default([0]),
+  }).describe('Filter criteria to select assets for removing tags. `includedEndpointIds` is REQUIRED.'),
+  tags: z.array(z.string()).min(1, { message: "Required: At least one tag must be provided to remove." }).describe('Array of tags to remove from the selected assets.'),
+});
+
 // Format asset for display
 function formatAsset(asset: Asset): string {
   return `
@@ -410,6 +433,44 @@ export const assetTools = {
           {
             type: 'text',
             text: `Failed to add tags to assets: ${errorMessage}`
+          }
+        ]
+      };
+    }
+  },
+
+  // New tool function to remove tags from assets
+  async removeTagsFromAssets(args: z.infer<typeof RemoveTagsFromAssetsArgsSchema>) {
+    try {
+      // Schema validation already ensures includedEndpointIds and tags are present and non-empty.
+      const response = await api.removeTagsFromAssetsByFilter(args.filter, args.tags);
+
+      if (response.success) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Successfully removed tags [${args.tags.join(', ')}] from assets matching the filter (targeted IDs: ${args.filter.includedEndpointIds.join(', ')}).`
+            }
+          ]
+        };
+      } else {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Error removing tags from assets: ${response.errors.join(', ')} (Status Code: ${response.statusCode})`
+            }
+          ]
+        };
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error during remove tags operation';
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Failed to remove tags from assets: ${errorMessage}`
           }
         ]
       };
