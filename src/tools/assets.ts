@@ -66,6 +66,29 @@ export const PurgeAndUninstallAssetsArgsSchema = z.object({
   }).describe('Filter criteria to select assets for purge and uninstallation. `includedEndpointIds` is REQUIRED.')
 });
 
+// Schema for adding tags to assets arguments
+export const AddTagsToAssetsArgsSchema = z.object({
+  filter: z.object({
+    searchTerm: z.string().optional(),
+    name: z.string().optional(),
+    ipAddress: z.string().optional(),
+    groupId: z.string().optional(),
+    groupFullPath: z.string().optional(),
+    managedStatus: z.array(z.string()).optional(),
+    isolationStatus: z.array(z.string()).optional(),
+    platform: z.array(z.string()).optional(),
+    issue: z.string().optional(),
+    onlineStatus: z.array(z.string()).optional(),
+    tagId: z.string().optional(), // Note: This filter might target assets that *already* have a specific tag.
+    version: z.string().optional(),
+    policy: z.string().optional(),
+    includedEndpointIds: z.array(z.string()).min(1, { message: "Required: At least one endpoint ID must be included to add tags." }),
+    excludedEndpointIds: z.array(z.string()).optional(),
+    organizationIds: z.array(z.union([z.number(), z.string()])).optional().default([0]),
+  }).describe('Filter criteria to select assets for adding tags. `includedEndpointIds` is REQUIRED.'),
+  tags: z.array(z.string()).min(1, { message: "Required: At least one tag must be provided." }).describe('Array of tags to add to the selected assets.'),
+});
+
 // Format asset for display
 function formatAsset(asset: Asset): string {
   return `
@@ -354,4 +377,42 @@ export const assetTools = {
       };
     }
   },
+
+  // New tool function to add tags to assets
+  async addTagsToAssets(args: z.infer<typeof AddTagsToAssetsArgsSchema>) {
+    try {
+      // Schema validation already ensures includedEndpointIds and tags are present and non-empty.
+      const response = await api.addTagsToAssetsByFilter(args.filter, args.tags);
+
+      if (response.success) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Successfully added tags [${args.tags.join(', ')}] to assets matching the filter (targeted IDs: ${args.filter.includedEndpointIds.join(', ')}).`
+            }
+          ]
+        };
+      } else {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Error adding tags to assets: ${response.errors.join(', ')} (Status Code: ${response.statusCode})`
+            }
+          ]
+        };
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error during add tags operation';
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Failed to add tags to assets: ${errorMessage}`
+          }
+        ]
+      };
+    }
+  }
 };

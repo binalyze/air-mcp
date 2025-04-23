@@ -166,6 +166,14 @@ export interface UninstallAssetsResponse {
   errors: string[];
 }
 
+// Structure for the response when modifying tags (add/remove)
+export interface ModifyTagsResponse {
+  success: boolean;
+  result: null; // Result is typically null for tag operations
+  statusCode: number;
+  errors: string[];
+}
+
 export const api = {
   async getAssets(organizationIds: string | string[] = '0'): Promise<AssetsResponse> {
     try {
@@ -267,6 +275,30 @@ export const api = {
       if (axios.isAxiosError(error) && error.response) {
         // Assuming the error response structure is the same as UninstallAssetsResponse
         return error.response.data as UninstallAssetsResponse; 
+      }
+      throw error;
+    }
+  },
+
+  // New function to add tags to assets by filter
+  async addTagsToAssetsByFilter(filter: AssetFilter, tags: string[]): Promise<ModifyTagsResponse> {
+    try {
+      const response = await axios.post(
+        `${config.airHost}/api/public/assets/tags`,
+        { filter, tags }, // Send filter and tags in the request body
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${config.airApiToken}`
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error adding tags to assets:', error);
+      if (axios.isAxiosError(error) && error.response) {
+        // Assuming the error response structure is the same as ModifyTagsResponse
+        return error.response.data as ModifyTagsResponse; 
       }
       throw error;
     }
