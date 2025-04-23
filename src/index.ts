@@ -13,7 +13,8 @@ import {
   ListAcquisitionProfilesArgsSchema, 
   AssignAcquisitionTaskArgsSchema,
   GetAcquisitionProfileByIdArgsSchema,
-  AssignImageAcquisitionTaskArgsSchema
+  AssignImageAcquisitionTaskArgsSchema,
+  CreateAcquisitionProfileArgsSchema
 } from './tools/acquisitions';
 import { organizationTools } from './tools/organizations';
 import { caseTools, ListCasesArgsSchema } from './tools/cases';
@@ -26,7 +27,7 @@ import { validateAirApiToken } from './utils/validation';
 
 const server = new Server({
   name: 'air-mcp',
-  version: '1.10.0'
+  version: '1.11.0'
 }, {
   capabilities: {
     tools: {}
@@ -209,6 +210,38 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
         },
       },
       {
+        name: 'create_acquisition_profile',
+        description: 'Create a new acquisition profile',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            name: { type: 'string', description: 'Name for the new acquisition profile' },
+            organizationIds: { type: 'array', items: { type: 'string' }, description: 'Organization IDs to associate the profile with. Defaults to empty array.' },
+            windows: { 
+              type: 'object', 
+              description: 'Windows specific configuration. Must include keys like `evidenceList` (array of strings), `artifactList` (array of strings, optional), `customContentProfiles` (array), and `networkCapture` (object). Example: { \"evidenceList\": [\"evt\"], \"artifactList\": [], \"customContentProfiles\": [], \"networkCapture\": { \"enabled\": false, \"duration\": 600, \"pcap\": { \"enabled\": false }, \"networkFlow\": { \"enabled\": false } } }' 
+            },
+            linux: { 
+              type: 'object', 
+              description: 'Linux specific configuration. Must include keys like `evidenceList` (array of strings), `artifactList` (array of strings, optional), `customContentProfiles` (array), and `networkCapture` (object). Example: { \"evidenceList\": [\"logs\"], ... }' 
+            },
+            macos: { 
+              type: 'object', 
+              description: 'macOS specific configuration. Must include keys like `evidenceList` (array of strings), `artifactList` (array of strings, optional), `customContentProfiles` (array), and `networkCapture` (object). Example: { \"evidenceList\": [\"logs\"], ... }' 
+            },
+            aix: { 
+              type: 'object', 
+              description: 'AIX specific configuration. Must include keys like `evidenceList` (array of strings), `artifactList` (array of strings, optional), and `customContentProfiles` (array). Example: { \"evidenceList\": [\"logs\"], ... }' 
+            },
+            eDiscovery: { 
+              type: 'object', 
+              description: 'eDiscovery configuration. Must include the key `patterns` (array of objects with `pattern` and `category` strings). Example: { \"patterns\": [] }' 
+            }
+          },
+          required: ['name', 'windows', 'linux', 'macos', 'aix', 'eDiscovery'],
+        },
+      },
+      {
         name: 'list_organizations',
         description: 'List all organizations in the system',
         inputSchema: {
@@ -325,6 +358,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       validateAirApiToken();
       const parsedArgs = AssignImageAcquisitionTaskArgsSchema.parse(args);
       return await acquisitionTools.assignImageAcquisitionTask(parsedArgs);
+    } else if (name === 'create_acquisition_profile') {
+      validateAirApiToken();
+      const parsedArgs = CreateAcquisitionProfileArgsSchema.parse(args);
+      return await acquisitionTools.createAcquisitionProfile(parsedArgs);
     } else if (name === 'list_organizations') {
       validateAirApiToken();
       return await organizationTools.listOrganizations();

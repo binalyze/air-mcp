@@ -8,7 +8,11 @@ import {
   TaskConfig, 
   ImageAcquisitionTaskRequest,
   DiskImageOptions,
-  EndpointVolumeConfig
+  EndpointVolumeConfig,
+  NetworkCaptureConfig,
+  EDiscoveryPattern,
+  AcquisitionProfilePlatformDetails,
+  CreateAcquisitionProfileRequest
 } from '../api/acquisitions/acquisitions';
 
 // Schema for list acquisition profiles arguments
@@ -55,6 +59,44 @@ export const AssignImageAcquisitionTaskArgsSchema = z.object({
 // Schema for get acquisition profile by ID arguments
 export const GetAcquisitionProfileByIdArgsSchema = z.object({
   profileId: z.string().describe('The ID of the acquisition profile to retrieve (e.g., "full")'),
+});
+
+// Schema for Network Capture Config
+const NetworkCaptureConfigSchema = z.object({
+  enabled: z.boolean(),
+  duration: z.number().int(),
+  pcap: z.object({ enabled: z.boolean() }),
+  networkFlow: z.object({ enabled: z.boolean() })
+}).describe('Network capture configuration');
+
+// Schema for EDiscovery Pattern
+const EDiscoveryPatternSchema = z.object({
+  pattern: z.string(),
+  category: z.string()
+}).describe('eDiscovery pattern configuration');
+
+// Schema for Platform Details
+const AcquisitionProfilePlatformDetailsSchema = z.object({
+  evidenceList: z.array(z.string()),
+  artifactList: z.array(z.string()).optional(),
+  customContentProfiles: z.array(z.any()).default([]), // Using z.any() for simplicity
+  networkCapture: NetworkCaptureConfigSchema.optional()
+}).describe('Platform specific acquisition details');
+
+// Schema for AIX Platform Details (no network capture)
+const AixAcquisitionProfilePlatformDetailsSchema = AcquisitionProfilePlatformDetailsSchema.omit({ networkCapture: true });
+
+// Schema for create acquisition profile arguments
+export const CreateAcquisitionProfileArgsSchema = z.object({
+  name: z.string().describe('Name for the new acquisition profile'),
+  organizationIds: z.array(z.string()).optional().default([]).describe('Organization IDs to associate the profile with. Defaults to empty array.'),
+  windows: AcquisitionProfilePlatformDetailsSchema.describe('Windows specific configuration'),
+  linux: AcquisitionProfilePlatformDetailsSchema.describe('Linux specific configuration'),
+  macos: AcquisitionProfilePlatformDetailsSchema.describe('macOS specific configuration'),
+  aix: AixAcquisitionProfilePlatformDetailsSchema.describe('AIX specific configuration'),
+  eDiscovery: z.object({
+    patterns: z.array(EDiscoveryPatternSchema)
+  }).describe('eDiscovery configuration')
 });
 
 // Format acquisition profile for display
@@ -454,4 +496,52 @@ Organization IDs: ${profile.organizationIds.length > 0 ? profile.organizationIds
       };
     }
   },
+
+  // Create Acquisition Profile
+  async createAcquisitionProfile(args: z.infer<typeof CreateAcquisitionProfileArgsSchema>) {
+    try {
+      // Construct the request body from validated arguments
+      const request: CreateAcquisitionProfileRequest = {
+        name: args.name,
+        organizationIds: args.organizationIds,
+        windows: args.windows,
+        linux: args.linux,
+        macos: args.macos,
+        aix: args.aix,
+        eDiscovery: args.eDiscovery
+      };
+
+      const response = await api.createAcquisitionProfile(request);
+
+      if (!response.success) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Error creating acquisition profile: ${response.errors.join(', ')}`
+            }
+          ]
+        };
+      }
+
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Successfully created acquisition profile: ${args.name}`
+          }
+        ]
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Failed to create acquisition profile: ${errorMessage}`
+          }
+        ]
+      };
+    }
+  }
 };

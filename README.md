@@ -21,6 +21,7 @@ A Node.js server implementing **Model Context Protocol (MCP)** for Binalyze AIR,
 - **Acquisition Profiles** - List acquisition profiles.
 - **Acquisition Tasks** - Assign evidence acquisition tasks to endpoints.
 - **Image Acquisition Tasks** - Assign disk image acquisition tasks to endpoints.
+- **Create Acquisition Profiles** - Create new acquisition profiles with specific evidence/artifact/network settings.
 - **Organization Management** - List organizations.
 - **Case Management** - List cases in your organization.
 - **Policy Management** - See security policies across your organization.
@@ -131,6 +132,7 @@ In Claude Desktop, or any MCP Client, you can use natural language commands:
 | `Get acquisition profile details by ID` | Shows detailed information about a specific acquisition profile, including evidence and artifacts |
 | `Assign an acquisition task to endpoint 123abc using profile "full" for case "C-2022-0001"` | Assigns an evidence acquisition task to specified endpoint(s) |
 | `Assign an image acquisition task to endpoint 123abc for volume /dev/sda1 saving to repository 456def` | Assigns a disk image acquisition task to a specific endpoint and volume, saving to a specified repository |
+| `Create an acquisition profile named "My Custom Profile" with windows evidence ["clp"] and linux artifact ["apcl"]` | Creates a new acquisition profile with the specified configuration |
 | `List all organizations` | Shows all organizations in environments |
 | `List all cases` | Displays cases with status and creation time |
 | `List all policies` | Shows security and collection policies |
@@ -196,3 +198,5 @@ Successfully assigned 1 acquisition task(s):
 
 Successfully assigned 1 image acquisition task(s):
 3c801542-d58e-4237-84b9-37651b455a38: Acquire Image 001 (Organization: 0)
+
+Successfully created acquisition profile: My Custom Profile

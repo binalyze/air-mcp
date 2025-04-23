@@ -125,17 +125,26 @@ export interface AcquisitionTaskResponse {
   errors: string[];
 }
 
-// Interface for detailed Acquisition Profile structure
+// Interface for Network Capture configuration
+export interface NetworkCaptureConfig {
+  enabled: boolean;
+  duration: number;
+  pcap: { enabled: boolean };
+  networkFlow: { enabled: boolean };
+}
+
+// Interface for eDiscovery Pattern
+export interface EDiscoveryPattern {
+  pattern: string;
+  category: string;
+}
+
+// Interface for Acquisition Profile Platform specifics (update)
 export interface AcquisitionProfilePlatformDetails {
   evidenceList: string[];
   artifactList?: string[]; 
   customContentProfiles: any[]; 
-  networkCapture?: {
-    enabled: boolean;
-    duration: number;
-    pcap: { enabled: boolean };
-    networkFlow: { enabled: boolean };
-  };
+  networkCapture?: NetworkCaptureConfig; // Updated type
 }
 
 export interface AcquisitionProfileDetails {
@@ -187,6 +196,27 @@ export interface ImageAcquisitionTaskRequest {
 
 // Interface for the image acquisition task response (structure matches AcquisitionTaskResponse)
 export type ImageAcquisitionTaskResponse = AcquisitionTaskResponse;
+
+// Interface for the request body of creating an acquisition profile
+export interface CreateAcquisitionProfileRequest {
+  name: string;
+  organizationIds: string[];
+  windows?: AcquisitionProfilePlatformDetails;
+  linux?: AcquisitionProfilePlatformDetails;
+  macos?: AcquisitionProfilePlatformDetails;
+  aix?: Omit<AcquisitionProfilePlatformDetails, 'networkCapture'>; // AIX doesn't have networkCapture
+  eDiscovery?: {
+    patterns: EDiscoveryPattern[];
+  };
+}
+
+// Interface for the response of creating an acquisition profile
+export interface CreateAcquisitionProfileResponse {
+  success: boolean;
+  result: null; // Typically null on successful creation
+  statusCode: number;
+  errors: string[];
+}
 
 export const api = {
   async getAcquisitionProfiles(organizationIds: string | string[] = '0', allOrganizations: boolean = true): Promise<AcquisitionProfilesResponse> {
@@ -268,6 +298,30 @@ export const api = {
     } catch (error) {
       console.error('Error assigning image acquisition task:', error);
       throw error;
+    }
+  },
+
+  // Create Acquisition Profile
+  async createAcquisitionProfile(request: CreateAcquisitionProfileRequest): Promise<CreateAcquisitionProfileResponse> {
+    try {
+      const response = await axios.post(
+        `${config.airHost}/api/public/acquisitions/profiles`,
+        request,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${config.airApiToken}`
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error creating acquisition profile:', error);
+      // Attempt to return a structured error if possible
+      if (axios.isAxiosError(error) && error.response) {
+        return error.response.data as CreateAcquisitionProfileResponse; // Assume error response matches structure
+      }
+      throw error; // Rethrow if it's not an Axios error or doesn't have response data
     }
   },
 };
