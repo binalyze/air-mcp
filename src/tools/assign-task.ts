@@ -59,6 +59,20 @@ export const AssignLogRetrievalTaskArgsSchema = z.object({
   managedStatus: z.array(z.string()).optional().default(['managed']).describe('Filter endpoints by managed status. Default is ["managed"].'),
 });
 
+// Schema for assign version update task arguments
+export const AssignVersionUpdateTaskArgsSchema = z.object({
+  endpointIds: z.union([
+    z.string(),
+    z.array(z.string())
+  ]).describe('Endpoint ID(s) to update version. Can be a single ID or an array of IDs.'),
+  organizationIds: z.union([
+    z.number(),
+    z.string(),
+    z.array(z.union([z.number(), z.string()]))
+  ]).optional().default(0).describe('Organization ID(s) to filter endpoints by. Defaults to 0.'),
+  managedStatus: z.array(z.string()).optional().default(['managed']).describe('Filter endpoints by managed status. Default is ["managed"].'),
+});
+
 export const assignTaskTools = {
   // Assign a reboot task to endpoints
   async assignRebootTask(args: z.infer<typeof AssignRebootTaskArgsSchema>) {
@@ -290,6 +304,62 @@ export const assignTaskTools = {
           {
             type: 'text',
             text: `Failed to assign log retrieval task: ${errorMessage}`
+          }
+        ]
+      };
+    }
+  },
+
+  // Assign a version update task to endpoints
+  async assignVersionUpdateTask(args: z.infer<typeof AssignVersionUpdateTaskArgsSchema>) {
+    try {
+      // Prepare filter object
+      const filter: AssetFilter = {
+        includedEndpointIds: Array.isArray(args.endpointIds) ? args.endpointIds : [args.endpointIds],
+        managedStatus: args.managedStatus,
+      };
+      
+      // Handle organization IDs
+      if (args.organizationIds !== undefined) {
+        if (Array.isArray(args.organizationIds)) {
+          filter.organizationIds = args.organizationIds.map(id => typeof id === 'string' ? parseInt(id, 10) : id);
+        } else {
+          filter.organizationIds = [typeof args.organizationIds === 'string' ? parseInt(args.organizationIds, 10) : args.organizationIds];
+        }
+      }
+
+      const response = await assignTaskApi.assignVersionUpdateTask(filter);
+      
+      if (!response.success) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Error assigning version update task: ${response.errors.join(', ')}`
+            }
+          ]
+        };
+      }
+      
+      const taskList = response.result.map(task => 
+        `${task._id}: ${task.name} (Organization: ${task.organizationId})`
+      ).join('\n');
+      
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Successfully assigned ${response.result.length} version update task(s):\n${taskList}`
+          }
+        ]
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Failed to assign version update task: ${errorMessage}`
           }
         ]
       };

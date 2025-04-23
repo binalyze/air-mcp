@@ -24,12 +24,12 @@ import { triageTools, ListTriageRulesArgsSchema } from './tools/triages';
 import { userTools, ListUsersArgsSchema } from './tools/users';
 import { droneAnalyzerTools } from './tools/droneAnalyzers';
 import { auditTools, ExportAuditLogsArgsSchema, ListAuditLogsArgsSchema } from './tools/audit';
-import { assignTaskTools, AssignRebootTaskArgsSchema, AssignShutdownTaskArgsSchema, AssignIsolationTaskArgsSchema, AssignLogRetrievalTaskArgsSchema } from './tools/assign-task';
+import { assignTaskTools, AssignRebootTaskArgsSchema, AssignShutdownTaskArgsSchema, AssignIsolationTaskArgsSchema, AssignLogRetrievalTaskArgsSchema, AssignVersionUpdateTaskArgsSchema } from './tools/assign-task';
 import { validateAirApiToken } from './utils/validation';
 
 const server = new Server({
   name: 'air-mcp',
-  version: '2.5.0'
+  version: '2.6.0'
 }, {
   capabilities: {
     tools: {}
@@ -368,6 +368,36 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
         },
       },
       {
+        name: 'assign_version_update_task',
+        description: 'Assign a version update task to specific endpoints',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            endpointIds: {
+              oneOf: [
+                { type: 'string' },
+                { type: 'array', items: { type: 'string' } }
+              ],
+              description: 'Endpoint ID(s) to update version. Can be a single ID or an array of IDs.'
+            },
+            organizationIds: {
+              oneOf: [
+                { type: 'number' },
+                { type: 'string' },
+                { type: 'array', items: { oneOf: [{ type: 'number' }, { type: 'string' }] } }
+              ],
+              description: 'Organization ID(s) to filter endpoints by. Defaults to 0.'
+            },
+            managedStatus: {
+              type: 'array',
+              items: { type: 'string' },
+              description: 'Filter endpoints by managed status. Default is ["managed"].'
+            }
+          },
+          required: ['endpointIds'],
+        },
+      },
+      {
         name: 'list_organizations',
         description: 'List all organizations in the system',
         inputSchema: {
@@ -532,6 +562,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       validateAirApiToken();
       const parsedArgs = AssignLogRetrievalTaskArgsSchema.parse(args);
       return await assignTaskTools.assignLogRetrievalTask(parsedArgs);
+    } else if (name === 'assign_version_update_task') {
+      validateAirApiToken();
+      const parsedArgs = AssignVersionUpdateTaskArgsSchema.parse(args);
+      return await assignTaskTools.assignVersionUpdateTask(parsedArgs);
     } else if (name === 'list_organizations') {
       validateAirApiToken();
       return await organizationTools.listOrganizations();

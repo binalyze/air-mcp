@@ -72,6 +72,17 @@ export interface LogRetrievalTaskResponse {
   errors: string[];
 }
 
+export interface VersionUpdateTaskResponse {
+  success: boolean;
+  result: Array<{
+    _id: string;
+    name: string;
+    organizationId: number;
+  }>;
+  statusCode: number;
+  errors: string[];
+}
+
 export const assignTaskApi = {
   /**
    * Assigns a reboot task to endpoints that match the provided filter
@@ -166,6 +177,30 @@ export const assignTaskApi = {
       return response.data;
     } catch (error) {
       console.error('Error assigning log retrieval task:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Assigns a version update task to endpoints that match the provided filter
+   * @param filter Filter criteria to select endpoints for the version update task
+   * @returns Response with the created task details
+   */
+  async assignVersionUpdateTask(filter: AssetFilter): Promise<VersionUpdateTaskResponse> {
+    try {
+      const response = await axios.post(
+        `${config.airHost}/api/public/assets/tasks/version-update`,
+        { filter },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${config.airApiToken}`
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error assigning version update task:', error);
       throw error;
     }
   },
