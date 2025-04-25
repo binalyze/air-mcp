@@ -27,12 +27,12 @@ import { auditTools, ExportAuditLogsArgsSchema, ListAuditLogsArgsSchema } from '
 import { assignTaskTools, AssignRebootTaskArgsSchema, AssignShutdownTaskArgsSchema, AssignIsolationTaskArgsSchema, AssignLogRetrievalTaskArgsSchema, AssignVersionUpdateTaskArgsSchema } from './tools/assign-task';
 import { autoAssetTagTools, CreateAutoAssetTagArgsSchema, UpdateAutoAssetTagArgsSchema, ListAutoAssetTagsArgsSchema, GetAutoAssetTagByIdArgsSchema, DeleteAutoAssetTagByIdArgsSchema, StartTaggingArgsSchema } from './tools/auto-asset-tags';
 import { validateAirApiToken } from './utils/validation';
-import { AcquireBaselineArgsSchema } from './tools/baseline';
+import { AcquireBaselineArgsSchema, CompareBaselineArgsSchema } from './tools/baseline';
 import { baselineTools } from './tools/baseline';
 
 const server = new Server({
   name: 'air-mcp',
-  version: '3.0.0'
+  version: '3.1.0'
 }, {
   capabilities: {
     tools: {}
@@ -933,6 +933,25 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: ['caseId', 'filter'],
         },
       },
+      {
+        name: 'compare_baseline',
+        description: 'Compare baseline acquisition tasks for a specific endpoint',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            endpointId: {
+              type: 'string',
+              description: 'The endpoint ID to compare baselines for',
+            },
+            taskIds: {
+              type: 'array',
+              items: { type: 'string' },
+              description: 'Array of baseline task IDs to compare (minimum 2)',
+            },
+          },
+          required: ['endpointId', 'taskIds'],
+        },
+      },
     ],
   };
 });
@@ -1072,7 +1091,11 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       validateAirApiToken();
       const parsedArgs = AcquireBaselineArgsSchema.parse(args);
       return await baselineTools.acquireBaseline(parsedArgs);
-    }else {
+    } else if (name === 'compare_baseline') {
+      validateAirApiToken();
+      const parsedArgs = CompareBaselineArgsSchema.parse(args);
+      return await baselineTools.compareBaseline(parsedArgs);
+    } else {
       throw new Error(`Unknown tool: ${name}`);
     }
   } catch (error) {

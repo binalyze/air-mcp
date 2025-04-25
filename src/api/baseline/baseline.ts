@@ -38,6 +38,11 @@ export interface BaselineAcquisitionRequest {
   filter: BaselineFilter;
 }
 
+export interface BaselineComparisonRequest {
+  endpointId: string;
+  taskIds: string[];
+}
+
 export interface BaselineResult {
   _id: string;
   name: string;
@@ -67,6 +72,25 @@ export const api = {
       return response.data;
     } catch (error) {
       console.error('Error acquiring baseline:', error);
+      throw error;
+    }
+  },
+  
+  async compareBaseline(request: BaselineComparisonRequest): Promise<BaselineResponse> {
+    try {
+      const response = await axios.post(
+        `${config.airHost}/api/public/baseline/compare`,
+        request,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${config.airApiToken}`
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error comparing baseline:', error);
       throw error;
     }
   },

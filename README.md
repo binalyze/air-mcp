@@ -23,6 +23,8 @@ A Node.js server implementing **Model Context Protocol (MCP)** for Binalyze AIR,
 - **Acquisition Profiles** - List acquisition profiles.
 - **Acquisition Tasks** - Assign evidence acquisition tasks to endpoints.
 - **Image Acquisition Tasks** - Assign disk image acquisition tasks to endpoints.
+- **Baseline Acquisition** - Acquire baseline data from specific endpoints to establish a reference point.
+- **Compare Baseline** - Compare multiple baseline acquisition tasks for a specific endpoint to identify changes.
 - **Create Acquisition Profiles** - Create new acquisition profiles with specific evidence/artifact/network settings.
 - **Reboot Tasks** - Assign reboot tasks to specific endpoints.
 - **Shutdown Tasks** - Assign shutdown tasks to specific endpoints.
@@ -178,6 +180,8 @@ In Claude Desktop, or any MCP Client, you can use natural language commands:
 | `Get auto asset tag with ID "f6kEPhpqMNqJeHfi4RyxiWEm"` | Shows detailed information about a specific auto asset tag rule. |
 | `Delete auto asset tag with ID "f6kEPhpqMNqJeHfi4RyxiWEm"` | Deletes a specific auto asset tag rule by its ID. |
 | `Start auto tagging for windows machines` | Initiates the auto tagging process for Windows assets matching specified criteria. |
+| `Acquire baseline for case "C-2022-001" from endpoints ["id1", "id2"]` | Acquires baseline data from specified endpoints for a given case ID. |
+| `Compare baselines for endpoint "id1" with task IDs ["task1", "task2"]` | Compares multiple baseline acquisition tasks for a specific endpoint to identify changes. |
 
 ### Filtering by Organization
 
@@ -367,4 +371,25 @@ Start auto tagging for all Windows assets
 Start tagging for managed Windows endpoints
 Initiate auto tagging process for assets with platform "linux"
 Start auto tagging for endpoints with IDs ["id1", "id2"]
+```
+
+### Acquiring Baseline
+
+You can acquire baseline data from specific endpoints by providing a case ID and filter criteria. Baselines establish a reference point for comparison in forensic investigations.
+
+```
+Acquire baseline for case "C-2022-001" from endpoints ["0ccbb181-685c-4f1e-982a-6f7c7e88eadd", "7a37cfdb-..."]
+Get baseline data for case "C-2023-042" from all Windows endpoints
+Acquire baseline for online endpoints with case ID "C-2024-099"
+Collect baseline from managed endpoints with IDs ["id1", "id2", "id3"] for case "C-2024-100"
+```
+
+### Comparing Baseline Acquisition Tasks
+
+You can compare multiple baseline acquisition tasks for a specific endpoint to identify changes over time or between different system states:
+
+```
+Compare baselines for endpoint "0ccbb181-685c-4f1e-982a-6f7c7e88eadd" with task IDs ["task1", "task2"]
+Compare baseline tasks ["task-id-1", "task-id-2", "task-id-3"] for endpoint "7a37cfdb-..."
+Create baseline comparison between tasks "pre-update-task-id" and "post-update-task-id" for endpoint "bc906dea-..."
 ```

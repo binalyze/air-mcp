@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { api, BaselineFilter } from '../api/baseline/baseline';
+import { api, BaselineFilter, BaselineComparisonRequest } from '../api/baseline/baseline';
 
 // Schema for acquire baseline arguments
 export const AcquireBaselineArgsSchema = z.object({
@@ -22,6 +22,12 @@ export const AcquireBaselineArgsSchema = z.object({
     excludedEndpointIds: z.array(z.string()).optional().describe('Array of endpoint IDs to exclude'),
     organizationIds: z.array(z.number()).optional().describe('Organization IDs filter. Defaults to [0]'),
   }).describe('Filter object to specify which assets to acquire baseline from'),
+});
+
+// Schema for compare baseline arguments
+export const CompareBaselineArgsSchema = z.object({
+  endpointId: z.string().describe('The endpoint ID to compare baselines for'),
+  taskIds: z.array(z.string()).min(2).describe('Array of baseline task IDs to compare (minimum 2)'),
 });
 
 export const baselineTools = {
@@ -81,6 +87,63 @@ export const baselineTools = {
           {
             type: 'text',
             text: `Failed to acquire baseline: ${errorMessage}`
+          }
+        ]
+      };
+    }
+  },
+
+  // Compare baselines by endpoint ID and task IDs
+  async compareBaseline(args: z.infer<typeof CompareBaselineArgsSchema>) {
+    try {
+      const { endpointId, taskIds } = args;
+      
+      const response = await api.compareBaseline({
+        endpointId,
+        taskIds
+      } as BaselineComparisonRequest);
+      
+      if (!response.success) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Error comparing baselines: ${response.errors.join(', ')}`
+            }
+          ]
+        };
+      }
+      
+      if (response.result.length === 0) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: 'No comparison tasks created. Check the endpoint ID and task IDs and ensure they exist.'
+            }
+          ]
+        };
+      }
+      
+      const comparisonList = response.result.map(result => 
+        `Comparison ID: ${result._id}\nName: ${result.name}\nOrganization ID: ${result.organizationId}`
+      ).join('\n\n');
+      
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Successfully created ${response.result.length} baseline comparison task(s):\n\n${comparisonList}`
+          }
+        ]
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Failed to compare baselines: ${errorMessage}`
           }
         ]
       };
