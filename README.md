@@ -25,7 +25,9 @@ A Node.js server implementing **Model Context Protocol (MCP)** for Binalyze AIR,
 - **Image Acquisition Tasks** - Assign disk image acquisition tasks to endpoints.
 - **Baseline Acquisition** - Acquire baseline data from specific endpoints to establish a reference point.
 - **Compare Baseline** - Compare multiple baseline acquisition tasks for a specific endpoint to identify changes.
+- **Get Comparison Report** - Retrieve comparison result report for a specific endpoint and task.
 - **Create Acquisition Profiles** - Create new acquisition profiles with specific evidence/artifact/network settings.
+- **Acquisition Artifacts** - List available artifacts for evidence collection.
 - **Reboot Tasks** - Assign reboot tasks to specific endpoints.
 - **Shutdown Tasks** - Assign shutdown tasks to specific endpoints.
 - **Isolation Tasks** - Isolate or unisolate specific endpoints.
@@ -152,6 +154,7 @@ In Claude Desktop, or any MCP Client, you can use natural language commands:
 | `Get tasks for asset with ID "abc123"` | Shows all tasks associated with a specific asset |
 | `List all acquisition profiles` | Displays available acquisition profiles |
 | `Get acquisition profile details by ID` | Shows detailed information about a specific acquisition profile, including evidence and artifacts |
+| `List all acquisition artifacts` | Shows all available artifacts for evidence collection, organized by platform and category |
 | `Assign an acquisition task to endpoint 123abc using profile "full" for case "C-2022-0001"` | Assigns an evidence acquisition task to specified endpoint(s) |
 | `Assign an image acquisition task to endpoint 123abc for volume /dev/sda1 saving to repository 456def` | Assigns a disk image acquisition task to a specific endpoint and volume, saving to a specified repository |
 | `Create an acquisition profile named "My Custom Profile" with windows evidence ["clp"] and linux artifact ["apcl"]` | Creates a new acquisition profile with the specified configuration |
@@ -163,7 +166,7 @@ In Claude Desktop, or any MCP Client, you can use natural language commands:
 | `Update version for endpoint 123abc` | Assigns a version update task to a specific endpoint |
 | `List all organizations` | Shows all organizations in environments |
 | `List all cases` | Displays cases with status and creation time |
-| `List all policies` | Shows security and collection policies |
+| `List all policies` | Shows security policies and collection policies |
 | `List all tasks` | Lists all tasks with their statuses |
 | `List all triage rules` | Shows YARA, OSQuery and Sigma rules for threat detection |
 | `List all users` | Shows all users in the system with their details |
@@ -182,6 +185,19 @@ In Claude Desktop, or any MCP Client, you can use natural language commands:
 | `Start auto tagging for windows machines` | Initiates the auto tagging process for Windows assets matching specified criteria. |
 | `Acquire baseline for case "C-2022-001" from endpoints ["id1", "id2"]` | Acquires baseline data from specified endpoints for a given case ID. |
 | `Compare baselines for endpoint "id1" with task IDs ["task1", "task2"]` | Compares multiple baseline acquisition tasks for a specific endpoint to identify changes. |
+| `Get comparison report for endpoint "id1" and task "task1"` | Retrieves the comparison result report for a specific endpoint and comparison task. |
+
+### Viewing Acquisition Artifacts
+
+You can list all available acquisition artifacts for evidence collection:
+
+```
+List all acquisition artifacts
+Show me all available artifacts for Windows
+What artifacts can be collected for evidence?
+```
+
+This will display a categorized list of artifacts that can be collected during an acquisition task, organized by platform (Windows, Linux, macOS, etc.) and group categories (Server, Communication, Cloud, etc.).
 
 ### Filtering by Organization
 
@@ -392,4 +408,14 @@ You can compare multiple baseline acquisition tasks for a specific endpoint to i
 Compare baselines for endpoint "0ccbb181-685c-4f1e-982a-6f7c7e88eadd" with task IDs ["task1", "task2"]
 Compare baseline tasks ["task-id-1", "task-id-2", "task-id-3"] for endpoint "7a37cfdb-..."
 Create baseline comparison between tasks "pre-update-task-id" and "post-update-task-id" for endpoint "bc906dea-..."
+```
+
+### Getting Comparison Report
+
+You can retrieve the comparison result report for a specific endpoint and comparison task:
+
+```
+Get comparison report for endpoint "0ccbb181-685c-4f1e-982a-6f7c7e88eadd" and task "task1"
+Show me the comparison result for endpoint "7a37cfdb-..." and task "comparison-task-id"
+Download the baseline comparison report for endpoint "bc906dea-..." task "task-xyz"
 ```

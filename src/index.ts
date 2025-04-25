@@ -22,7 +22,7 @@ import { policyTools, ListPoliciesArgsSchema } from './tools/policies';
 import { taskTools, ListTasksArgsSchema } from './tools/tasks';
 import { triageTools, ListTriageRulesArgsSchema } from './tools/triages';
 import { userTools, ListUsersArgsSchema } from './tools/users';
-import { droneAnalyzerTools } from './tools/droneAnalyzers';
+import { droneAnalyzerTools as paramsTools, ListAcquisitionArtifactsArgsSchema, acquisitionArtifactTools } from './tools/params';
 import { auditTools, ExportAuditLogsArgsSchema, ListAuditLogsArgsSchema } from './tools/audit';
 import { assignTaskTools, AssignRebootTaskArgsSchema, AssignShutdownTaskArgsSchema, AssignIsolationTaskArgsSchema, AssignLogRetrievalTaskArgsSchema, AssignVersionUpdateTaskArgsSchema } from './tools/assign-task';
 import { autoAssetTagTools, CreateAutoAssetTagArgsSchema, UpdateAutoAssetTagArgsSchema, ListAutoAssetTagsArgsSchema, GetAutoAssetTagByIdArgsSchema, DeleteAutoAssetTagByIdArgsSchema, StartTaggingArgsSchema } from './tools/auto-asset-tags';
@@ -32,7 +32,7 @@ import { baselineTools } from './tools/baseline';
 
 const server = new Server({
   name: 'air-mcp',
-  version: '3.2.0'
+  version: '3.3.0'
 }, {
   capabilities: {
     tools: {}
@@ -970,6 +970,20 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: ['endpointId', 'taskId'],
         },
       },
+      {
+        name: 'list_acquisition_artifacts',
+        description: 'List all acquisition artifacts available for evidence collection',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            random_string: {
+              type: 'string',
+              description: 'Dummy parameter for no-parameter tools',
+            },
+          },
+          required: ['random_string'],
+        },
+      },
     ],
   };
 });
@@ -1072,7 +1086,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       return await userTools.listUsers(parsedArgs);
     } else if (name === 'list_drone_analyzers') {
       validateAirApiToken();
-      return await droneAnalyzerTools.listDroneAnalyzers();
+      return await paramsTools.listDroneAnalyzers();
     } else if (name === 'export_audit_logs') {
       validateAirApiToken();
       const parsedArgs = ExportAuditLogsArgsSchema.parse(args);
@@ -1117,6 +1131,9 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       validateAirApiToken();
       const parsedArgs = GetComparisonReportArgsSchema.parse(args);
       return await baselineTools.getComparisonReport(parsedArgs);
+    } else if (name === 'list_acquisition_artifacts') {
+      validateAirApiToken();
+      return await acquisitionArtifactTools.listAcquisitionArtifacts();
     } else {
       throw new Error(`Unknown tool: ${name}`);
     }
