@@ -11,6 +11,11 @@ export const ListAcquisitionArtifactsArgsSchema = z.object({
   // Define empty schema as this endpoint doesn't require any parameters
 }).optional();
 
+// Schema for list acquisition evidences arguments - no specific arguments needed
+export const ListAcquisitionEvidencesArgsSchema = z.object({
+  // Define empty schema as this endpoint doesn't require any parameters
+}).optional();
+
 // Format the supported operating systems for display
 function formatOSList(platformList: string[]): string {
   return platformList.map(platform => {
@@ -169,6 +174,113 @@ export const acquisitionArtifactTools = {
           {
             type: 'text',
             text: `Failed to fetch acquisition artifacts: ${errorMessage}`
+          }
+        ]
+      };
+    }
+  },
+};
+
+export const acquisitionEvidenceTools = {
+  // List all acquisition evidences
+  async listAcquisitionEvidences() {
+    try {
+      const response = await api.getAcquisitionEvidences();
+      
+      // Check if the response has the expected structure
+      if (!response || typeof response !== 'object') {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: 'Received invalid data format for acquisition evidences.'
+            }
+          ]
+        };
+      }
+      
+      // Create formatted output for each OS section
+      const resultParts = [];
+      
+      // Process Windows evidences
+      if (response.windows && Array.isArray(response.windows) && response.windows.length > 0) {
+        const windowsGroups = response.windows.map(group => {
+          const evidenceList = group.items.map(item => 
+            `  • ${item.name} (${item.type}): ${item.desc}`
+          ).join('\n');
+          
+          return `### ${group.group}\n${evidenceList}`;
+        }).join('\n\n');
+        
+        resultParts.push(`## Windows Evidences\n${windowsGroups}`);
+      }
+      
+      // Process Linux evidences
+      if (response.linux && Array.isArray(response.linux) && response.linux.length > 0) {
+        const linuxGroups = response.linux.map(group => {
+          const evidenceList = group.items.map(item => 
+            `  • ${item.name} (${item.type}): ${item.desc}`
+          ).join('\n');
+          
+          return `### ${group.group}\n${evidenceList}`;
+        }).join('\n\n');
+        
+        resultParts.push(`## Linux Evidences\n${linuxGroups}`);
+      }
+      
+      // Process macOS evidences if present
+      if (response.macos && Array.isArray(response.macos) && response.macos.length > 0) {
+        const macosGroups = response.macos.map(group => {
+          const evidenceList = group.items.map(item => 
+            `  • ${item.name} (${item.type}): ${item.desc}`
+          ).join('\n');
+          
+          return `### ${group.group}\n${evidenceList}`;
+        }).join('\n\n');
+        
+        resultParts.push(`## macOS Evidences\n${macosGroups}`);
+      }
+      
+      // Process AIX evidences if present
+      if (response.aix && Array.isArray(response.aix) && response.aix.length > 0) {
+        const aixGroups = response.aix.map(group => {
+          const evidenceList = group.items.map(item => 
+            `  • ${item.name} (${item.type}): ${item.desc}`
+          ).join('\n');
+          
+          return `### ${group.group}\n${evidenceList}`;
+        }).join('\n\n');
+        
+        resultParts.push(`## AIX Evidences\n${aixGroups}`);
+      }
+      
+      // If no evidences were found for any platform
+      if (resultParts.length === 0) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: 'No acquisition evidences found.'
+            }
+          ]
+        };
+      }
+      
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `# Acquisition Evidences\n\n${resultParts.join('\n\n')}`
+          }
+        ]
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Failed to fetch acquisition evidences: ${errorMessage}`
           }
         ]
       };

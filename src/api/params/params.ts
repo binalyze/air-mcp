@@ -7,6 +7,7 @@
  * The module includes:
  * - DroneAnalyzer interface: Represents a single drone analyzer in the system
  * - AcquisitionArtifact interfaces: Represents artifacts available for acquisition
+ * - AcquisitionEvidence interfaces: Represents evidence items available for collection
  * - api object: Contains methods to interact with the API endpoints
  */
 
@@ -36,6 +37,24 @@ export interface AcquisitionArtifacts {
   linux: ArtifactGroup[];
   macos?: ArtifactGroup[];
   aix?: ArtifactGroup[];
+}
+
+export interface EvidenceItem {
+  name: string;
+  desc: string;
+  type: string;
+}
+
+export interface EvidenceGroup {
+  group: string;
+  items: EvidenceItem[];
+}
+
+export interface AcquisitionEvidences {
+  windows: EvidenceGroup[];
+  linux: EvidenceGroup[];
+  macos?: EvidenceGroup[];
+  aix?: EvidenceGroup[];
 }
 
 export const api = {
@@ -71,6 +90,24 @@ export const api = {
       return response.data;
     } catch (error) {
       console.error('Error fetching acquisition artifacts:', error);
+      throw error;
+    }
+  },
+
+  async getAcquisitionEvidences(): Promise<AcquisitionEvidences> {
+    try {
+      const response = await axios.get(
+        `${config.airHost}/api/public/params/acquisition/evidences`,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${config.airApiToken}`
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching acquisition evidences:', error);
       throw error;
     }
   },

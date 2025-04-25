@@ -22,7 +22,7 @@ import { policyTools, ListPoliciesArgsSchema } from './tools/policies';
 import { taskTools, ListTasksArgsSchema } from './tools/tasks';
 import { triageTools, ListTriageRulesArgsSchema } from './tools/triages';
 import { userTools, ListUsersArgsSchema } from './tools/users';
-import { droneAnalyzerTools as paramsTools, ListAcquisitionArtifactsArgsSchema, acquisitionArtifactTools } from './tools/params';
+import { droneAnalyzerTools, acquisitionArtifactTools } from './tools/params';
 import { auditTools, ExportAuditLogsArgsSchema, ListAuditLogsArgsSchema } from './tools/audit';
 import { assignTaskTools, AssignRebootTaskArgsSchema, AssignShutdownTaskArgsSchema, AssignIsolationTaskArgsSchema, AssignLogRetrievalTaskArgsSchema, AssignVersionUpdateTaskArgsSchema } from './tools/assign-task';
 import { autoAssetTagTools, CreateAutoAssetTagArgsSchema, UpdateAutoAssetTagArgsSchema, ListAutoAssetTagsArgsSchema, GetAutoAssetTagByIdArgsSchema, DeleteAutoAssetTagByIdArgsSchema, StartTaggingArgsSchema } from './tools/auto-asset-tags';
@@ -32,7 +32,7 @@ import { baselineTools } from './tools/baseline';
 
 const server = new Server({
   name: 'air-mcp',
-  version: '3.3.0'
+  version: '3.4.0'
 }, {
   capabilities: {
     tools: {}
@@ -1086,7 +1086,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       return await userTools.listUsers(parsedArgs);
     } else if (name === 'list_drone_analyzers') {
       validateAirApiToken();
-      return await paramsTools.listDroneAnalyzers();
+      return await droneAnalyzerTools.listDroneAnalyzers();
     } else if (name === 'export_audit_logs') {
       validateAirApiToken();
       const parsedArgs = ExportAuditLogsArgsSchema.parse(args);

@@ -28,6 +28,7 @@ A Node.js server implementing **Model Context Protocol (MCP)** for Binalyze AIR,
 - **Get Comparison Report** - Retrieve comparison result report for a specific endpoint and task.
 - **Create Acquisition Profiles** - Create new acquisition profiles with specific evidence/artifact/network settings.
 - **Acquisition Artifacts** - List available artifacts for evidence collection.
+- **Acquisition Evidences** - List available evidence items for forensic data collection.
 - **Reboot Tasks** - Assign reboot tasks to specific endpoints.
 - **Shutdown Tasks** - Assign shutdown tasks to specific endpoints.
 - **Isolation Tasks** - Isolate or unisolate specific endpoints.
@@ -155,6 +156,7 @@ In Claude Desktop, or any MCP Client, you can use natural language commands:
 | `List all acquisition profiles` | Displays available acquisition profiles |
 | `Get acquisition profile details by ID` | Shows detailed information about a specific acquisition profile, including evidence and artifacts |
 | `List all acquisition artifacts` | Shows all available artifacts for evidence collection, organized by platform and category |
+| `List all acquisition evidences` | Shows all available evidence items for forensic data collection, organized by platform and category |
 | `Assign an acquisition task to endpoint 123abc using profile "full" for case "C-2022-0001"` | Assigns an evidence acquisition task to specified endpoint(s) |
 | `Assign an image acquisition task to endpoint 123abc for volume /dev/sda1 saving to repository 456def` | Assigns a disk image acquisition task to a specific endpoint and volume, saving to a specified repository |
 | `Create an acquisition profile named "My Custom Profile" with windows evidence ["clp"] and linux artifact ["apcl"]` | Creates a new acquisition profile with the specified configuration |
@@ -198,6 +200,18 @@ What artifacts can be collected for evidence?
 ```
 
 This will display a categorized list of artifacts that can be collected during an acquisition task, organized by platform (Windows, Linux, macOS, etc.) and group categories (Server, Communication, Cloud, etc.).
+
+### Viewing Acquisition Evidences
+
+You can list all available evidence items for forensic data collection:
+
+```
+List all acquisition evidences
+Show me all available evidences for Windows
+What evidences can be collected during an investigation?
+```
+
+This will display a categorized list of evidence items that can be collected during a forensic investigation, organized by platform (Windows, Linux, macOS, etc.) and group categories (System, Network, Memory, etc.).
 
 ### Filtering by Organization
 
