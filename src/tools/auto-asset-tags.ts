@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { api, CreateAutoAssetTagRequest, CreateAutoAssetTagResponse, UpdateAutoAssetTagRequest, UpdateAutoAssetTagResponse, Condition, ConditionGroup, AutoAssetTagResult } from '../api/auto-asset-tags/auto-asset-tags';
+import { api, CreateAutoAssetTagRequest, AutoAssetTagModifyResponse, UpdateAutoAssetTagRequest, AutoAssetTagResult, ListAutoAssetTagResponse } from '../api/auto-asset-tags/auto-asset-tags';
 
 // Base schema for a single condition
 const BaseConditionSchema = z.object({
@@ -42,8 +42,11 @@ export const UpdateAutoAssetTagArgsSchema = z.object({
   macosConditions: ConditionGroupSchema.optional().describe('Conditions for macOS assets'),
 });
 
-// Format the response for display
-function formatAutoAssetTagResponse(response: AutoAssetTagResult): string {
+// Schema for list auto asset tags arguments (empty)
+export const ListAutoAssetTagsArgsSchema = z.object({});
+
+// Format the response for create display
+function formatCreateAutoAssetTagResponse(response: AutoAssetTagResult): string {
   // Basic formatting, could be enhanced to show conditions structure
   return `
 Successfully created auto asset tag:
@@ -56,7 +59,7 @@ Condition ID Counter: ${response.conditionIdCounter}
 // Add detailed conditions formatting if needed
 }
 
-// Format the update response for display
+// Format the response for update display
 function formatUpdateAutoAssetTagResponse(response: AutoAssetTagResult): string {
   return `
 Successfully updated auto asset tag:
@@ -67,6 +70,55 @@ Updated At: ${new Date(response.updatedAt).toLocaleString()}
 Condition ID Counter: ${response.conditionIdCounter}
 `;
 }
+
+// Helper to format a single condition group (recursive)
+function formatConditionGroup(group: any, indent = '  '): string {
+    if (!group || typeof group !== 'object' || Object.keys(group).length === 0) {
+        return `${indent}No conditions defined\n`;
+    }
+    let output = `${indent}Operator: ${group.operator}\n`;
+    output += `${indent}Conditions:\n`;
+    group.conditions.forEach((cond: any, index: number) => {
+      output += `${indent}  Condition ${index + 1}:\n`;
+      if (cond.conditions) { // It's a nested group
+        output += formatConditionGroup(cond, indent + '    ');
+      } else { // It's a single condition
+        output += `${indent}    Field: ${cond.field}\n`;
+        output += `${indent}    Operator: ${cond.operator}\n`;
+        output += `${indent}    Value: ${cond.value}\n`;
+        if (cond.conditionId !== undefined) {
+          output += `${indent}    Condition ID: ${cond.conditionId}\n`;
+        }
+      }
+    });
+    return output;
+  }
+
+// Format the response for list display
+function formatListAutoAssetTagsResponse(response: ListAutoAssetTagResponse): string {
+    if (!response.result || response.result.entities.length === 0) {
+      return 'No auto asset tags found.';
+    }
+  
+    let output = `Found ${response.result.totalEntityCount} auto asset tag(s) (Page ${response.result.currentPage}/${response.result.totalPageCount}):\n\n`;
+  
+    response.result.entities.forEach(tag => {
+      output += `----------------------------------------\n`;
+      output += `Tag: ${tag.tag}\n`;
+      output += `ID: ${tag._id}\n`;
+      output += `Created At: ${new Date(tag.createdAt).toLocaleString()}\n`;
+      output += `Updated At: ${new Date(tag.updatedAt).toLocaleString()}\n`;
+      output += `Linux Conditions:\n`;
+      output += formatConditionGroup(tag.linuxConditions, '  ');
+      output += `Windows Conditions:\n`;
+      output += formatConditionGroup(tag.windowsConditions, '  ');
+      output += `macOS Conditions:\n`;
+      output += formatConditionGroup(tag.macosConditions, '  ');
+      output += `----------------------------------------\n\n`;
+    });
+  
+    return output;
+  }
 
 export const autoAssetTagTools = {
   /**
@@ -84,7 +136,7 @@ export const autoAssetTagTools = {
           content: [
             {
               type: 'text', 
-              text: formatAutoAssetTagResponse(response.result)
+              text: formatCreateAutoAssetTagResponse(response.result)
             }
           ]
         };
@@ -118,15 +170,16 @@ export const autoAssetTagTools = {
     try {
       const { id, ...updateData } = args;
       
-      // Create the request data, ensuring we have empty objects for any missing conditions
-      const requestData: UpdateAutoAssetTagRequest = {
+      // Create the request data, ensuring we have non-null condition objects if provided, 
+      // otherwise they should be omitted from the PUT request if not being updated.
+      const requestData: Partial<UpdateAutoAssetTagRequest> = {
         tag: updateData.tag,
-        linuxConditions: updateData.linuxConditions || { operator: 'and', conditions: [] },
-        windowsConditions: updateData.windowsConditions || { operator: 'and', conditions: [] },
-        macosConditions: updateData.macosConditions || { operator: 'and', conditions: [] }
       };
+      if (updateData.linuxConditions) requestData.linuxConditions = updateData.linuxConditions;
+      if (updateData.windowsConditions) requestData.windowsConditions = updateData.windowsConditions;
+      if (updateData.macosConditions) requestData.macosConditions = updateData.macosConditions;
       
-      const response = await api.updateAutoAssetTag(id, requestData);
+      const response = await api.updateAutoAssetTag(id, requestData as UpdateAutoAssetTagRequest); // Cast needed due to partial construction
 
       if (response.success && response.result) {
         return {
@@ -158,5 +211,45 @@ export const autoAssetTagTools = {
         ]
       };
     }
-  }
+  },
+
+  /**
+   * Lists all Auto Asset Tag rules.
+   */
+  async listAutoAssetTags(args: z.infer<typeof ListAutoAssetTagsArgsSchema>) {
+    try {
+        // Args are currently empty for list, but passed for consistency
+        const response = await api.listAutoAssetTags();
+
+        if (response.success && response.result) {
+            return {
+              content: [
+                {
+                  type: 'text',
+                  text: formatListAutoAssetTagsResponse(response)
+                }
+              ]
+            };
+          } else {
+            return {
+              content: [
+                {
+                  type: 'text',
+                  text: `Error listing auto asset tags: ${response.errors.join(', ')} (Status Code: ${response.statusCode})`
+                }
+              ]
+            };
+          }
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : 'Unknown error during list auto asset tags operation';
+          return {
+            content: [
+              {
+                type: 'text',
+                text: `Failed to list auto asset tags: ${errorMessage}`
+              }
+            ]
+          };
+        }
+      }
 };

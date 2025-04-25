@@ -4,7 +4,7 @@ import { config } from '../../config';
 // Define the structure for a single condition
 export interface Condition {
   field: string;
-  operator: string; 
+  operator: string;
   value: string;
   conditionId?: number;
 }
@@ -31,28 +31,46 @@ export interface UpdateAutoAssetTagRequest {
   macosConditions: ConditionGroup;
 }
 
-// Define the structure of the successful result in the response
+// Define the structure of a single auto asset tag entity in responses
 export interface AutoAssetTagResult {
   _id: string;
   createdAt: string;
   updatedAt: string;
   tag: string;
-  conditionIdCounter: number;
-  linuxConditions: ConditionGroup; // Note: Response includes conditionId in nested Conditions
-  windowsConditions: ConditionGroup; // Note: Response includes conditionId in nested Conditions
-  macosConditions: ConditionGroup; // Note: Response includes conditionId in nested Conditions
+  conditionIdCounter?: number; // Present in create/update responses
+  linuxConditions: ConditionGroup | Record<string, never>; // Can be empty object {}
+  windowsConditions: ConditionGroup | Record<string, never>; // Can be empty object {}
+  macosConditions: ConditionGroup | Record<string, never>; // Can be empty object {}
 }
 
-// Define the overall API response structure
-export interface CreateAutoAssetTagResponse {
+// Define the overall API response structure for create/update
+export interface AutoAssetTagModifyResponse {
   success: boolean;
   result: AutoAssetTagResult | null;
   statusCode: number;
   errors: string[];
 }
 
-// The update response structure is the same as the create response
-export interface UpdateAutoAssetTagResponse extends CreateAutoAssetTagResponse {}
+// Define the structure for the list response result
+interface ListAutoAssetTagResult {
+    entities: AutoAssetTagResult[];
+    filters: { name: string; type: string; options: any[]; filterUrl: string | null }[];
+    sortables: string[];
+    totalEntityCount: number;
+    currentPage: number;
+    pageSize: number;
+    previousPage: number;
+    totalPageCount: number;
+    nextPage: number;
+  }
+
+// Define the overall API response structure for list
+export interface ListAutoAssetTagResponse {
+    success: boolean;
+    result: ListAutoAssetTagResult | null;
+    statusCode: number;
+    errors: string[];
+  }
 
 export const api = {
   /**
@@ -60,9 +78,9 @@ export const api = {
    * @param requestData The configuration for the new auto asset tag.
    * @returns The API response.
    */
-  async createAutoAssetTag(requestData: CreateAutoAssetTagRequest): Promise<CreateAutoAssetTagResponse> {
+  async createAutoAssetTag(requestData: CreateAutoAssetTagRequest): Promise<AutoAssetTagModifyResponse> {
     try {
-      const response = await axios.post<CreateAutoAssetTagResponse>(
+      const response = await axios.post<AutoAssetTagModifyResponse>(
         `${config.airHost}/api/public/auto-asset-tag`,
         requestData,
         {
@@ -77,7 +95,7 @@ export const api = {
       console.error('Error creating auto asset tag:', error);
       if (axios.isAxiosError(error) && error.response) {
         // Return the structured error from AIR if available
-        return error.response.data as CreateAutoAssetTagResponse;
+        return error.response.data as AutoAssetTagModifyResponse;
       }
       // Fallback for other types of errors
       throw new Error(`Failed to create auto asset tag: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -90,9 +108,9 @@ export const api = {
    * @param requestData The updated configuration for the auto asset tag.
    * @returns The API response.
    */
-  async updateAutoAssetTag(id: string, requestData: UpdateAutoAssetTagRequest): Promise<UpdateAutoAssetTagResponse> {
+  async updateAutoAssetTag(id: string, requestData: UpdateAutoAssetTagRequest): Promise<AutoAssetTagModifyResponse> {
     try {
-      const response = await axios.put<UpdateAutoAssetTagResponse>(
+      const response = await axios.put<AutoAssetTagModifyResponse>(
         `${config.airHost}/api/public/auto-asset-tag/${id}`,
         requestData,
         {
@@ -107,10 +125,37 @@ export const api = {
       console.error('Error updating auto asset tag:', error);
       if (axios.isAxiosError(error) && error.response) {
         // Return the structured error from AIR if available
-        return error.response.data as UpdateAutoAssetTagResponse;
+        return error.response.data as AutoAssetTagModifyResponse;
       }
       // Fallback for other types of errors
       throw new Error(`Failed to update auto asset tag: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  },
+
+  /**
+   * Lists all Auto Asset Tag configurations in Binalyze AIR.
+   * @returns The API response containing the list of auto asset tags.
+   */
+  async listAutoAssetTags(): Promise<ListAutoAssetTagResponse> {
+    try {
+      const response = await axios.get<ListAutoAssetTagResponse>(
+        `${config.airHost}/api/public/auto-asset-tag`,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${config.airApiToken}`
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error listing auto asset tags:', error);
+      if (axios.isAxiosError(error) && error.response) {
+        // Return the structured error from AIR if available
+        return error.response.data as ListAutoAssetTagResponse;
+      }
+      // Fallback for other types of errors
+      throw new Error(`Failed to list auto asset tags: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 };

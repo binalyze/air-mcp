@@ -25,12 +25,12 @@ import { userTools, ListUsersArgsSchema } from './tools/users';
 import { droneAnalyzerTools } from './tools/droneAnalyzers';
 import { auditTools, ExportAuditLogsArgsSchema, ListAuditLogsArgsSchema } from './tools/audit';
 import { assignTaskTools, AssignRebootTaskArgsSchema, AssignShutdownTaskArgsSchema, AssignIsolationTaskArgsSchema, AssignLogRetrievalTaskArgsSchema, AssignVersionUpdateTaskArgsSchema } from './tools/assign-task';
-import { autoAssetTagTools, CreateAutoAssetTagArgsSchema, UpdateAutoAssetTagArgsSchema } from './tools/auto-asset-tags';
+import { autoAssetTagTools, CreateAutoAssetTagArgsSchema, UpdateAutoAssetTagArgsSchema, ListAutoAssetTagsArgsSchema } from './tools/auto-asset-tags';
 import { validateAirApiToken } from './utils/validation';
 
 const server = new Server({
   name: 'air-mcp',
-  version: '2.14.0'
+  version: '2.15.0'
 }, {
   capabilities: {
     tools: {}
@@ -826,6 +826,15 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           },
         },
       },
+      {
+        name: 'list_auto_asset_tags',
+        description: 'List all auto asset tag rules in the system.',
+        inputSchema: {
+          type: 'object',
+          properties: {},
+          required: [],
+        },
+      },
     ],
   };
 });
@@ -945,6 +954,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       validateAirApiToken();
       const parsedArgs = UpdateAutoAssetTagArgsSchema.parse(args);
       return await autoAssetTagTools.updateAutoAssetTag(parsedArgs);
+    } else if (name === 'list_auto_asset_tags') {
+      validateAirApiToken();
+      const parsedArgs = ListAutoAssetTagsArgsSchema.parse(args);
+      return await autoAssetTagTools.listAutoAssetTags(parsedArgs);
     } else {
       throw new Error(`Unknown tool: ${name}`);
     }

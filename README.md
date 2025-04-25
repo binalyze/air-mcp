@@ -42,7 +42,8 @@ A Node.js server implementing **Model Context Protocol (MCP)** for Binalyze AIR,
 - **Purge and Uninstall Assets** - Purge data and uninstall specific assets based on filters.
 - **Add Tags to Assets** - Add tags to specific assets based on filters.
 - **Remove Tags from Assets** - Remove tags from specific assets based on filters.
-- **Auto Asset Tagging** - Create rules to automatically tag assets based on specific conditions.
+- **Auto Asset Tagging** - Create and update rules to automatically tag assets based on specific conditions.
+- **List Auto Asset Tags** - List all existing auto asset tag rules.
 
 ## Overview
 
@@ -170,6 +171,7 @@ In Claude Desktop, or any MCP Client, you can use natural language commands:
 | `Remove tags ["tag1"] from asset with ID "endpoint-id"` | Removes specified tags from the targeted asset(s) (requires providing `filter.includedEndpointIds` and `tags`) |
 | `Create an auto asset tag rule named "Container" where linux process "dockerd" is running, windows process "dockerd.exe" is running, or macos process "dockerd" is running` | Creates a new rule to automatically tag assets based on conditions. |
 | `Update auto asset tag "fkkEPhpqMNqJeHfi4RyxiWEm" to have tag name "Updated Container" with linux process "containerd" running` | Updates an existing auto asset tag rule with new conditions. |
+| `List all auto asset tag rules` | Lists all existing auto asset tag rules with their configurations. |
 
 ### Filtering by Organization
 
@@ -319,4 +321,13 @@ Create an auto asset tag named "Web Server"
 - For macOS: if process "httpd" is running
 
 Create auto asset tag "Domain Controller" if windows registry key "HKLM\\SYSTEM\\CurrentControlSet\\Services\\NTDS\\Parameters" exists
+```
+
+### Listing Auto Asset Tag Rules
+
+You can list all configured auto asset tag rules to see their IDs, tags, and conditions.
+
+```
+List all auto asset tags
+Show me the auto asset tag rules
 ```
