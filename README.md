@@ -169,6 +169,7 @@ In Claude Desktop, or any MCP Client, you can use natural language commands:
 | `Add tags ["tag1", "tag2"] to asset with ID "endpoint-id"` | Adds specified tags to the targeted asset(s) (requires providing `filter.includedEndpointIds` and `tags`) |
 | `Remove tags ["tag1"] from asset with ID "endpoint-id"` | Removes specified tags from the targeted asset(s) (requires providing `filter.includedEndpointIds` and `tags`) |
 | `Create an auto asset tag rule named "Container" where linux process "dockerd" is running, windows process "dockerd.exe" is running, or macos process "dockerd" is running` | Creates a new rule to automatically tag assets based on conditions. |
+| `Update auto asset tag "fkkEPhpqMNqJeHfi4RyxiWEm" to have tag name "Updated Container" with linux process "containerd" running` | Updates an existing auto asset tag rule with new conditions. |
 
 ### Filtering by Organization
 

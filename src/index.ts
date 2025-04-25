@@ -25,12 +25,12 @@ import { userTools, ListUsersArgsSchema } from './tools/users';
 import { droneAnalyzerTools } from './tools/droneAnalyzers';
 import { auditTools, ExportAuditLogsArgsSchema, ListAuditLogsArgsSchema } from './tools/audit';
 import { assignTaskTools, AssignRebootTaskArgsSchema, AssignShutdownTaskArgsSchema, AssignIsolationTaskArgsSchema, AssignLogRetrievalTaskArgsSchema, AssignVersionUpdateTaskArgsSchema } from './tools/assign-task';
-import { autoAssetTagTools, CreateAutoAssetTagArgsSchema } from './tools/auto-asset-tags';
+import { autoAssetTagTools, CreateAutoAssetTagArgsSchema, UpdateAutoAssetTagArgsSchema } from './tools/auto-asset-tags';
 import { validateAirApiToken } from './utils/validation';
 
 const server = new Server({
   name: 'air-mcp',
-  version: '2.13.0'
+  version: '2.14.0'
 }, {
   capabilities: {
     tools: {}
@@ -754,6 +754,78 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           },
         },
       },
+      {
+        name: 'update_auto_asset_tag',
+        description: 'Update an existing auto asset tag rule.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            id: {
+              type: 'string',
+              description: 'The ID of the auto asset tag to update.',
+            },
+            tag: {
+              type: 'string',
+              description: 'The tag name to be applied automatically.',
+            },
+            linuxConditions: {
+              $ref: '#/definitions/ConditionGroup',
+              description: 'Conditions for Linux assets.',
+            },
+            windowsConditions: {
+              $ref: '#/definitions/ConditionGroup',
+              description: 'Conditions for Windows assets.',
+            },
+            macosConditions: {
+              $ref: '#/definitions/ConditionGroup',
+              description: 'Conditions for macOS assets.',
+            },
+          },
+          required: ['id', 'tag'],
+          definitions: {
+            ConditionGroup: {
+              type: 'object',
+              properties: {
+                operator: {
+                  type: 'string',
+                  enum: ['and', 'or'],
+                  description: 'Logical operator for combining conditions.',
+                },
+                conditions: {
+                  type: 'array',
+                  items: {
+                    oneOf: [
+                      { $ref: '#/definitions/Condition' },
+                      { $ref: '#/definitions/ConditionGroup' } // Recursive reference
+                    ],
+                  },
+                  minItems: 1,
+                  description: 'Array of conditions or nested groups.',
+                },
+              },
+              required: ['operator', 'conditions'],
+            },
+            Condition: {
+              type: 'object',
+              properties: {
+                field: {
+                  type: 'string',
+                  description: 'Field to check (e.g., "process")',
+                },
+                operator: {
+                  type: 'string',
+                  description: 'Comparison operator (e.g., "running")',
+                },
+                value: {
+                  type: 'string',
+                  description: 'Value to compare against',
+                },
+              },
+              required: ['field', 'operator', 'value'],
+            },
+          },
+        },
+      },
     ],
   };
 });
@@ -869,6 +941,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       validateAirApiToken();
       const parsedArgs = CreateAutoAssetTagArgsSchema.parse(args);
       return await autoAssetTagTools.createAutoAssetTag(parsedArgs);
+    } else if (name === 'update_auto_asset_tag') {
+      validateAirApiToken();
+      const parsedArgs = UpdateAutoAssetTagArgsSchema.parse(args);
+      return await autoAssetTagTools.updateAutoAssetTag(parsedArgs);
     } else {
       throw new Error(`Unknown tool: ${name}`);
     }

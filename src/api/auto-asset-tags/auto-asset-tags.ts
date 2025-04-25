@@ -23,6 +23,14 @@ export interface CreateAutoAssetTagRequest {
   macosConditions: ConditionGroup;
 }
 
+// Define the request body for updating an auto asset tag
+export interface UpdateAutoAssetTagRequest {
+  tag: string;
+  linuxConditions: ConditionGroup;
+  windowsConditions: ConditionGroup;
+  macosConditions: ConditionGroup;
+}
+
 // Define the structure of the successful result in the response
 export interface AutoAssetTagResult {
   _id: string;
@@ -42,6 +50,9 @@ export interface CreateAutoAssetTagResponse {
   statusCode: number;
   errors: string[];
 }
+
+// The update response structure is the same as the create response
+export interface UpdateAutoAssetTagResponse extends CreateAutoAssetTagResponse {}
 
 export const api = {
   /**
@@ -70,6 +81,36 @@ export const api = {
       }
       // Fallback for other types of errors
       throw new Error(`Failed to create auto asset tag: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  },
+
+  /**
+   * Updates an existing Auto Asset Tag configuration in Binalyze AIR.
+   * @param id The ID of the auto asset tag to update.
+   * @param requestData The updated configuration for the auto asset tag.
+   * @returns The API response.
+   */
+  async updateAutoAssetTag(id: string, requestData: UpdateAutoAssetTagRequest): Promise<UpdateAutoAssetTagResponse> {
+    try {
+      const response = await axios.put<UpdateAutoAssetTagResponse>(
+        `${config.airHost}/api/public/auto-asset-tag/${id}`,
+        requestData,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${config.airApiToken}`
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error updating auto asset tag:', error);
+      if (axios.isAxiosError(error) && error.response) {
+        // Return the structured error from AIR if available
+        return error.response.data as UpdateAutoAssetTagResponse;
+      }
+      // Fallback for other types of errors
+      throw new Error(`Failed to update auto asset tag: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 };
