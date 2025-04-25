@@ -27,12 +27,12 @@ import { auditTools, ExportAuditLogsArgsSchema, ListAuditLogsArgsSchema } from '
 import { assignTaskTools, AssignRebootTaskArgsSchema, AssignShutdownTaskArgsSchema, AssignIsolationTaskArgsSchema, AssignLogRetrievalTaskArgsSchema, AssignVersionUpdateTaskArgsSchema } from './tools/assign-task';
 import { autoAssetTagTools, CreateAutoAssetTagArgsSchema, UpdateAutoAssetTagArgsSchema, ListAutoAssetTagsArgsSchema, GetAutoAssetTagByIdArgsSchema, DeleteAutoAssetTagByIdArgsSchema, StartTaggingArgsSchema } from './tools/auto-asset-tags';
 import { validateAirApiToken } from './utils/validation';
-import { AcquireBaselineArgsSchema, CompareBaselineArgsSchema } from './tools/baseline';
+import { AcquireBaselineArgsSchema, CompareBaselineArgsSchema, GetComparisonReportArgsSchema } from './tools/baseline';
 import { baselineTools } from './tools/baseline';
 
 const server = new Server({
   name: 'air-mcp',
-  version: '3.1.0'
+  version: '3.2.0'
 }, {
   capabilities: {
     tools: {}
@@ -952,6 +952,24 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: ['endpointId', 'taskIds'],
         },
       },
+      {
+        name: 'get_comparison_report',
+        description: 'Get comparison result report for a specific endpoint and task',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            endpointId: {
+              type: 'string',
+              description: 'The endpoint ID associated with the comparison task',
+            },
+            taskId: {
+              type: 'string',
+              description: 'The ID of the comparison task to get the report for',
+            },
+          },
+          required: ['endpointId', 'taskId'],
+        },
+      },
     ],
   };
 });
@@ -1095,6 +1113,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       validateAirApiToken();
       const parsedArgs = CompareBaselineArgsSchema.parse(args);
       return await baselineTools.compareBaseline(parsedArgs);
+    } else if (name === 'get_comparison_report') {
+      validateAirApiToken();
+      const parsedArgs = GetComparisonReportArgsSchema.parse(args);
+      return await baselineTools.getComparisonReport(parsedArgs);
     } else {
       throw new Error(`Unknown tool: ${name}`);
     }

@@ -94,4 +94,27 @@ export const api = {
       throw error;
     }
   },
+  
+  async getComparisonReport(endpointId: string, taskId: string): Promise<void> {
+    try {
+      const response = await axios.get(
+        `${config.airHost}/api/public/baseline/comparison/report/${endpointId}/${taskId}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${config.airApiToken}`
+          },
+        }
+      );
+      
+      // The endpoint doesn't return a response body, but we can check the status
+      if (response.status === 200) {
+        return;
+      } else {
+        throw new Error(`Failed to get comparison report: ${response.status}`);
+      }
+    } catch (error) {
+      console.error('Error getting comparison report:', error);
+      throw error;
+    }
+  }
 };

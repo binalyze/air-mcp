@@ -30,6 +30,12 @@ export const CompareBaselineArgsSchema = z.object({
   taskIds: z.array(z.string()).min(2).describe('Array of baseline task IDs to compare (minimum 2)'),
 });
 
+// Schema for get comparison report arguments
+export const GetComparisonReportArgsSchema = z.object({
+  endpointId: z.string().describe('The endpoint ID associated with the comparison task'),
+  taskId: z.string().describe('The ID of the comparison task to get the report for'),
+});
+
 export const baselineTools = {
   // Acquire baseline by filter
   async acquireBaseline(args: z.infer<typeof AcquireBaselineArgsSchema>) {
@@ -149,4 +155,32 @@ export const baselineTools = {
       };
     }
   },
+
+  // Get comparison report by endpoint ID and task ID
+  async getComparisonReport(args: z.infer<typeof GetComparisonReportArgsSchema>) {
+    try {
+      const { endpointId, taskId } = args;
+      
+      await api.getComparisonReport(endpointId, taskId);
+      
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Comparison report for endpoint ID '${endpointId}' and task ID '${taskId}' has been initiated. The report will be available in the AIR console.`
+          }
+        ]
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Failed to get comparison report: ${errorMessage}`
+          }
+        ]
+      };
+    }
+  }
 };
