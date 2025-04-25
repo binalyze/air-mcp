@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { api, CreateAutoAssetTagRequest, AutoAssetTagModifyResponse, UpdateAutoAssetTagRequest, AutoAssetTagResult, ListAutoAssetTagResponse, GetAutoAssetTagByIdResponse } from '../api/auto-asset-tags/auto-asset-tags';
+import { api, CreateAutoAssetTagRequest, AutoAssetTagModifyResponse, UpdateAutoAssetTagRequest, AutoAssetTagResult, ListAutoAssetTagResponse, GetAutoAssetTagByIdResponse, DeleteAutoAssetTagResponse } from '../api/auto-asset-tags/auto-asset-tags';
 
 // Base schema for a single condition
 const BaseConditionSchema = z.object({
@@ -45,6 +45,11 @@ export const UpdateAutoAssetTagArgsSchema = z.object({
 // Schema for get auto asset tag by ID arguments
 export const GetAutoAssetTagByIdArgsSchema = z.object({
   id: z.string().min(1, 'Auto asset tag ID cannot be empty.').describe('The ID of the auto asset tag to retrieve'),
+});
+
+// Schema for delete auto asset tag by ID arguments
+export const DeleteAutoAssetTagByIdArgsSchema = z.object({
+  id: z.string().min(1, 'Auto asset tag ID cannot be empty.').describe('The ID of the auto asset tag to delete'),
 });
 
 // Schema for list auto asset tags arguments (empty)
@@ -318,5 +323,46 @@ export const autoAssetTagTools = {
             ]
           };
         }
+      },
+
+  /**
+   * Deletes a specific Auto Asset Tag rule by ID.
+   */
+  async deleteAutoAssetTagById(args: z.infer<typeof DeleteAutoAssetTagByIdArgsSchema>) {
+    try {
+      const { id } = args;
+      
+      const response = await api.deleteAutoAssetTagById(id);
+
+      if (response.success) {
+        return {
+          content: [
+            {
+              type: 'text', 
+              text: `Successfully deleted auto asset tag with ID: ${id}`
+            }
+          ]
+        };
+      } else {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Error deleting auto asset tag: ${response.errors.join(', ')} (Status Code: ${response.statusCode})`
+            }
+          ]
+        };
       }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error during delete auto asset tag operation';
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Failed to delete auto asset tag: ${errorMessage}`
+          }
+        ]
+      };
+    }
+  }
 };

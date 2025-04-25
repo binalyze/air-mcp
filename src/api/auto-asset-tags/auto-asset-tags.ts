@@ -80,6 +80,14 @@ export interface ListAutoAssetTagResponse {
     errors: string[];
   }
 
+// Define the API response structure for delete operation
+export interface DeleteAutoAssetTagResponse {
+  success: boolean;
+  result: null;
+  statusCode: number;
+  errors: string[];
+}
+
 export const api = {
   /**
    * Creates a new Auto Asset Tag configuration in Binalyze AIR.
@@ -192,6 +200,34 @@ export const api = {
       }
       // Fallback for other types of errors
       throw new Error(`Failed to list auto asset tags: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  },
+
+  /**
+   * Deletes an Auto Asset Tag configuration in Binalyze AIR.
+   * @param id The ID of the auto asset tag to delete.
+   * @returns The API response for the delete operation.
+   */
+  async deleteAutoAssetTagById(id: string): Promise<DeleteAutoAssetTagResponse> {
+    try {
+      const response = await axios.delete<DeleteAutoAssetTagResponse>(
+        `${config.airHost}/api/public/auto-asset-tag/${id}`,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${config.airApiToken}`
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error deleting auto asset tag:', error);
+      if (axios.isAxiosError(error) && error.response) {
+        // Return the structured error from AIR if available
+        return error.response.data as DeleteAutoAssetTagResponse;
+      }
+      // Fallback for other types of errors
+      throw new Error(`Failed to delete auto asset tag: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 };

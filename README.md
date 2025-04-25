@@ -45,6 +45,7 @@ A Node.js server implementing **Model Context Protocol (MCP)** for Binalyze AIR,
 - **Auto Asset Tagging** - Create and update rules to automatically tag assets based on specific conditions.
 - **List Auto Asset Tags** - List all existing auto asset tag rules.
 - **Get Auto Asset Tag Details** - Get detailed information about a specific auto asset tag rule by its ID.
+- **Delete Auto Asset Tag** - Delete a specific auto asset tag rule by its ID.
 
 ## Overview
 
@@ -174,6 +175,7 @@ In Claude Desktop, or any MCP Client, you can use natural language commands:
 | `Update auto asset tag "fkkEPhpqMNqJeHfi4RyxiWEm" to have tag name "Updated Container" with linux process "containerd" running` | Updates an existing auto asset tag rule with new conditions. |
 | `List all auto asset tag rules` | Lists all existing auto asset tag rules with their configurations. |
 | `Get auto asset tag with ID "f6kEPhpqMNqJeHfi4RyxiWEm"` | Shows detailed information about a specific auto asset tag rule. |
+| `Delete auto asset tag with ID "f6kEPhpqMNqJeHfi4RyxiWEm"` | Deletes a specific auto asset tag rule by its ID. |
 
 ### Filtering by Organization
 
@@ -333,6 +335,16 @@ You can retrieve detailed information about a specific auto asset tag rule by it
 Get auto asset tag with ID "f6kEPhpqMNqJeHfi4RyxiWEm"
 Show me details about the auto asset tag rule "f6kEPhpqMNqJeHfi4RyxiWEm"
 Fetch information about auto asset tag "f6kEPhpqMNqJeHfi4RyxiWEm"
+```
+
+### Deleting Auto Asset Tag
+
+You can delete an auto asset tag rule by its ID:
+
+```
+Delete auto asset tag with ID "f6kEPhpqMNqJeHfi4RyxiWEm"
+Remove the auto asset tag rule "f6kEPhpqMNqJeHfi4RyxiWEm"
+Delete the auto asset tagging rule "f6kEPhpqMNqJeHfi4RyxiWEm"
 ```
 
 ### Listing Auto Asset Tag Rules

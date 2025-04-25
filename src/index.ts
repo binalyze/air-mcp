@@ -25,12 +25,12 @@ import { userTools, ListUsersArgsSchema } from './tools/users';
 import { droneAnalyzerTools } from './tools/droneAnalyzers';
 import { auditTools, ExportAuditLogsArgsSchema, ListAuditLogsArgsSchema } from './tools/audit';
 import { assignTaskTools, AssignRebootTaskArgsSchema, AssignShutdownTaskArgsSchema, AssignIsolationTaskArgsSchema, AssignLogRetrievalTaskArgsSchema, AssignVersionUpdateTaskArgsSchema } from './tools/assign-task';
-import { autoAssetTagTools, CreateAutoAssetTagArgsSchema, UpdateAutoAssetTagArgsSchema, ListAutoAssetTagsArgsSchema, GetAutoAssetTagByIdArgsSchema } from './tools/auto-asset-tags';
+import { autoAssetTagTools, CreateAutoAssetTagArgsSchema, UpdateAutoAssetTagArgsSchema, ListAutoAssetTagsArgsSchema, GetAutoAssetTagByIdArgsSchema, DeleteAutoAssetTagByIdArgsSchema } from './tools/auto-asset-tags';
 import { validateAirApiToken } from './utils/validation';
 
 const server = new Server({
   name: 'air-mcp',
-  version: '2.16.0'
+  version: '2.17.0'
 }, {
   capabilities: {
     tools: {}
@@ -841,6 +841,20 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
         },
       },
       {
+        name: 'delete_auto_asset_tag_by_id',
+        description: 'Delete a specific auto asset tag rule by its ID',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            id: {
+              type: 'string',
+              description: 'The ID of the auto asset tag to delete',
+            },
+          },
+          required: ['id'],
+        },
+      },
+      {
         name: 'list_auto_asset_tags',
         description: 'List all auto asset tag rules in the system.',
         inputSchema: {
@@ -976,6 +990,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       validateAirApiToken();
       const parsedArgs = GetAutoAssetTagByIdArgsSchema.parse(args);
       return await autoAssetTagTools.getAutoAssetTagById(parsedArgs);
+    } else if (name === 'delete_auto_asset_tag_by_id') {
+      validateAirApiToken();
+      const parsedArgs = DeleteAutoAssetTagByIdArgsSchema.parse(args);
+      return await autoAssetTagTools.deleteAutoAssetTagById(parsedArgs);
     } else {
       throw new Error(`Unknown tool: ${name}`);
     }
