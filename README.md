@@ -42,6 +42,7 @@ A Node.js server implementing **Model Context Protocol (MCP)** for Binalyze AIR,
 - **Purge and Uninstall Assets** - Purge data and uninstall specific assets based on filters.
 - **Add Tags to Assets** - Add tags to specific assets based on filters.
 - **Remove Tags from Assets** - Remove tags from specific assets based on filters.
+- **Auto Asset Tagging** - Create rules to automatically tag assets based on specific conditions.
 
 ## Overview
 
@@ -167,6 +168,7 @@ In Claude Desktop, or any MCP Client, you can use natural language commands:
 | `Purge and uninstall asset with ID "endpoint-id"` | Purges data and uninstalls the specified asset (requires providing `filter.includedEndpointIds`) |
 | `Add tags ["tag1", "tag2"] to asset with ID "endpoint-id"` | Adds specified tags to the targeted asset(s) (requires providing `filter.includedEndpointIds` and `tags`) |
 | `Remove tags ["tag1"] from asset with ID "endpoint-id"` | Removes specified tags from the targeted asset(s) (requires providing `filter.includedEndpointIds` and `tags`) |
+| `Create an auto asset tag rule named "Container" where linux process "dockerd" is running, windows process "dockerd.exe" is running, or macos process "dockerd" is running` | Creates a new rule to automatically tag assets based on conditions. |
 
 ### Filtering by Organization
 
@@ -305,72 +307,15 @@ Remove tags ["obsolete"] from asset with ID "0ccbb181-685c-4f1e-982a-6f7c7e88ead
 Remove tag "needs-review" from assets with IDs ["id1", "id2"] for organization 0
 ```
 
-## Response Example
+### Creating Auto Asset Tag Rules
+
+You can define rules to automatically tag assets based on conditions across different operating systems. Describe the tag name and the conditions for Linux, Windows, and macOS.
 
 ```
-Found 3 assets:
-a1b2c3d4: Win10-Workstation1 (Windows - Windows 10 Pro)
-e5f6g7h8: Ubuntu-Server1 (Linux - Ubuntu 20.04)
-i9j0k1l2: MacBook-Pro (macOS - macOS 12.3)
+Create an auto asset tag named "Web Server"
+- For Linux: if process "apache2" is running OR process "nginx" is running
+- For Windows: if process "httpd.exe" is running OR process "nginx.exe" is running
+- For macOS: if process "httpd" is running
+
+Create auto asset tag "Domain Controller" if windows registry key "HKLM\\SYSTEM\\CurrentControlSet\\Services\\NTDS\\Parameters" exists
 ```
-
-```
-Asset details:
-Asset: Endpoint - 2 (bc906dea-f92d-46b3-87f2-a2fc36667f70)
-OS: Ubuntu
-Platform: windows
-IP Address: 127.0.0.1
-Group: Computers (e5a82e99-868b-4ae5-85f3-06f05b260824)
-Type: Workstation
-Management: Managed
-Last Seen: 5/22/2022, 6:38:38 PM
-Version: 2.9.0 (2009000)
-Registered: 5/22/2022, 6:38:38 PM
-Created: 5/22/2022, 6:38:38 PM
-Updated: 5/22/2022, 6:38:38 PM
-Organization ID: 0
-Online Status: offline
-Isolation Status: unisolated
-Tags: None
-Issues: None
-Waiting For Version Update Fix: No
-Policies: None
-```
-
-Successfully assigned 1 acquisition task(s):
-3c801542-d58e-4237-84b9-37651b455a38: Example Case Acquisition 003 (Organization: 0)
-
-Successfully assigned 1 image acquisition task(s):
-3c801542-d58e-4237-84b9-37651b455a38: Acquire Image 001 (Organization: 0)
-
-Successfully created acquisition profile: My Custom Profile
-
-Successfully assigned 1 reboot task(s):
-8fe018d3-83de-4a6d-b7f4-bc97ed3b3156: Reboot 002 (Organization: 0)
-
-Successfully assigned 1 shutdown task(s):
-a5f2ee9d-066e-47dd-a436-ba27808d76fb: Shutdown 004 (Organization: 0)
-
-Successfully assigned 1 isolation task(s):
-26aeb2db-9fd0-467c-a3ba-b74c675ef0c8: Isolation 003 (Organization: 0)
-
-Successfully assigned 1 log retrieval task(s):
-517ac6b7-92f1-4401-8f75-79931d73c2c1: Log Retrieval 002 (Organization: 0)
-
-Successfully assigned 1 version update task(s):
-cbed8ab3-24d1-4697-8552-6ff6a6c1fae6: Version Update 002 (Organization: 0)
-```
-
-Successfully initiated uninstall task for assets matching the filter (targeted IDs: 0ccbb181-685c-4f1e-982a-6f7c7e88eadd).
-
-Successfully initiated purge and uninstall task for assets matching the filter (targeted IDs: 0ccbb181-685c-4f1e-982a-6f7c7e88eadd).
-
-Successfully added tags [tag1] to assets matching the filter (targeted IDs: d169d2ee-aad3-47f0-bd1d-6c1829195201).
-
-Successfully removed tags [obsolete] from assets matching the filter (targeted IDs: 0ccbb181-685c-4f1e-982a-6f7c7e88eadd).
-
-```
-Found 3 tasks for asset with ID bc906dea-f92d-46b3-87f2-a2fc36667f70:
-1e18c426-b00a-44d1-9102-faa80b594fd0: Example Case Acquisition 002 (Type: acquisition, Status: assigned, Progress: 0%)
-dfbcdd26-6c74-4de4-8704-bf5d48b90722: Example Case Acquisition 001 (Type: acquisition, Status: assigned, Progress: 0%)
-45f5bfeb-e503-4123-80f0-422229b1b097: Auto Tagging 003 (Type: auto-tagging, Status: assigned, Progress: 0%)
