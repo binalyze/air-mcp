@@ -27,10 +27,12 @@ import { auditTools, ExportAuditLogsArgsSchema, ListAuditLogsArgsSchema } from '
 import { assignTaskTools, AssignRebootTaskArgsSchema, AssignShutdownTaskArgsSchema, AssignIsolationTaskArgsSchema, AssignLogRetrievalTaskArgsSchema, AssignVersionUpdateTaskArgsSchema } from './tools/assign-task';
 import { autoAssetTagTools, CreateAutoAssetTagArgsSchema, UpdateAutoAssetTagArgsSchema, ListAutoAssetTagsArgsSchema, GetAutoAssetTagByIdArgsSchema, DeleteAutoAssetTagByIdArgsSchema, StartTaggingArgsSchema } from './tools/auto-asset-tags';
 import { validateAirApiToken } from './utils/validation';
+import { AcquireBaselineArgsSchema } from './tools/baseline';
+import { baselineTools } from './tools/baseline';
 
 const server = new Server({
   name: 'air-mcp',
-  version: '2.18.0'
+  version: '3.0.0'
 }, {
   capabilities: {
     tools: {}
@@ -895,6 +897,42 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: ['filter'],
         },
       },
+      {
+        name: 'acquire_baseline',
+        description: 'Assign a baseline acquisition task to specific endpoints',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            caseId: {
+              type: 'string',
+              description: 'The case ID to associate the baseline acquisition with',
+            },
+            filter: {
+              type: 'object',
+              properties: {
+                searchTerm: { type: 'string', description: 'Optional search term' },
+                name: { type: 'string', description: 'Filter by asset name' },
+                ipAddress: { type: 'string', description: 'Filter by IP address' },
+                groupId: { type: 'string', description: 'Filter by group ID' },
+                groupFullPath: { type: 'string', description: 'Filter by full group path' },
+                managedStatus: { type: 'array', items: { type: 'string' }, description: 'Filter by managed status (e.g., ["managed"])' },
+                isolationStatus: { type: 'array', items: { type: 'string' }, description: 'Filter by isolation status (e.g., ["isolated"])' },
+                platform: { type: 'array', items: { type: 'string' }, description: 'Filter by platform (e.g., ["windows"])' },
+                issue: { type: 'string', description: 'Filter by issue' },
+                onlineStatus: { type: 'array', items: { type: 'string' }, description: 'Filter by online status (e.g., ["online"])' },
+                tags: { type: 'array', items: { type: 'string' }, description: 'Filter by tags' },
+                version: { type: 'string', description: 'Filter by agent version' },
+                policy: { type: 'string', description: 'Filter by policy' },
+                includedEndpointIds: { type: 'array', items: { type: 'string' }, description: 'Array of endpoint IDs to include for baseline acquisition' },
+                excludedEndpointIds: { type: 'array', items: { type: 'string' }, description: 'Array of endpoint IDs to exclude' },
+                organizationIds: { type: 'array', items: { type: 'number' }, description: 'Organization IDs filter. Defaults to [0]' },
+              },
+              description: 'Filter object to specify which assets to acquire baseline from',
+            },
+          },
+          required: ['caseId', 'filter'],
+        },
+      },
     ],
   };
 });
@@ -1030,7 +1068,11 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       validateAirApiToken();
       const parsedArgs = StartTaggingArgsSchema.parse(args);
       return await autoAssetTagTools.startTagging(parsedArgs);
-    } else {
+    } else if (name === 'acquire_baseline') {
+      validateAirApiToken();
+      const parsedArgs = AcquireBaselineArgsSchema.parse(args);
+      return await baselineTools.acquireBaseline(parsedArgs);
+    }else {
       throw new Error(`Unknown tool: ${name}`);
     }
   } catch (error) {
