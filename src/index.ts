@@ -25,12 +25,12 @@ import { userTools, ListUsersArgsSchema } from './tools/users';
 import { droneAnalyzerTools } from './tools/droneAnalyzers';
 import { auditTools, ExportAuditLogsArgsSchema, ListAuditLogsArgsSchema } from './tools/audit';
 import { assignTaskTools, AssignRebootTaskArgsSchema, AssignShutdownTaskArgsSchema, AssignIsolationTaskArgsSchema, AssignLogRetrievalTaskArgsSchema, AssignVersionUpdateTaskArgsSchema } from './tools/assign-task';
-import { autoAssetTagTools, CreateAutoAssetTagArgsSchema, UpdateAutoAssetTagArgsSchema, ListAutoAssetTagsArgsSchema, GetAutoAssetTagByIdArgsSchema, DeleteAutoAssetTagByIdArgsSchema } from './tools/auto-asset-tags';
+import { autoAssetTagTools, CreateAutoAssetTagArgsSchema, UpdateAutoAssetTagArgsSchema, ListAutoAssetTagsArgsSchema, GetAutoAssetTagByIdArgsSchema, DeleteAutoAssetTagByIdArgsSchema, StartTaggingArgsSchema } from './tools/auto-asset-tags';
 import { validateAirApiToken } from './utils/validation';
 
 const server = new Server({
   name: 'air-mcp',
-  version: '2.17.0'
+  version: '2.18.0'
 }, {
   capabilities: {
     tools: {}
@@ -863,6 +863,38 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: [],
         },
       },
+      {
+        name: 'start_tagging',
+        description: 'Start the auto asset tagging process for assets matching filter criteria.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            filter: {
+              type: 'object',
+              properties: {
+                searchTerm: { type: 'string', description: 'Optional search term.' },
+                name: { type: 'string', description: 'Filter by asset name.' },
+                ipAddress: { type: 'string', description: 'Filter by IP address.' },
+                groupId: { type: 'string', description: 'Filter by group ID.' },
+                groupFullPath: { type: 'string', description: 'Filter by full group path.' },
+                managedStatus: { type: 'array', items: { type: 'string' }, description: 'Filter by managed status (e.g., ["managed"]).' },
+                isolationStatus: { type: 'array', items: { type: 'string' }, description: 'Filter by isolation status (e.g., ["isolated"]).' },
+                platform: { type: 'array', items: { type: 'string' }, description: 'Filter by platform (e.g., ["windows"]).' },
+                issue: { type: 'string', description: 'Filter by issue.' },
+                onlineStatus: { type: 'array', items: { type: 'string' }, description: 'Filter by online status (e.g., ["online"]).' },
+                tags: { type: 'array', items: { type: 'string' }, description: 'Filter by tags.' },
+                version: { type: 'string', description: 'Filter by agent version.' },
+                policy: { type: 'string', description: 'Filter by policy.' },
+                includedEndpointIds: { type: 'array', items: { type: 'string' }, description: 'Array of endpoint IDs to include.' },
+                excludedEndpointIds: { type: 'array', items: { type: 'string' }, description: 'Array of endpoint IDs to exclude.' },
+                organizationIds: { type: 'array', items: { type: 'number' }, description: 'Organization IDs filter. Defaults to [0].' },
+              },
+              description: 'Filter object to specify which assets to apply auto tagging to.'
+            },
+          },
+          required: ['filter'],
+        },
+      },
     ],
   };
 });
@@ -994,6 +1026,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       validateAirApiToken();
       const parsedArgs = DeleteAutoAssetTagByIdArgsSchema.parse(args);
       return await autoAssetTagTools.deleteAutoAssetTagById(parsedArgs);
+    } else if (name === 'start_tagging') {
+      validateAirApiToken();
+      const parsedArgs = StartTaggingArgsSchema.parse(args);
+      return await autoAssetTagTools.startTagging(parsedArgs);
     } else {
       throw new Error(`Unknown tool: ${name}`);
     }

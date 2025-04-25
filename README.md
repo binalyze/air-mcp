@@ -46,6 +46,7 @@ A Node.js server implementing **Model Context Protocol (MCP)** for Binalyze AIR,
 - **List Auto Asset Tags** - List all existing auto asset tag rules.
 - **Get Auto Asset Tag Details** - Get detailed information about a specific auto asset tag rule by its ID.
 - **Delete Auto Asset Tag** - Delete a specific auto asset tag rule by its ID.
+- **Start Auto Tagging** - Initiate the auto tagging process for assets that match specific filter criteria.
 
 ## Overview
 
@@ -176,6 +177,7 @@ In Claude Desktop, or any MCP Client, you can use natural language commands:
 | `List all auto asset tag rules` | Lists all existing auto asset tag rules with their configurations. |
 | `Get auto asset tag with ID "f6kEPhpqMNqJeHfi4RyxiWEm"` | Shows detailed information about a specific auto asset tag rule. |
 | `Delete auto asset tag with ID "f6kEPhpqMNqJeHfi4RyxiWEm"` | Deletes a specific auto asset tag rule by its ID. |
+| `Start auto tagging for windows machines` | Initiates the auto tagging process for Windows assets matching specified criteria. |
 
 ### Filtering by Organization
 
@@ -354,4 +356,15 @@ You can list all configured auto asset tag rules to see their IDs, tags, and con
 ```
 List all auto asset tags
 Show me the auto asset tag rules
+```
+
+### Starting Auto Asset Tagging Process
+
+You can initiate the auto tagging process for assets that match specific filter criteria.
+
+```
+Start auto tagging for all Windows assets
+Start tagging for managed Windows endpoints
+Initiate auto tagging process for assets with platform "linux"
+Start auto tagging for endpoints with IDs ["id1", "id2"]
 ```

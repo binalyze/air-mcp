@@ -15,6 +15,46 @@ export interface ConditionGroup {
   conditions: (Condition | ConditionGroup)[];
 }
 
+// Define the filter structure for start tagging request
+export interface AssetFilter {
+  searchTerm?: string;
+  name?: string;
+  ipAddress?: string;
+  groupId?: string;
+  groupFullPath?: string;
+  managedStatus?: string[];
+  isolationStatus?: string[];
+  platform?: string[];
+  issue?: string;
+  onlineStatus?: string[];
+  tags?: string[];
+  version?: string;
+  policy?: string;
+  includedEndpointIds?: string[];
+  excludedEndpointIds?: string[];
+  organizationIds?: number[];
+}
+
+// Define the request body for start tagging
+export interface StartTaggingRequest {
+  filter: AssetFilter;
+}
+
+// Define the structure of a single result item in start tagging response
+export interface StartTaggingResultItem {
+  _id: string;
+  name: string;
+  organizationId: number;
+}
+
+// Define the overall API response structure for start tagging
+export interface StartTaggingResponse {
+  success: boolean;
+  result: StartTaggingResultItem[] | null;
+  statusCode: number;
+  errors: string[];
+}
+
 // Define the request body for creating an auto asset tag
 export interface CreateAutoAssetTagRequest {
   tag: string;
@@ -228,6 +268,35 @@ export const api = {
       }
       // Fallback for other types of errors
       throw new Error(`Failed to delete auto asset tag: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  },
+  
+  /**
+   * Initiates auto asset tagging process for assets matching the filter criteria.
+   * @param requestData The filter criteria for selecting assets to tag.
+   * @returns The API response with the IDs of created tagging tasks.
+   */
+  async startTagging(requestData: StartTaggingRequest): Promise<StartTaggingResponse> {
+    try {
+      const response = await axios.post<StartTaggingResponse>(
+        `${config.airHost}/api/public/auto-asset-tag/start-tagging`,
+        requestData,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${config.airApiToken}`
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error starting asset tagging:', error);
+      if (axios.isAxiosError(error) && error.response) {
+        // Return the structured error from AIR if available
+        return error.response.data as StartTaggingResponse;
+      }
+      // Fallback for other types of errors
+      throw new Error(`Failed to start asset tagging: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 };

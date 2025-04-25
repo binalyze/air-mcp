@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { api, CreateAutoAssetTagRequest, AutoAssetTagModifyResponse, UpdateAutoAssetTagRequest, AutoAssetTagResult, ListAutoAssetTagResponse, GetAutoAssetTagByIdResponse, DeleteAutoAssetTagResponse } from '../api/auto-asset-tags/auto-asset-tags';
+import { api, CreateAutoAssetTagRequest, AutoAssetTagModifyResponse, UpdateAutoAssetTagRequest, AutoAssetTagResult, ListAutoAssetTagResponse, GetAutoAssetTagByIdResponse, DeleteAutoAssetTagResponse, StartTaggingRequest, StartTaggingResponse } from '../api/auto-asset-tags/auto-asset-tags';
 
 // Base schema for a single condition
 const BaseConditionSchema = z.object({
@@ -54,6 +54,28 @@ export const DeleteAutoAssetTagByIdArgsSchema = z.object({
 
 // Schema for list auto asset tags arguments (empty)
 export const ListAutoAssetTagsArgsSchema = z.object({});
+
+// Schema for start tagging arguments
+export const StartTaggingArgsSchema = z.object({
+  filter: z.object({
+    searchTerm: z.string().optional().describe('Optional search term.'),
+    name: z.string().optional().describe('Filter by asset name.'),
+    ipAddress: z.string().optional().describe('Filter by IP address.'),
+    groupId: z.string().optional().describe('Filter by group ID.'),
+    groupFullPath: z.string().optional().describe('Filter by full group path.'),
+    managedStatus: z.array(z.string()).optional().describe('Filter by managed status (e.g., ["managed"]).'),
+    isolationStatus: z.array(z.string()).optional().describe('Filter by isolation status (e.g., ["isolated"]).'),
+    platform: z.array(z.string()).optional().describe('Filter by platform (e.g., ["windows"]).'),
+    issue: z.string().optional().describe('Filter by issue.'),
+    onlineStatus: z.array(z.string()).optional().describe('Filter by online status (e.g., ["online"]).'),
+    tags: z.array(z.string()).optional().describe('Filter by tags.'),
+    version: z.string().optional().describe('Filter by agent version.'),
+    policy: z.string().optional().describe('Filter by policy.'),
+    includedEndpointIds: z.array(z.string()).optional().describe('Array of endpoint IDs to include.'),
+    excludedEndpointIds: z.array(z.string()).optional().describe('Array of endpoint IDs to exclude.'),
+    organizationIds: z.array(z.number()).optional().describe('Organization IDs filter. Defaults to [0].'),
+  }).describe('Filter object to specify which assets to apply auto tagging to.'),
+});
 
 // Format the response for create display
 function formatCreateAutoAssetTagResponse(response: AutoAssetTagResult): string {
@@ -150,6 +172,25 @@ function formatListAutoAssetTagsResponse(response: ListAutoAssetTagResponse): st
   
     return output;
   }
+
+// Format the response for start tagging display
+function formatStartTaggingResponse(response: StartTaggingResponse): string {
+  if (!response.success || !response.result || response.result.length === 0) {
+    return 'No tagging tasks were created.';
+  }
+
+  let output = `Successfully started auto tagging process:\n\n`;
+  
+  response.result.forEach(task => {
+    output += `----------------------------------------\n`;
+    output += `Task ID: ${task._id}\n`;
+    output += `Name: ${task.name}\n`;
+    output += `Organization ID: ${task.organizationId}\n`;
+    output += `----------------------------------------\n\n`;
+  });
+
+  return output;
+}
 
 export const autoAssetTagTools = {
   /**
@@ -360,6 +401,49 @@ export const autoAssetTagTools = {
           {
             type: 'text',
             text: `Failed to delete auto asset tag: ${errorMessage}`
+          }
+        ]
+      };
+    }
+  },
+
+  /**
+   * Starts the auto asset tagging process for assets matching the filter criteria.
+   */
+  async startTagging(args: z.infer<typeof StartTaggingArgsSchema>) {
+    try {
+      const requestData: StartTaggingRequest = {
+        filter: args.filter
+      };
+      
+      const response = await api.startTagging(requestData);
+
+      if (response.success && response.result) {
+        return {
+          content: [
+            {
+              type: 'text', 
+              text: formatStartTaggingResponse(response)
+            }
+          ]
+        };
+      } else {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Error starting auto tagging: ${response.errors?.join(', ') || 'Unknown error'} (Status Code: ${response.statusCode})`
+            }
+          ]
+        };
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error during start tagging operation';
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Failed to start auto tagging: ${errorMessage}`
           }
         ]
       };
