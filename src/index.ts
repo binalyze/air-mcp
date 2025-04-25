@@ -25,12 +25,12 @@ import { userTools, ListUsersArgsSchema } from './tools/users';
 import { droneAnalyzerTools } from './tools/droneAnalyzers';
 import { auditTools, ExportAuditLogsArgsSchema, ListAuditLogsArgsSchema } from './tools/audit';
 import { assignTaskTools, AssignRebootTaskArgsSchema, AssignShutdownTaskArgsSchema, AssignIsolationTaskArgsSchema, AssignLogRetrievalTaskArgsSchema, AssignVersionUpdateTaskArgsSchema } from './tools/assign-task';
-import { autoAssetTagTools, CreateAutoAssetTagArgsSchema, UpdateAutoAssetTagArgsSchema, ListAutoAssetTagsArgsSchema } from './tools/auto-asset-tags';
+import { autoAssetTagTools, CreateAutoAssetTagArgsSchema, UpdateAutoAssetTagArgsSchema, ListAutoAssetTagsArgsSchema, GetAutoAssetTagByIdArgsSchema } from './tools/auto-asset-tags';
 import { validateAirApiToken } from './utils/validation';
 
 const server = new Server({
   name: 'air-mcp',
-  version: '2.15.0'
+  version: '2.16.0'
 }, {
   capabilities: {
     tools: {}
@@ -827,6 +827,20 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
         },
       },
       {
+        name: 'get_auto_asset_tag_by_id',
+        description: 'Get details of a specific auto asset tag rule by its ID',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            id: {
+              type: 'string',
+              description: 'The ID of the auto asset tag to retrieve',
+            },
+          },
+          required: ['id'],
+        },
+      },
+      {
         name: 'list_auto_asset_tags',
         description: 'List all auto asset tag rules in the system.',
         inputSchema: {
@@ -958,6 +972,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       validateAirApiToken();
       const parsedArgs = ListAutoAssetTagsArgsSchema.parse(args);
       return await autoAssetTagTools.listAutoAssetTags(parsedArgs);
+    } else if (name === 'get_auto_asset_tag_by_id') {
+      validateAirApiToken();
+      const parsedArgs = GetAutoAssetTagByIdArgsSchema.parse(args);
+      return await autoAssetTagTools.getAutoAssetTagById(parsedArgs);
     } else {
       throw new Error(`Unknown tool: ${name}`);
     }

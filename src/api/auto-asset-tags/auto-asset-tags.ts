@@ -51,6 +51,14 @@ export interface AutoAssetTagModifyResponse {
   errors: string[];
 }
 
+// Define the overall API response structure for get by id
+export interface GetAutoAssetTagByIdResponse {
+  success: boolean;
+  result: AutoAssetTagResult | null;
+  statusCode: number;
+  errors: string[];
+}
+
 // Define the structure for the list response result
 interface ListAutoAssetTagResult {
     entities: AutoAssetTagResult[];
@@ -129,6 +137,34 @@ export const api = {
       }
       // Fallback for other types of errors
       throw new Error(`Failed to update auto asset tag: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  },
+
+  /**
+   * Gets a specific Auto Asset Tag configuration by ID in Binalyze AIR.
+   * @param id The ID of the auto asset tag to retrieve.
+   * @returns The API response containing the auto asset tag details.
+   */
+  async getAutoAssetTagById(id: string): Promise<GetAutoAssetTagByIdResponse> {
+    try {
+      const response = await axios.get<GetAutoAssetTagByIdResponse>(
+        `${config.airHost}/api/public/auto-asset-tag/${id}`,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${config.airApiToken}`
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error getting auto asset tag by ID:', error);
+      if (axios.isAxiosError(error) && error.response) {
+        // Return the structured error from AIR if available
+        return error.response.data as GetAutoAssetTagByIdResponse;
+      }
+      // Fallback for other types of errors
+      throw new Error(`Failed to get auto asset tag by ID: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   },
 

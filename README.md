@@ -44,6 +44,7 @@ A Node.js server implementing **Model Context Protocol (MCP)** for Binalyze AIR,
 - **Remove Tags from Assets** - Remove tags from specific assets based on filters.
 - **Auto Asset Tagging** - Create and update rules to automatically tag assets based on specific conditions.
 - **List Auto Asset Tags** - List all existing auto asset tag rules.
+- **Get Auto Asset Tag Details** - Get detailed information about a specific auto asset tag rule by its ID.
 
 ## Overview
 
@@ -169,9 +170,10 @@ In Claude Desktop, or any MCP Client, you can use natural language commands:
 | `Purge and uninstall asset with ID "endpoint-id"` | Purges data and uninstalls the specified asset (requires providing `filter.includedEndpointIds`) |
 | `Add tags ["tag1", "tag2"] to asset with ID "endpoint-id"` | Adds specified tags to the targeted asset(s) (requires providing `filter.includedEndpointIds` and `tags`) |
 | `Remove tags ["tag1"] from asset with ID "endpoint-id"` | Removes specified tags from the targeted asset(s) (requires providing `filter.includedEndpointIds` and `tags`) |
-| `Create an auto asset tag rule named "Container" where linux process "dockerd" is running, windows process "dockerd.exe" is running, or macos process "dockerd" is running` | Creates a new rule to automatically tag assets based on conditions. |
+| `Create an auto asset tag named "Web Server"` | Creates a new rule to automatically tag assets based on conditions. |
 | `Update auto asset tag "fkkEPhpqMNqJeHfi4RyxiWEm" to have tag name "Updated Container" with linux process "containerd" running` | Updates an existing auto asset tag rule with new conditions. |
 | `List all auto asset tag rules` | Lists all existing auto asset tag rules with their configurations. |
+| `Get auto asset tag with ID "f6kEPhpqMNqJeHfi4RyxiWEm"` | Shows detailed information about a specific auto asset tag rule. |
 
 ### Filtering by Organization
 
@@ -321,6 +323,16 @@ Create an auto asset tag named "Web Server"
 - For macOS: if process "httpd" is running
 
 Create auto asset tag "Domain Controller" if windows registry key "HKLM\\SYSTEM\\CurrentControlSet\\Services\\NTDS\\Parameters" exists
+```
+
+### Getting Auto Asset Tag Details
+
+You can retrieve detailed information about a specific auto asset tag rule by its ID:
+
+```
+Get auto asset tag with ID "f6kEPhpqMNqJeHfi4RyxiWEm"
+Show me details about the auto asset tag rule "f6kEPhpqMNqJeHfi4RyxiWEm"
+Fetch information about auto asset tag "f6kEPhpqMNqJeHfi4RyxiWEm"
 ```
 
 ### Listing Auto Asset Tag Rules

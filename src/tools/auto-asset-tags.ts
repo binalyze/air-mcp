@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { api, CreateAutoAssetTagRequest, AutoAssetTagModifyResponse, UpdateAutoAssetTagRequest, AutoAssetTagResult, ListAutoAssetTagResponse } from '../api/auto-asset-tags/auto-asset-tags';
+import { api, CreateAutoAssetTagRequest, AutoAssetTagModifyResponse, UpdateAutoAssetTagRequest, AutoAssetTagResult, ListAutoAssetTagResponse, GetAutoAssetTagByIdResponse } from '../api/auto-asset-tags/auto-asset-tags';
 
 // Base schema for a single condition
 const BaseConditionSchema = z.object({
@@ -42,6 +42,11 @@ export const UpdateAutoAssetTagArgsSchema = z.object({
   macosConditions: ConditionGroupSchema.optional().describe('Conditions for macOS assets'),
 });
 
+// Schema for get auto asset tag by ID arguments
+export const GetAutoAssetTagByIdArgsSchema = z.object({
+  id: z.string().min(1, 'Auto asset tag ID cannot be empty.').describe('The ID of the auto asset tag to retrieve'),
+});
+
 // Schema for list auto asset tags arguments (empty)
 export const ListAutoAssetTagsArgsSchema = z.object({});
 
@@ -69,6 +74,27 @@ Created At: ${new Date(response.createdAt).toLocaleString()}
 Updated At: ${new Date(response.updatedAt).toLocaleString()}
 Condition ID Counter: ${response.conditionIdCounter}
 `;
+}
+
+// Format the response for get by ID display
+function formatGetAutoAssetTagByIdResponse(response: AutoAssetTagResult): string {
+  let output = `
+Auto Asset Tag Details:
+Tag: ${response.tag}
+ID: ${response._id}
+Created At: ${new Date(response.createdAt).toLocaleString()}
+Updated At: ${new Date(response.updatedAt).toLocaleString()}
+Condition ID Counter: ${response.conditionIdCounter || 'N/A'}
+`;
+
+  output += `\nLinux Conditions:\n`;
+  output += formatConditionGroup(response.linuxConditions, '  ');
+  output += `\nWindows Conditions:\n`;
+  output += formatConditionGroup(response.windowsConditions, '  ');
+  output += `\nmacOS Conditions:\n`;
+  output += formatConditionGroup(response.macosConditions, '  ');
+
+  return output;
 }
 
 // Helper to format a single condition group (recursive)
@@ -207,6 +233,47 @@ export const autoAssetTagTools = {
           {
             type: 'text',
             text: `Failed to update auto asset tag: ${errorMessage}`
+          }
+        ]
+      };
+    }
+  },
+
+  /**
+   * Gets a specific Auto Asset Tag rule by ID.
+   */
+  async getAutoAssetTagById(args: z.infer<typeof GetAutoAssetTagByIdArgsSchema>) {
+    try {
+      const { id } = args;
+      
+      const response = await api.getAutoAssetTagById(id);
+
+      if (response.success && response.result) {
+        return {
+          content: [
+            {
+              type: 'text', 
+              text: formatGetAutoAssetTagByIdResponse(response.result)
+            }
+          ]
+        };
+      } else {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Error getting auto asset tag: ${response.errors.join(', ')} (Status Code: ${response.statusCode})`
+            }
+          ]
+        };
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error during get auto asset tag operation';
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Failed to get auto asset tag: ${errorMessage}`
           }
         ]
       };
