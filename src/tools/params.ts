@@ -16,6 +16,11 @@ export const ListAcquisitionEvidencesArgsSchema = z.object({
   // Define empty schema as this endpoint doesn't require any parameters
 }).optional();
 
+// Schema for list e-discovery patterns arguments - no specific arguments needed
+export const ListEDiscoveryPatternsArgsSchema = z.object({
+  // Define empty schema as this endpoint doesn't require any parameters
+}).optional();
+
 // Format the supported operating systems for display
 function formatOSList(platformList: string[]): string {
   return platformList.map(platform => {
@@ -281,6 +286,55 @@ export const acquisitionEvidenceTools = {
           {
             type: 'text',
             text: `Failed to fetch acquisition evidences: ${errorMessage}`
+          }
+        ]
+      };
+    }
+  },
+};
+
+export const eDiscoveryTools = {
+  // List all e-discovery patterns
+  async listEDiscoveryPatterns() {
+    try {
+      const response = await api.getEDiscoveryPatterns();
+      
+      // Check if the response has the expected structure
+      if (!Array.isArray(response) || response.length === 0) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: Array.isArray(response) ? 'No e-discovery patterns found.' : 'Received invalid data format for e-discovery patterns.'
+            }
+          ]
+        };
+      }
+      
+      // Create formatted output for each category
+      const resultParts = response.map(category => {
+        const applicationList = category.applications.map(app => 
+          `  • ${app.name}: \`${app.pattern}\``
+        ).join('\n');
+        
+        return `## ${category.category}\n${applicationList}`;
+      }).join('\n\n');
+      
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `# E-Discovery Patterns\n\n${resultParts}`
+          }
+        ]
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Failed to fetch e-discovery patterns: ${errorMessage}`
           }
         ]
       };

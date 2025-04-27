@@ -52,6 +52,7 @@ A Node.js server implementing **Model Context Protocol (MCP)** for Binalyze AIR,
 - **Get Auto Asset Tag Details** - Get detailed information about a specific auto asset tag rule by its ID.
 - **Delete Auto Asset Tag** - Delete a specific auto asset tag rule by its ID.
 - **Start Auto Tagging** - Initiate the auto tagging process for assets that match specific filter criteria.
+- **E-Discovery Patterns** - List available e-discovery patterns for detecting different file types.
 
 ## Overview
 
@@ -188,6 +189,7 @@ In Claude Desktop, or any MCP Client, you can use natural language commands:
 | `Acquire baseline for case "C-2022-001" from endpoints ["id1", "id2"]` | Acquires baseline data from specified endpoints for a given case ID. |
 | `Compare baselines for endpoint "id1" with task IDs ["task1", "task2"]` | Compares multiple baseline acquisition tasks for a specific endpoint to identify changes. |
 | `Get comparison report for endpoint "id1" and task "task1"` | Retrieves the comparison result report for a specific endpoint and comparison task. |
+| `List all e-discovery patterns` | Shows all available e-discovery patterns for file type detection |
 
 ### Viewing Acquisition Artifacts
 
@@ -212,6 +214,16 @@ What evidences can be collected during an investigation?
 ```
 
 This will display a categorized list of evidence items that can be collected during a forensic investigation, organized by platform (Windows, Linux, macOS, etc.) and group categories (System, Network, Memory, etc.).
+
+### Viewing E-Discovery Patterns
+
+You can list all available e-discovery patterns for file type detection:
+
+```
+List all e-discovery patterns
+Show me all file patterns for e-discovery
+What file patterns are available for e-discovery?
+```
 
 ### Filtering by Organization
 

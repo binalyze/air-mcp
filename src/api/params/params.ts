@@ -8,6 +8,7 @@
  * - DroneAnalyzer interface: Represents a single drone analyzer in the system
  * - AcquisitionArtifact interfaces: Represents artifacts available for acquisition
  * - AcquisitionEvidence interfaces: Represents evidence items available for collection
+ * - EDiscoveryPattern interfaces: Represents e-discovery patterns for file types
  * - api object: Contains methods to interact with the API endpoints
  */
 
@@ -55,6 +56,16 @@ export interface AcquisitionEvidences {
   linux: EvidenceGroup[];
   macos?: EvidenceGroup[];
   aix?: EvidenceGroup[];
+}
+
+export interface EDiscoveryApplication {
+  name: string;
+  pattern: string;
+}
+
+export interface EDiscoveryCategory {
+  category: string;
+  applications: EDiscoveryApplication[];
 }
 
 export const api = {
@@ -108,6 +119,24 @@ export const api = {
       return response.data;
     } catch (error) {
       console.error('Error fetching acquisition evidences:', error);
+      throw error;
+    }
+  },
+  
+  async getEDiscoveryPatterns(): Promise<EDiscoveryCategory[]> {
+    try {
+      const response = await axios.get(
+        `${config.airHost}/api/public/params/acquisition/e-discovery-patterns`,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${config.airApiToken}`
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching e-discovery patterns:', error);
       throw error;
     }
   },

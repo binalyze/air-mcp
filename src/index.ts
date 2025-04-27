@@ -22,7 +22,7 @@ import { policyTools, ListPoliciesArgsSchema } from './tools/policies';
 import { taskTools, ListTasksArgsSchema } from './tools/tasks';
 import { triageTools, ListTriageRulesArgsSchema } from './tools/triages';
 import { userTools, ListUsersArgsSchema } from './tools/users';
-import { droneAnalyzerTools, acquisitionArtifactTools } from './tools/params';
+import { droneAnalyzerTools, acquisitionArtifactTools, eDiscoveryTools } from './tools/params';
 import { auditTools, ExportAuditLogsArgsSchema, ListAuditLogsArgsSchema } from './tools/audit';
 import { assignTaskTools, AssignRebootTaskArgsSchema, AssignShutdownTaskArgsSchema, AssignIsolationTaskArgsSchema, AssignLogRetrievalTaskArgsSchema, AssignVersionUpdateTaskArgsSchema } from './tools/assign-task';
 import { autoAssetTagTools, CreateAutoAssetTagArgsSchema, UpdateAutoAssetTagArgsSchema, ListAutoAssetTagsArgsSchema, GetAutoAssetTagByIdArgsSchema, DeleteAutoAssetTagByIdArgsSchema, StartTaggingArgsSchema } from './tools/auto-asset-tags';
@@ -32,7 +32,7 @@ import { baselineTools } from './tools/baseline';
 
 const server = new Server({
   name: 'air-mcp',
-  version: '3.4.0'
+  version: '3.5.0'
 }, {
   capabilities: {
     tools: {}
@@ -984,6 +984,20 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: ['random_string'],
         },
       },
+      {
+        name: 'list_e_discovery_patterns',
+        description: 'List all e-discovery patterns for file type detection',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            random_string: {
+              type: 'string',
+              description: 'Dummy parameter for no-parameter tools',
+            },
+          },
+          required: ['random_string'],
+        },
+      },
     ],
   };
 });
@@ -1134,6 +1148,9 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     } else if (name === 'list_acquisition_artifacts') {
       validateAirApiToken();
       return await acquisitionArtifactTools.listAcquisitionArtifacts();
+    } else if (name === 'list_e_discovery_patterns') {
+      validateAirApiToken();
+      return await eDiscoveryTools.listEDiscoveryPatterns();
     } else {
       throw new Error(`Unknown tool: ${name}`);
     }
