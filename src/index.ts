@@ -29,10 +29,12 @@ import { autoAssetTagTools, CreateAutoAssetTagArgsSchema, UpdateAutoAssetTagArgs
 import { validateAirApiToken } from './utils/validation';
 import { AcquireBaselineArgsSchema, CompareBaselineArgsSchema, GetComparisonReportArgsSchema } from './tools/baseline';
 import { baselineTools } from './tools/baseline';
+import { assignmentTools } from './tools/assignments';
+import { GetTaskAssignmentsByIdArgsSchema } from './tools/assignments';
 
 const server = new Server({
   name: 'air-mcp',
-  version: '4.5.0'
+  version: '5.0.0'
 }, {
   capabilities: {
     tools: {}
@@ -1267,6 +1269,20 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: ['id'],
         },
       },
+      {
+        name: 'get_task_assignments_by_id',
+        description: 'Get all assignments associated with a specific task by its ID',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            taskId: {
+              type: 'string',
+              description: 'The ID of the task to retrieve assignments for',
+            },
+          },
+          required: ['taskId'],
+        },
+      },
     ],
   };
 });
@@ -1444,6 +1460,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       validateAirApiToken();
       const parsedArgs = DeletePolicyByIdArgsSchema.parse(args);
       return await policyTools.deletePolicyById(parsedArgs);
+    } else if (name === 'get_task_assignments_by_id') {
+      validateAirApiToken();
+      const parsedArgs = GetTaskAssignmentsByIdArgsSchema.parse(args);
+      return await assignmentTools.getTaskAssignmentsById(parsedArgs);
     } else {
       throw new Error(`Unknown tool: ${name}`);
     }
