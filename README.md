@@ -193,6 +193,7 @@ In Claude Desktop, or any MCP Client, you can use natural language commands:
 | `List all e-discovery patterns` | Shows all available e-discovery patterns for file type detection |
 | `Create a policy named "Production Policy" with specific storage settings` | Creates a new policy with custom settings |
 | `Update policy with ID "abc123"` | Updates an existing policy with new settings |
+| `Get policy details for ID "System"` | Displays detailed information about a specific policy |
 
 ### Viewing Acquisition Artifacts
 

@@ -18,7 +18,7 @@ import {
 } from './tools/acquisitions';
 import { organizationTools } from './tools/organizations';
 import { caseTools, ListCasesArgsSchema } from './tools/cases';
-import { policyTools, ListPoliciesArgsSchema, CreatePolicyArgsSchema, UpdatePolicyArgsSchema } from './tools/policies';
+import { policyTools, ListPoliciesArgsSchema, CreatePolicyArgsSchema, UpdatePolicyArgsSchema, GetPolicyByIdArgsSchema } from './tools/policies';
 import { taskTools, ListTasksArgsSchema } from './tools/tasks';
 import { triageTools, ListTriageRulesArgsSchema } from './tools/triages';
 import { userTools, ListUsersArgsSchema } from './tools/users';
@@ -32,7 +32,7 @@ import { baselineTools } from './tools/baseline';
 
 const server = new Server({
   name: 'air-mcp',
-  version: '4.1.0'
+  version: '4.2.0'
 }, {
   capabilities: {
     tools: {}
@@ -1189,6 +1189,20 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: ['id', 'name', 'saveTo', 'compression', 'sendTo'],
         },
       },
+      {
+        name: 'get_policy_by_id',
+        description: 'Get detailed information about a specific policy by its ID',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            id: {
+              type: 'string',
+              description: 'The ID of the policy to retrieve',
+            },
+          },
+          required: ['id'],
+        },
+      },
     ],
   };
 });
@@ -1350,6 +1364,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       validateAirApiToken();
       const parsedArgs = UpdatePolicyArgsSchema.parse(args);
       return await policyTools.updatePolicy(parsedArgs);
+    } else if (name === 'get_policy_by_id') {
+      validateAirApiToken();
+      const parsedArgs = GetPolicyByIdArgsSchema.parse(args);
+      return await policyTools.getPolicyById(parsedArgs);
     } else {
       throw new Error(`Unknown tool: ${name}`);
     }

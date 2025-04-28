@@ -124,6 +124,11 @@ export const UpdatePolicyArgsSchema = z.object({
   }).optional().describe('Filter conditions to determine which endpoints the policy applies to')
 });
 
+// Schema for get policy by ID arguments
+export const GetPolicyByIdArgsSchema = z.object({
+  id: z.string().describe('The ID of the policy to retrieve'),
+});
+
 // Format policy for display
 function formatPolicy(policy: Policy): string {
   return `
@@ -327,6 +332,74 @@ export const policyTools = {
           {
             type: 'text',
             text: `Failed to update policy: ${errorMessage}`
+          }
+        ]
+      };
+    }
+  },
+
+  // Get policy by ID
+  async getPolicyById(args: z.infer<typeof GetPolicyByIdArgsSchema>) {
+    try {
+      const response = await api.getPolicyById(args.id);
+      
+      if (!response.success) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Error fetching policy: ${response.errors.join(', ')}`
+            }
+          ]
+        };
+      }
+      
+      if (!response.result) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `No policy found with ID: ${args.id}`
+            }
+          ]
+        };
+      }
+      
+      const policy = response.result;
+      
+      // Create a detailed policy information object
+      const policyInfo = {
+        id: policy._id,
+        name: policy.name,
+        default: policy.default,
+        createdBy: policy.createdBy,
+        updatedAt: new Date(policy.updatedAt).toLocaleString(),
+        organizationIds: policy.organizationIds,
+        cpuLimit: policy.cpu.limit,
+        saveTo: policy.saveTo,
+        sendTo: policy.sendTo,
+        compression: policy.compression
+      };
+      
+      return {
+        content: [
+          {
+            type: 'text',
+            text: formatPolicy(policy)
+          },
+          {
+            type: 'json',
+            json: policyInfo
+          }
+        ]
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Failed to fetch policy: ${errorMessage}`
           }
         ]
       };

@@ -161,6 +161,13 @@ export interface UpdatePolicyResponse {
   errors: string[];
 }
 
+export interface GetPolicyResponse {
+  success: boolean;
+  result: Policy | null;
+  statusCode: number;
+  errors: string[];
+}
+
 export const api = {
   async getPolicies(organizationIds: string | string[] = '0'): Promise<PoliciesResponse> {
     try {
@@ -180,6 +187,24 @@ export const api = {
       return response.data;
     } catch (error) {
       console.error('Error fetching policies:', error);
+      throw error;
+    }
+  },
+  
+  async getPolicyById(id: string): Promise<GetPolicyResponse> {
+    try {
+      const response = await axios.get(
+        `${config.airHost}/api/public/policies/${id}`,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${config.airApiToken}`
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching policy with ID ${id}:`, error);
       throw error;
     }
   },
