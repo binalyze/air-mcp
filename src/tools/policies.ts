@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { api, Policy, CreatePolicyRequest, FilterCondition, UpdatePolicyRequest } from '../api/policies/policies';
+import { api, Policy, CreatePolicyRequest, FilterCondition, UpdatePolicyRequest, UpdatePolicyPrioritiesRequest } from '../api/policies/policies';
 
 // Schema for list policies arguments
 export const ListPoliciesArgsSchema = z.object({
@@ -127,6 +127,17 @@ export const UpdatePolicyArgsSchema = z.object({
 // Schema for get policy by ID arguments
 export const GetPolicyByIdArgsSchema = z.object({
   id: z.string().describe('The ID of the policy to retrieve'),
+});
+
+// Schema for update policy priorities arguments
+export const UpdatePolicyPrioritiesArgsSchema = z.object({
+  ids: z.array(z.string()).min(1).describe('Ordered list of policy IDs that defines their priority (first has highest priority)'),
+  organizationIds: z.union([
+    z.array(z.number()),
+    z.array(z.string()),
+    z.number(),
+    z.string()
+  ]).optional().default([0]).describe('Organization IDs to associate with priority update. Defaults to [0].'),
 });
 
 // Format policy for display
@@ -400,6 +411,66 @@ export const policyTools = {
           {
             type: 'text',
             text: `Failed to fetch policy: ${errorMessage}`
+          }
+        ]
+      };
+    }
+  },
+
+  // Update policy priorities (order)
+  async updatePolicyPriorities(args: z.infer<typeof UpdatePolicyPrioritiesArgsSchema>) {
+    try {
+      // Format organizationIds to ensure it's an array of the same type
+      let organizationIds: number[] | string[];
+      if (typeof args.organizationIds === 'number') {
+        organizationIds = [args.organizationIds];
+      } else if (typeof args.organizationIds === 'string') {
+        organizationIds = [args.organizationIds];
+      } else if (Array.isArray(args.organizationIds)) {
+        // Check if all elements are numbers
+        if (args.organizationIds.every(id => typeof id === 'number')) {
+          organizationIds = args.organizationIds as number[];
+        } else {
+          // Convert any numbers to strings to ensure consistent array type
+          organizationIds = args.organizationIds.map(id => String(id));
+        }
+      } else {
+        organizationIds = [0]; // Default
+      }
+
+      const priorityData: UpdatePolicyPrioritiesRequest = {
+        ids: args.ids,
+        organizationIds
+      };
+
+      const response = await api.updatePolicyPriorities(priorityData);
+
+      if (!response.success) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Error updating policy priorities: ${response.errors.join(', ')}`
+            }
+          ]
+        };
+      }
+
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Policy priorities updated successfully. The policies will be applied in this order: ${args.ids.join(', ')}`
+          }
+        ]
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Failed to update policy priorities: ${errorMessage}`
           }
         ]
       };

@@ -168,6 +168,18 @@ export interface GetPolicyResponse {
   errors: string[];
 }
 
+export interface UpdatePolicyPrioritiesRequest {
+  ids: string[];
+  organizationIds: number[] | string[];
+}
+
+export interface UpdatePolicyPrioritiesResponse {
+  success: boolean;
+  result: null;
+  statusCode: number;
+  errors: string[];
+}
+
 export const api = {
   async getPolicies(organizationIds: string | string[] = '0'): Promise<PoliciesResponse> {
     try {
@@ -243,6 +255,25 @@ export const api = {
       return response.data;
     } catch (error) {
       console.error('Error updating policy:', error);
+      throw error;
+    }
+  },
+  
+  async updatePolicyPriorities(data: UpdatePolicyPrioritiesRequest): Promise<UpdatePolicyPrioritiesResponse> {
+    try {
+      const response = await axios.put(
+        `${config.airHost}/api/public/policies/priorities`,
+        data,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${config.airApiToken}`
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error updating policy priorities:', error);
       throw error;
     }
   },

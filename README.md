@@ -53,7 +53,8 @@ A Node.js server implementing **Model Context Protocol (MCP)** for Binalyze AIR,
 - **Delete Auto Asset Tag** - Delete a specific auto asset tag rule by its ID.
 - **Start Auto Tagging** - Initiate the auto tagging process for assets that match specific filter criteria.
 - **E-Discovery Patterns** - List available e-discovery patterns for detecting different file types.
-- **Policy Management** - List, create, and update policies for your organization.
+- **Policy Management** - Create, view, update, and prioritize policies.
+
 
 ## Overview
 
@@ -194,6 +195,7 @@ In Claude Desktop, or any MCP Client, you can use natural language commands:
 | `Create a policy named "Production Policy" with specific storage settings` | Creates a new policy with custom settings |
 | `Update policy with ID "abc123"` | Updates an existing policy with new settings |
 | `Get policy details for ID "System"` | Displays detailed information about a specific policy |
+| `Update policy priorities to ["policy1", "policy2", "policy3"]` | Updates the order of policy application |
 
 ### Viewing Acquisition Artifacts
 

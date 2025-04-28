@@ -18,7 +18,7 @@ import {
 } from './tools/acquisitions';
 import { organizationTools } from './tools/organizations';
 import { caseTools, ListCasesArgsSchema } from './tools/cases';
-import { policyTools, ListPoliciesArgsSchema, CreatePolicyArgsSchema, UpdatePolicyArgsSchema, GetPolicyByIdArgsSchema } from './tools/policies';
+import { policyTools, ListPoliciesArgsSchema, CreatePolicyArgsSchema, UpdatePolicyArgsSchema, GetPolicyByIdArgsSchema, UpdatePolicyPrioritiesArgsSchema } from './tools/policies';
 import { taskTools, ListTasksArgsSchema } from './tools/tasks';
 import { triageTools, ListTriageRulesArgsSchema } from './tools/triages';
 import { userTools, ListUsersArgsSchema } from './tools/users';
@@ -32,7 +32,7 @@ import { baselineTools } from './tools/baseline';
 
 const server = new Server({
   name: 'air-mcp',
-  version: '4.2.0'
+  version: '4.3.0'
 }, {
   capabilities: {
     tools: {}
@@ -1203,6 +1203,30 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: ['id'],
         },
       },
+      {
+        name: 'update_policy_priorities',
+        description: 'Update the priority order of policies',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            ids: { 
+              type: 'array', 
+              items: { type: 'string' }, 
+              description: 'Ordered list of policy IDs that defines their priority (first has highest priority)' 
+            },
+            organizationIds: { 
+              oneOf: [
+                { type: 'array', items: { type: 'number' } },
+                { type: 'array', items: { type: 'string' } },
+                { type: 'number' },
+                { type: 'string' }
+              ],
+              description: 'Organization IDs to associate with priority update. Defaults to [0].' 
+            },
+          },
+          required: ['ids'],
+        },
+      },
     ],
   };
 });
@@ -1368,6 +1392,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       validateAirApiToken();
       const parsedArgs = GetPolicyByIdArgsSchema.parse(args);
       return await policyTools.getPolicyById(parsedArgs);
+    } else if (name === 'update_policy_priorities') {
+      validateAirApiToken();
+      const parsedArgs = UpdatePolicyPrioritiesArgsSchema.parse(args);
+      return await policyTools.updatePolicyPriorities(parsedArgs);
     } else {
       throw new Error(`Unknown tool: ${name}`);
     }
