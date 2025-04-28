@@ -120,6 +120,13 @@ export interface TaskResponse {
   errors: string[];
 }
 
+export interface CancelTaskResponse {
+  success: boolean;
+  result: null;
+  statusCode: number;
+  errors: string[];
+}
+
 export const api = {
   async getTasks(organizationIds: string | string[] = '0'): Promise<TasksResponse> {
     try {
@@ -157,6 +164,25 @@ export const api = {
       return response.data;
     } catch (error) {
       console.error(`Error fetching task with ID ${id}:`, error);
+      throw error;
+    }
+  },
+
+  async cancelTaskById(id: string): Promise<CancelTaskResponse> {
+    try {
+      const response = await axios.post(
+        `${config.airHost}/api/public/tasks/${id}/cancel`,
+        {},
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${config.airApiToken}`
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error(`Error cancelling task with ID ${id}:`, error);
       throw error;
     }
   },

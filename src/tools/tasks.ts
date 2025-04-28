@@ -14,6 +14,11 @@ export const GetTaskByIdArgsSchema = z.object({
   id: z.string().describe('The ID of the task to retrieve'),
 });
 
+// Schema for cancel task by ID arguments
+export const CancelTaskByIdArgsSchema = z.object({
+  id: z.string().describe('The ID of the task to cancel'),
+});
+
 // Format task type to be more readable
 function formatTaskType(type: string): string {
   return type
@@ -175,6 +180,43 @@ export const taskTools = {
           {
             type: 'text',
             text: `Failed to fetch task with ID ${args.id}: ${errorMessage}`
+          }
+        ]
+      };
+    }
+  },
+
+  // Cancel task by ID
+  async cancelTaskById(args: z.infer<typeof CancelTaskByIdArgsSchema>) {
+    try {
+      const response = await api.cancelTaskById(args.id);
+      
+      if (!response.success) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Error cancelling task: ${response.errors.join(', ')}`
+            }
+          ]
+        };
+      }
+      
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Task with ID ${args.id} has been successfully cancelled.`
+          }
+        ]
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Failed to cancel task with ID ${args.id}: ${errorMessage}`
           }
         ]
       };

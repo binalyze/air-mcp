@@ -19,7 +19,7 @@ import {
 import { organizationTools } from './tools/organizations';
 import { caseTools, ListCasesArgsSchema } from './tools/cases';
 import { policyTools, ListPoliciesArgsSchema, CreatePolicyArgsSchema, UpdatePolicyArgsSchema, GetPolicyByIdArgsSchema, UpdatePolicyPrioritiesArgsSchema, PolicyMatchStatsArgsSchema, DeletePolicyByIdArgsSchema } from './tools/policies';
-import { taskTools, ListTasksArgsSchema, GetTaskByIdArgsSchema } from './tools/tasks';
+import { taskTools, ListTasksArgsSchema, GetTaskByIdArgsSchema, CancelTaskByIdArgsSchema } from './tools/tasks';
 import { triageTools, ListTriageRulesArgsSchema } from './tools/triages';
 import { userTools, ListUsersArgsSchema } from './tools/users';
 import { droneAnalyzerTools, acquisitionArtifactTools, eDiscoveryTools } from './tools/params';
@@ -34,7 +34,7 @@ import { GetTaskAssignmentsByIdArgsSchema } from './tools/assignments';
 
 const server = new Server({
   name: 'air-mcp',
-  version: '5.3.0'
+  version: '5.4.0'
 }, {
   capabilities: {
     tools: {}
@@ -1325,6 +1325,20 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: ['id'],
         },
       },
+      {
+        name: 'cancel_task_by_id',
+        description: 'Cancel a specific task by its ID',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            id: {
+              type: 'string',
+              description: 'The ID of the task to cancel',
+            },
+          },
+          required: ['id'],
+        },
+      },
     ],
   };
 });
@@ -1518,6 +1532,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       validateAirApiToken();
       const parsedArgs = GetTaskByIdArgsSchema.parse(args);
       return await taskTools.getTaskById(parsedArgs);
+    } else if (name === 'cancel_task_by_id') {
+      validateAirApiToken();
+      const parsedArgs = CancelTaskByIdArgsSchema.parse(args);
+      return await taskTools.cancelTaskById(parsedArgs);
     } else {
       throw new Error(`Unknown tool: ${name}`);
     }
