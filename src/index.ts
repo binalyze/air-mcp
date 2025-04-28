@@ -18,7 +18,7 @@ import {
 } from './tools/acquisitions';
 import { organizationTools } from './tools/organizations';
 import { caseTools, ListCasesArgsSchema } from './tools/cases';
-import { policyTools, ListPoliciesArgsSchema } from './tools/policies';
+import { policyTools, ListPoliciesArgsSchema, CreatePolicyArgsSchema } from './tools/policies';
 import { taskTools, ListTasksArgsSchema } from './tools/tasks';
 import { triageTools, ListTriageRulesArgsSchema } from './tools/triages';
 import { userTools, ListUsersArgsSchema } from './tools/users';
@@ -32,7 +32,7 @@ import { baselineTools } from './tools/baseline';
 
 const server = new Server({
   name: 'air-mcp',
-  version: '3.5.0'
+  version: '4.0.0'
 }, {
   capabilities: {
     tools: {}
@@ -998,6 +998,97 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: ['random_string'],
         },
       },
+      {
+        name: 'create_policy',
+        description: 'Create a new policy with specific storage and compression settings',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            name: { type: 'string', description: 'Name for the new policy' },
+            organizationIds: { 
+              oneOf: [
+                { type: 'array', items: { type: 'number' } },
+                { type: 'array', items: { type: 'string' } },
+                { type: 'number' },
+                { type: 'string' }
+              ],
+              description: 'Organization IDs to associate with policy. Defaults to [0].'
+            },
+            saveTo: {
+              type: 'object',
+              properties: {
+                windows: {
+                  type: 'object',
+                  properties: {
+                    location: { type: 'string', description: 'Storage location for Windows (e.g., "local")' },
+                    path: { type: 'string', description: 'Path for evidence storage on Windows' },
+                    useMostFreeVolume: { type: 'boolean', description: 'Whether to use volume with most free space' },
+                    volume: { type: 'string', description: 'Volume to use for Windows (e.g., "C:")' },
+                    tmp: { type: 'string', description: 'Temporary folder path for Windows' }
+                  },
+                  required: ['location', 'path', 'useMostFreeVolume', 'volume']
+                },
+                linux: {
+                  type: 'object',
+                  properties: {
+                    location: { type: 'string', description: 'Storage location for Linux (e.g., "local")' },
+                    path: { type: 'string', description: 'Path for evidence storage on Linux' },
+                    useMostFreeVolume: { type: 'boolean', description: 'Whether to use volume with most free space' },
+                    volume: { type: 'string', description: 'Volume to use for Linux (e.g., "/")' },
+                    tmp: { type: 'string', description: 'Temporary folder path for Linux' }
+                  },
+                  required: ['location', 'path', 'useMostFreeVolume', 'volume']
+                },
+                macos: {
+                  type: 'object',
+                  properties: {
+                    location: { type: 'string', description: 'Storage location for macOS (e.g., "local")' },
+                    path: { type: 'string', description: 'Path for evidence storage on macOS' },
+                    useMostFreeVolume: { type: 'boolean', description: 'Whether to use volume with most free space' },
+                    volume: { type: 'string', description: 'Volume to use for macOS (e.g., "/")' },
+                    tmp: { type: 'string', description: 'Temporary folder path for macOS' }
+                  },
+                  required: ['location', 'path', 'useMostFreeVolume', 'volume']
+                }
+              },
+              required: ['windows', 'linux', 'macos'],
+              description: 'Configuration for where to save evidence'
+            },
+            compression: {
+              type: 'object',
+              properties: {
+                enabled: { type: 'boolean', description: 'Whether compression is enabled' },
+                encryption: {
+                  type: 'object',
+                  properties: {
+                    enabled: { type: 'boolean', description: 'Whether encryption is enabled' },
+                    password: { type: 'string', description: 'Password for encryption when enabled' }
+                  },
+                  required: ['enabled']
+                }
+              },
+              required: ['enabled', 'encryption'],
+              description: 'Compression and encryption settings'
+            },
+            sendTo: {
+              type: 'object',
+              properties: {
+                location: { type: 'string', description: 'Location to send evidence to (e.g., "user-local")' }
+              },
+              required: ['location'],
+              description: 'Configuration for where to send evidence'
+            },
+            cpu: {
+              type: 'object',
+              properties: {
+                limit: { type: 'number', description: 'CPU usage limit percentage (1-100)' }
+              },
+              description: 'CPU usage limits'
+            }
+          },
+          required: ['name', 'saveTo', 'compression', 'sendTo'],
+        },
+      },
     ],
   };
 });
@@ -1151,6 +1242,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     } else if (name === 'list_e_discovery_patterns') {
       validateAirApiToken();
       return await eDiscoveryTools.listEDiscoveryPatterns();
+    } else if (name === 'create_policy') {
+      validateAirApiToken();
+      const parsedArgs = CreatePolicyArgsSchema.parse(args);
+      return await policyTools.createPolicy(parsedArgs);
     } else {
       throw new Error(`Unknown tool: ${name}`);
     }

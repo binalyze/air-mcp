@@ -7,6 +7,7 @@
  * The module includes:
  * - Policy interface: Represents a single policy in the system
  * - PoliciesResponse interface: Represents the API response structure
+ * - CreatePolicyRequest interface: Represents the request body for creating a policy
  * - api object: Contains methods to interact with the Policies API endpoints
  */
 
@@ -78,6 +79,54 @@ export interface PoliciesResponse {
   errors: string[];
 }
 
+export interface CreatePolicyRequest {
+  name: string;
+  organizationIds: number[] | string[];
+  saveTo: {
+    windows: {
+      location: string;
+      path: string;
+      useMostFreeVolume: boolean;
+      volume: string;
+      tmp?: string;
+    };
+    linux: {
+      location: string;
+      path: string;
+      useMostFreeVolume: boolean;
+      volume: string;
+      tmp?: string;
+    };
+    macos: {
+      location: string;
+      path: string;
+      useMostFreeVolume: boolean;
+      volume: string;
+      tmp?: string;
+    };
+  };
+  compression: {
+    enabled: boolean;
+    encryption: {
+      enabled: boolean;
+      password?: string;
+    };
+  };
+  sendTo: {
+    location: string;
+  };
+  cpu?: {
+    limit?: number;
+  };
+}
+
+export interface CreatePolicyResponse {
+  success: boolean;
+  result: Policy | null;
+  statusCode: number;
+  errors: string[];
+}
+
 export const api = {
   async getPolicies(organizationIds: string | string[] = '0'): Promise<PoliciesResponse> {
     try {
@@ -97,6 +146,25 @@ export const api = {
       return response.data;
     } catch (error) {
       console.error('Error fetching policies:', error);
+      throw error;
+    }
+  },
+  
+  async createPolicy(policyData: CreatePolicyRequest): Promise<CreatePolicyResponse> {
+    try {
+      const response = await axios.post(
+        `${config.airHost}/api/public/policies`,
+        policyData,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${config.airApiToken}`
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error creating policy:', error);
       throw error;
     }
   },
