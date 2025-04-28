@@ -18,7 +18,7 @@ import {
 } from './tools/acquisitions';
 import { organizationTools } from './tools/organizations';
 import { caseTools, ListCasesArgsSchema } from './tools/cases';
-import { policyTools, ListPoliciesArgsSchema, CreatePolicyArgsSchema, UpdatePolicyArgsSchema, GetPolicyByIdArgsSchema, UpdatePolicyPrioritiesArgsSchema } from './tools/policies';
+import { policyTools, ListPoliciesArgsSchema, CreatePolicyArgsSchema, UpdatePolicyArgsSchema, GetPolicyByIdArgsSchema, UpdatePolicyPrioritiesArgsSchema, PolicyMatchStatsArgsSchema } from './tools/policies';
 import { taskTools, ListTasksArgsSchema } from './tools/tasks';
 import { triageTools, ListTriageRulesArgsSchema } from './tools/triages';
 import { userTools, ListUsersArgsSchema } from './tools/users';
@@ -32,7 +32,7 @@ import { baselineTools } from './tools/baseline';
 
 const server = new Server({
   name: 'air-mcp',
-  version: '4.3.0'
+  version: '4.4.0'
 }, {
   capabilities: {
     tools: {}
@@ -1227,6 +1227,32 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: ['ids'],
         },
       },
+      {
+        name: 'get_policy_match_stats',
+        description: 'Get statistics on how many endpoints match each policy based on filter criteria',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            name: { type: 'string', description: 'Filter assets by name' },
+            searchTerm: { type: 'string', description: 'General search term for filtering assets' },
+            ipAddress: { type: 'string', description: 'Filter assets by IP address' },
+            groupId: { type: 'string', description: 'Filter assets by group ID' },
+            groupFullPath: { type: 'string', description: 'Filter assets by full group path' },
+            managedStatus: { type: 'array', items: { type: 'string' }, description: 'Filter assets by managed status (e.g., ["managed"])' },
+            isolationStatus: { type: 'array', items: { type: 'string' }, description: 'Filter assets by isolation status (e.g., ["isolated"])' },
+            platform: { type: 'array', items: { type: 'string' }, description: 'Filter assets by platform (e.g., ["windows"])' },
+            issue: { type: 'string', description: 'Filter assets by issue' },
+            onlineStatus: { type: 'array', items: { type: 'string' }, description: 'Filter assets by online status (e.g., ["online"])' },
+            tags: { type: 'array', items: { type: 'string' }, description: 'Filter assets by tags' },
+            version: { type: 'string', description: 'Filter assets by agent version' },
+            policy: { type: 'string', description: 'Filter assets by policy name' },
+            includedEndpointIds: { type: 'array', items: { type: 'string' }, description: 'Include only these endpoint IDs' },
+            excludedEndpointIds: { type: 'array', items: { type: 'string' }, description: 'Exclude these endpoint IDs' },
+            organizationIds: { type: 'array', items: { oneOf: [{ type: 'number' }, { type: 'string' }] }, description: 'Organization IDs to filter by. Defaults to [0].' },
+          },
+          required: [],
+        },
+      },
     ],
   };
 });
@@ -1396,6 +1422,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       validateAirApiToken();
       const parsedArgs = UpdatePolicyPrioritiesArgsSchema.parse(args);
       return await policyTools.updatePolicyPriorities(parsedArgs);
+    } else if (name === 'get_policy_match_stats') {
+      validateAirApiToken();
+      const parsedArgs = PolicyMatchStatsArgsSchema.parse(args);
+      return await policyTools.getPolicyMatchStats(parsedArgs);
     } else {
       throw new Error(`Unknown tool: ${name}`);
     }

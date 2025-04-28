@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { api, Policy, CreatePolicyRequest, FilterCondition, UpdatePolicyRequest, UpdatePolicyPrioritiesRequest } from '../api/policies/policies';
+import { api, Policy, CreatePolicyRequest, FilterCondition, UpdatePolicyRequest, UpdatePolicyPrioritiesRequest, PolicyMatchStatsRequest } from '../api/policies/policies';
 
 // Schema for list policies arguments
 export const ListPoliciesArgsSchema = z.object({
@@ -138,6 +138,31 @@ export const UpdatePolicyPrioritiesArgsSchema = z.object({
     z.number(),
     z.string()
   ]).optional().default([0]).describe('Organization IDs to associate with priority update. Defaults to [0].'),
+});
+
+// Schema for policy match stats arguments
+export const PolicyMatchStatsArgsSchema = z.object({
+  name: z.string().optional().describe('Filter assets by name'),
+  searchTerm: z.string().optional().describe('General search term for filtering assets'),
+  ipAddress: z.string().optional().describe('Filter assets by IP address'),
+  groupId: z.string().optional().describe('Filter assets by group ID'),
+  groupFullPath: z.string().optional().describe('Filter assets by full group path'),
+  managedStatus: z.array(z.string()).optional().describe('Filter assets by managed status (e.g., ["managed"])'),
+  isolationStatus: z.array(z.string()).optional().describe('Filter assets by isolation status (e.g., ["isolated"])'),
+  platform: z.array(z.string()).optional().describe('Filter assets by platform (e.g., ["windows"])'),
+  issue: z.string().optional().describe('Filter assets by issue'),
+  onlineStatus: z.array(z.string()).optional().describe('Filter assets by online status (e.g., ["online"])'),
+  tags: z.array(z.string()).optional().describe('Filter assets by tags'),
+  version: z.string().optional().describe('Filter assets by agent version'),
+  policy: z.string().optional().describe('Filter assets by policy name'),
+  includedEndpointIds: z.array(z.string()).optional().describe('Include only these endpoint IDs'),
+  excludedEndpointIds: z.array(z.string()).optional().describe('Exclude these endpoint IDs'),
+  organizationIds: z.union([
+    z.array(z.number()),
+    z.array(z.string()),
+    z.number(),
+    z.string()
+  ]).optional().describe('Organization IDs to filter by. Defaults to [0].'),
 });
 
 // Format policy for display
@@ -471,6 +496,92 @@ export const policyTools = {
           {
             type: 'text',
             text: `Failed to update policy priorities: ${errorMessage}`
+          }
+        ]
+      };
+    }
+  },
+
+  // Get policy match statistics
+  async getPolicyMatchStats(args: z.infer<typeof PolicyMatchStatsArgsSchema>) {
+    try {
+      // Format organizationIds to ensure it's an array
+      let organizationIds: (number | string)[] | undefined;
+      if (args.organizationIds !== undefined) {
+        if (typeof args.organizationIds === 'number' || typeof args.organizationIds === 'string') {
+          organizationIds = [args.organizationIds];
+        } else {
+          organizationIds = args.organizationIds;
+        }
+      }
+
+      const filter: PolicyMatchStatsRequest = {
+        name: args.name,
+        searchTerm: args.searchTerm,
+        ipAddress: args.ipAddress,
+        groupId: args.groupId,
+        groupFullPath: args.groupFullPath,
+        managedStatus: args.managedStatus,
+        isolationStatus: args.isolationStatus,
+        platform: args.platform,
+        issue: args.issue,
+        onlineStatus: args.onlineStatus,
+        tags: args.tags,
+        version: args.version,
+        policy: args.policy,
+        includedEndpointIds: args.includedEndpointIds,
+        excludedEndpointIds: args.excludedEndpointIds,
+        organizationIds: organizationIds
+      };
+
+      const response = await api.getPolicyMatchStats(filter);
+
+      if (!response.success) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Error fetching policy match stats: ${response.errors.join(', ')}`
+            }
+          ]
+        };
+      }
+
+      if (!response.result || response.result.length === 0) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: 'No policy match statistics found for the specified filters.'
+            }
+          ]
+        };
+      }
+
+      // Format the match stats for display
+      const statsText = response.result.map(stat => 
+        `${stat.name} (${stat._id}): ${stat.count} endpoints`
+      ).join('\n');
+
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Policy Match Statistics:\n${statsText}`
+          },
+          {
+            type: 'json',
+            json: response.result
+          }
+        ]
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Failed to fetch policy match statistics: ${errorMessage}`
           }
         ]
       };

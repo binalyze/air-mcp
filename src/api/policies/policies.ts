@@ -180,6 +180,38 @@ export interface UpdatePolicyPrioritiesResponse {
   errors: string[];
 }
 
+export interface PolicyMatchStatsRequest {
+  name?: string;
+  searchTerm?: string;
+  ipAddress?: string;
+  groupId?: string;
+  groupFullPath?: string;
+  managedStatus?: string[];
+  isolationStatus?: string[];
+  platform?: string[];
+  issue?: string;
+  onlineStatus?: string[];
+  tags?: string[];
+  version?: string;
+  policy?: string;
+  includedEndpointIds?: string[];
+  excludedEndpointIds?: string[];
+  organizationIds?: (number | string)[];
+}
+
+export interface PolicyMatchStats {
+  _id: string;
+  name: string;
+  count: number;
+}
+
+export interface PolicyMatchStatsResponse {
+  success: boolean;
+  result: PolicyMatchStats[];
+  statusCode: number;
+  errors: string[];
+}
+
 export const api = {
   async getPolicies(organizationIds: string | string[] = '0'): Promise<PoliciesResponse> {
     try {
@@ -274,6 +306,25 @@ export const api = {
       return response.data;
     } catch (error) {
       console.error('Error updating policy priorities:', error);
+      throw error;
+    }
+  },
+  
+  async getPolicyMatchStats(filter: PolicyMatchStatsRequest): Promise<PolicyMatchStatsResponse> {
+    try {
+      const response = await axios.post(
+        `${config.airHost}/api/public/policies/match-stats`,
+        filter,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${config.airApiToken}`
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching policy match stats:', error);
       throw error;
     }
   },

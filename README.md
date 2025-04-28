@@ -54,6 +54,7 @@ A Node.js server implementing **Model Context Protocol (MCP)** for Binalyze AIR,
 - **Start Auto Tagging** - Initiate the auto tagging process for assets that match specific filter criteria.
 - **E-Discovery Patterns** - List available e-discovery patterns for detecting different file types.
 - **Policy Management** - Create, view, update, and prioritize policies.
+- **Policy Match Statistics** - See which policies apply to your assets based on various criteria.
 
 
 ## Overview
@@ -196,6 +197,9 @@ In Claude Desktop, or any MCP Client, you can use natural language commands:
 | `Update policy with ID "abc123"` | Updates an existing policy with new settings |
 | `Get policy details for ID "System"` | Displays detailed information about a specific policy |
 | `Update policy priorities to ["policy1", "policy2", "policy3"]` | Updates the order of policy application |
+| `Show policy match statistics` | Shows how many endpoints match each policy |
+| `Get policy distribution for Windows endpoints` | Shows policy matches filtered by platform |
+| `Get policy match stats for offline endpoints` | Shows policy matches for offline assets |
 
 ### Viewing Acquisition Artifacts
 
