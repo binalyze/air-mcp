@@ -127,6 +127,13 @@ export interface CancelTaskResponse {
   errors: string[];
 }
 
+export interface DeleteTaskResponse {
+  success: boolean;
+  result: null;
+  statusCode: number;
+  errors: string[];
+}
+
 export const api = {
   async getTasks(organizationIds: string | string[] = '0'): Promise<TasksResponse> {
     try {
@@ -183,6 +190,24 @@ export const api = {
       return response.data;
     } catch (error) {
       console.error(`Error cancelling task with ID ${id}:`, error);
+      throw error;
+    }
+  },
+
+  async deleteTaskById(id: string): Promise<DeleteTaskResponse> {
+    try {
+      const response = await axios.delete(
+        `${config.airHost}/api/public/tasks/${id}`,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${config.airApiToken}`
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error(`Error deleting task with ID ${id}:`, error);
       throw error;
     }
   },

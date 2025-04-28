@@ -19,7 +19,7 @@ import {
 import { organizationTools } from './tools/organizations';
 import { caseTools, ListCasesArgsSchema } from './tools/cases';
 import { policyTools, ListPoliciesArgsSchema, CreatePolicyArgsSchema, UpdatePolicyArgsSchema, GetPolicyByIdArgsSchema, UpdatePolicyPrioritiesArgsSchema, PolicyMatchStatsArgsSchema, DeletePolicyByIdArgsSchema } from './tools/policies';
-import { taskTools, ListTasksArgsSchema, GetTaskByIdArgsSchema, CancelTaskByIdArgsSchema } from './tools/tasks';
+import { taskTools, ListTasksArgsSchema, GetTaskByIdArgsSchema, CancelTaskByIdArgsSchema, DeleteTaskByIdArgsSchema } from './tools/tasks';
 import { triageTools, ListTriageRulesArgsSchema } from './tools/triages';
 import { userTools, ListUsersArgsSchema } from './tools/users';
 import { droneAnalyzerTools, acquisitionArtifactTools, eDiscoveryTools } from './tools/params';
@@ -34,7 +34,7 @@ import { GetTaskAssignmentsByIdArgsSchema } from './tools/assignments';
 
 const server = new Server({
   name: 'air-mcp',
-  version: '5.4.0'
+  version: '5.5.0'
 }, {
   capabilities: {
     tools: {}
@@ -1339,6 +1339,20 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: ['id'],
         },
       },
+      {
+        name: 'delete_task_by_id',
+        description: 'Delete a specific task by its ID',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            id: {
+              type: 'string',
+              description: 'The ID of the task to delete',
+            },
+          },
+          required: ['id'],
+        },
+      },
     ],
   };
 });
@@ -1536,6 +1550,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       validateAirApiToken();
       const parsedArgs = CancelTaskByIdArgsSchema.parse(args);
       return await taskTools.cancelTaskById(parsedArgs);
+    } else if (name === 'delete_task_by_id') {
+      validateAirApiToken();
+      const parsedArgs = DeleteTaskByIdArgsSchema.parse(args);
+      return await taskTools.deleteTaskById(parsedArgs);
     } else {
       throw new Error(`Unknown tool: ${name}`);
     }
