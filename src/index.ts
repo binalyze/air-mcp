@@ -29,12 +29,12 @@ import { autoAssetTagTools, CreateAutoAssetTagArgsSchema, UpdateAutoAssetTagArgs
 import { validateAirApiToken } from './utils/validation';
 import { AcquireBaselineArgsSchema, CompareBaselineArgsSchema, GetComparisonReportArgsSchema } from './tools/baseline';
 import { baselineTools } from './tools/baseline';
-import { assignmentTools } from './tools/assignments';
+import { assignmentTools, CancelTaskAssignmentArgsSchema, DeleteTaskAssignmentArgsSchema } from './tools/assignments';
 import { GetTaskAssignmentsByIdArgsSchema } from './tools/assignments';
 
 const server = new Server({
   name: 'air-mcp',
-  version: '5.0.0'
+  version: '5.2.0'
 }, {
   capabilities: {
     tools: {}
@@ -1283,6 +1283,34 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: ['taskId'],
         },
       },
+      {
+        name: 'cancel_task_assignment',
+        description: 'Cancel a task assignment by its ID',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            assignmentId: {
+              type: 'string',
+              description: 'The ID of the task assignment to cancel',
+            },
+          },
+          required: ['assignmentId'],
+        },
+      },
+      {
+        name: 'delete_task_assignment',
+        description: 'Delete a specific task assignment by its ID',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            assignmentId: {
+              type: 'string',
+              description: 'The ID of the task assignment to delete',
+            },
+          },
+          required: ['assignmentId'],
+        },
+      },
     ],
   };
 });
@@ -1464,6 +1492,14 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       validateAirApiToken();
       const parsedArgs = GetTaskAssignmentsByIdArgsSchema.parse(args);
       return await assignmentTools.getTaskAssignmentsById(parsedArgs);
+    } else if (name === 'cancel_task_assignment') {
+      validateAirApiToken();
+      const parsedArgs = CancelTaskAssignmentArgsSchema.parse(args);
+      return await assignmentTools.cancelTaskAssignment(parsedArgs);
+    } else if (name === 'delete_task_assignment') {
+      validateAirApiToken();
+      const parsedArgs = DeleteTaskAssignmentArgsSchema.parse(args);
+      return await assignmentTools.deleteTaskAssignment(parsedArgs);
     } else {
       throw new Error(`Unknown tool: ${name}`);
     }

@@ -58,6 +58,20 @@ export interface TaskAssignmentsResponse {
   errors: string[];
 }
 
+export interface CancelTaskAssignmentResponse {
+  success: boolean;
+  result: null;
+  statusCode: number;
+  errors: string[];
+}
+
+export interface DeleteTaskAssignmentResponse {
+  success: boolean;
+  result: null;
+  statusCode: number;
+  errors: string[];
+}
+
 export const api = {
   async getTaskAssignments(taskId: string): Promise<TaskAssignmentsResponse> {
     try {
@@ -73,6 +87,43 @@ export const api = {
       return response.data;
     } catch (error) {
       console.error('Error fetching task assignments:', error);
+      throw error;
+    }
+  },
+  
+  async cancelTaskAssignment(assignmentId: string): Promise<CancelTaskAssignmentResponse> {
+    try {
+      const response = await axios.post(
+        `${config.airHost}/api/public/tasks/assignments/${assignmentId}/cancel`,
+        {},
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${config.airApiToken}`
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error canceling task assignment:', error);
+      throw error;
+    }
+  },
+  
+  async deleteTaskAssignment(assignmentId: string): Promise<DeleteTaskAssignmentResponse> {
+    try {
+      const response = await axios.delete(
+        `${config.airHost}/api/public/tasks/assignments/${assignmentId}`,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${config.airApiToken}`
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error deleting task assignment:', error);
       throw error;
     }
   },

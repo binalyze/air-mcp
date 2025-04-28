@@ -55,7 +55,7 @@ A Node.js server implementing **Model Context Protocol (MCP)** for Binalyze AIR,
 - **E-Discovery Patterns** - List available e-discovery patterns for detecting different file types.
 - **Policy Management** - List, create, update, and delete policies in your organization.
 - **Policy Match Statistics** - See which policies apply to your assets based on various criteria.
-- **Task Assignments** - View all assignments for a specific task by its ID.
+- **Task Assignment Management** - View and manage task assignments.
 
 ## Overview
 
@@ -202,6 +202,8 @@ In Claude Desktop, or any MCP Client, you can use natural language commands:
 | `Get policy match stats for offline endpoints` | Shows policy matches for offline assets |
 | `Delete policy with ID "abc123"` | Permanently removes a policy from the system |
 | `Get all assignments for task with ID "def456"` | Shows all assignments associated with a specific task |
+| `Cancel task assignment with ID "xyz789"` | Cancels a specific task assignment |
+| `Delete task assignment with ID "xyz789"` | Permanently removes a task assignment |
 
 ### Viewing Acquisition Artifacts
 
