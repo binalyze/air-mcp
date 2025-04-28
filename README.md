@@ -53,7 +53,7 @@ A Node.js server implementing **Model Context Protocol (MCP)** for Binalyze AIR,
 - **Delete Auto Asset Tag** - Delete a specific auto asset tag rule by its ID.
 - **Start Auto Tagging** - Initiate the auto tagging process for assets that match specific filter criteria.
 - **E-Discovery Patterns** - List available e-discovery patterns for detecting different file types.
-- **Policy Management** - Create, view, update, and prioritize policies.
+- **Policy Management** - List, create, update, and delete policies in your organization.
 - **Policy Match Statistics** - See which policies apply to your assets based on various criteria.
 
 
@@ -200,6 +200,7 @@ In Claude Desktop, or any MCP Client, you can use natural language commands:
 | `Show policy match statistics` | Shows how many endpoints match each policy |
 | `Get policy distribution for Windows endpoints` | Shows policy matches filtered by platform |
 | `Get policy match stats for offline endpoints` | Shows policy matches for offline assets |
+| `Delete policy with ID "abc123"` | Permanently removes a policy from the system |
 
 ### Viewing Acquisition Artifacts
 

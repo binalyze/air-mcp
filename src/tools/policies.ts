@@ -165,6 +165,11 @@ export const PolicyMatchStatsArgsSchema = z.object({
   ]).optional().describe('Organization IDs to filter by. Defaults to [0].'),
 });
 
+// Schema for delete policy by ID arguments
+export const DeletePolicyByIdArgsSchema = z.object({
+  id: z.string().describe('The ID of the policy to delete'),
+});
+
 // Format policy for display
 function formatPolicy(policy: Policy): string {
   return `
@@ -582,6 +587,43 @@ export const policyTools = {
           {
             type: 'text',
             text: `Failed to fetch policy match statistics: ${errorMessage}`
+          }
+        ]
+      };
+    }
+  },
+
+  // Delete policy by ID
+  async deletePolicyById(args: z.infer<typeof DeletePolicyByIdArgsSchema>) {
+    try {
+      const response = await api.deletePolicyById(args.id);
+      
+      if (!response.success) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Error deleting policy: ${response.errors.join(', ')}`
+            }
+          ]
+        };
+      }
+      
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Policy with ID ${args.id} deleted successfully.`
+          }
+        ]
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Failed to delete policy: ${errorMessage}`
           }
         ]
       };

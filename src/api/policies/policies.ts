@@ -212,6 +212,13 @@ export interface PolicyMatchStatsResponse {
   errors: string[];
 }
 
+export interface DeletePolicyResponse {
+  success: boolean;
+  result: null;
+  statusCode: number;
+  errors: string[];
+}
+
 export const api = {
   async getPolicies(organizationIds: string | string[] = '0'): Promise<PoliciesResponse> {
     try {
@@ -325,6 +332,24 @@ export const api = {
       return response.data;
     } catch (error) {
       console.error('Error fetching policy match stats:', error);
+      throw error;
+    }
+  },
+  
+  async deletePolicyById(id: string): Promise<DeletePolicyResponse> {
+    try {
+      const response = await axios.delete(
+        `${config.airHost}/api/public/policies/${id}`,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${config.airApiToken}`
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error(`Error deleting policy with ID ${id}:`, error);
       throw error;
     }
   },

@@ -18,7 +18,7 @@ import {
 } from './tools/acquisitions';
 import { organizationTools } from './tools/organizations';
 import { caseTools, ListCasesArgsSchema } from './tools/cases';
-import { policyTools, ListPoliciesArgsSchema, CreatePolicyArgsSchema, UpdatePolicyArgsSchema, GetPolicyByIdArgsSchema, UpdatePolicyPrioritiesArgsSchema, PolicyMatchStatsArgsSchema } from './tools/policies';
+import { policyTools, ListPoliciesArgsSchema, CreatePolicyArgsSchema, UpdatePolicyArgsSchema, GetPolicyByIdArgsSchema, UpdatePolicyPrioritiesArgsSchema, PolicyMatchStatsArgsSchema, DeletePolicyByIdArgsSchema } from './tools/policies';
 import { taskTools, ListTasksArgsSchema } from './tools/tasks';
 import { triageTools, ListTriageRulesArgsSchema } from './tools/triages';
 import { userTools, ListUsersArgsSchema } from './tools/users';
@@ -32,7 +32,7 @@ import { baselineTools } from './tools/baseline';
 
 const server = new Server({
   name: 'air-mcp',
-  version: '4.4.0'
+  version: '4.5.0'
 }, {
   capabilities: {
     tools: {}
@@ -1253,6 +1253,20 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: [],
         },
       },
+      {
+        name: 'delete_policy_by_id',
+        description: 'Delete a specific policy by its ID',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            id: {
+              type: 'string',
+              description: 'The ID of the policy to delete',
+            },
+          },
+          required: ['id'],
+        },
+      },
     ],
   };
 });
@@ -1426,6 +1440,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       validateAirApiToken();
       const parsedArgs = PolicyMatchStatsArgsSchema.parse(args);
       return await policyTools.getPolicyMatchStats(parsedArgs);
+    } else if (name === 'delete_policy_by_id') {
+      validateAirApiToken();
+      const parsedArgs = DeletePolicyByIdArgsSchema.parse(args);
+      return await policyTools.deletePolicyById(parsedArgs);
     } else {
       throw new Error(`Unknown tool: ${name}`);
     }
