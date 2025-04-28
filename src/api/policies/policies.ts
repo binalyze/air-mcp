@@ -8,11 +8,22 @@
  * - Policy interface: Represents a single policy in the system
  * - PoliciesResponse interface: Represents the API response structure
  * - CreatePolicyRequest interface: Represents the request body for creating a policy
+ * - UpdatePolicyRequest interface: Represents the request body for updating a policy
  * - api object: Contains methods to interact with the Policies API endpoints
  */
 
 import axios from 'axios';
 import { config } from '../../config';
+
+export interface FilterCondition {
+  field?: string;
+  operator: string;
+  value?: string;
+  conditions?: Array<FilterCondition>;
+  id?: string;
+  disabled?: boolean;
+  version?: string;
+}
 
 export interface Policy {
   _id: string;
@@ -20,6 +31,10 @@ export interface Policy {
   organizationIds: string[];
   default: boolean;
   order: number;
+  filter?: {
+    operator: string;
+    conditions: Array<FilterCondition>;
+  };
   cpu: {
     limit: number;
   };
@@ -29,12 +44,14 @@ export interface Policy {
       path: string;
       useMostFreeVolume: boolean;
       volume: string;
+      tmp?: string;
     };
     linux: {
       location: string;
       path: string;
       useMostFreeVolume: boolean;
       volume: string;
+      tmp?: string;
     };
     macos: {
       useMostFreeVolume: boolean;
@@ -51,9 +68,11 @@ export interface Policy {
     enabled: boolean;
     encryption: {
       enabled: boolean;
+      password?: string;
     };
   };
   createdBy: string;
+  createdAt?: string;
   updatedAt: string;
 }
 
@@ -118,9 +137,24 @@ export interface CreatePolicyRequest {
   cpu?: {
     limit?: number;
   };
+  filter?: {
+    operator: string;
+    conditions: Array<FilterCondition>;
+  };
+}
+
+export interface UpdatePolicyRequest extends CreatePolicyRequest {
+  // Same structure as CreatePolicyRequest, just a different semantic meaning
 }
 
 export interface CreatePolicyResponse {
+  success: boolean;
+  result: Policy | null;
+  statusCode: number;
+  errors: string[];
+}
+
+export interface UpdatePolicyResponse {
   success: boolean;
   result: Policy | null;
   statusCode: number;
@@ -165,6 +199,25 @@ export const api = {
       return response.data;
     } catch (error) {
       console.error('Error creating policy:', error);
+      throw error;
+    }
+  },
+  
+  async updatePolicy(id: string, policyData: UpdatePolicyRequest): Promise<UpdatePolicyResponse> {
+    try {
+      const response = await axios.put(
+        `${config.airHost}/api/public/policies/${id}`,
+        policyData,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${config.airApiToken}`
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error updating policy:', error);
       throw error;
     }
   },

@@ -53,7 +53,7 @@ A Node.js server implementing **Model Context Protocol (MCP)** for Binalyze AIR,
 - **Delete Auto Asset Tag** - Delete a specific auto asset tag rule by its ID.
 - **Start Auto Tagging** - Initiate the auto tagging process for assets that match specific filter criteria.
 - **E-Discovery Patterns** - List available e-discovery patterns for detecting different file types.
-- **Policy Management** - View and create security and collection policies.
+- **Policy Management** - List, create, and update policies for your organization.
 
 ## Overview
 
@@ -192,6 +192,7 @@ In Claude Desktop, or any MCP Client, you can use natural language commands:
 | `Get comparison report for endpoint "id1" and task "task1"` | Retrieves the comparison result report for a specific endpoint and comparison task. |
 | `List all e-discovery patterns` | Shows all available e-discovery patterns for file type detection |
 | `Create a policy named "Production Policy" with specific storage settings` | Creates a new policy with custom settings |
+| `Update policy with ID "abc123"` | Updates an existing policy with new settings |
 
 ### Viewing Acquisition Artifacts
 
@@ -447,3 +448,16 @@ Get comparison report for endpoint "0ccbb181-685c-4f1e-982a-6f7c7e88eadd" and ta
 Show me the comparison result for endpoint "7a37cfdb-..." and task "comparison-task-id"
 Download the baseline comparison report for endpoint "bc906dea-..." task "task-xyz"
 ```
+
+### Creating Policies
+
+You can create new policies with specific storage, compression, and security settings:
+
+```
+Create a policy named "Dev Policy" with:
+Windows storage at C:\Binalyze\AIR
+Linux storage at /opt/binalyze/air
+macOS storage at /opt/binalyze/air
+Compression enabled
+Encryption enable with password "secure123"
+```  
