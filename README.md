@@ -204,6 +204,7 @@ In Claude Desktop, or any MCP Client, you can use natural language commands:
 | `Get all assignments for task with ID "def456"` | Shows all assignments associated with a specific task |
 | `Cancel task assignment with ID "xyz789"` | Cancels a specific task assignment |
 | `Delete task assignment with ID "xyz789"` | Permanently removes a task assignment |
+| `Get details about task with ID "40a9dc46-d401-4bd1-82d3-ca9cf97c9024"` | Displays detailed information about a specific task including evidence types and configuration |
 
 ### Viewing Acquisition Artifacts
 

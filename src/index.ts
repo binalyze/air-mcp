@@ -19,7 +19,7 @@ import {
 import { organizationTools } from './tools/organizations';
 import { caseTools, ListCasesArgsSchema } from './tools/cases';
 import { policyTools, ListPoliciesArgsSchema, CreatePolicyArgsSchema, UpdatePolicyArgsSchema, GetPolicyByIdArgsSchema, UpdatePolicyPrioritiesArgsSchema, PolicyMatchStatsArgsSchema, DeletePolicyByIdArgsSchema } from './tools/policies';
-import { taskTools, ListTasksArgsSchema } from './tools/tasks';
+import { taskTools, ListTasksArgsSchema, GetTaskByIdArgsSchema } from './tools/tasks';
 import { triageTools, ListTriageRulesArgsSchema } from './tools/triages';
 import { userTools, ListUsersArgsSchema } from './tools/users';
 import { droneAnalyzerTools, acquisitionArtifactTools, eDiscoveryTools } from './tools/params';
@@ -34,7 +34,7 @@ import { GetTaskAssignmentsByIdArgsSchema } from './tools/assignments';
 
 const server = new Server({
   name: 'air-mcp',
-  version: '5.2.0'
+  version: '5.3.0'
 }, {
   capabilities: {
     tools: {}
@@ -1311,6 +1311,20 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: ['assignmentId'],
         },
       },
+      {
+        name: 'get_task_by_id',
+        description: 'Get detailed information about a specific task by its ID',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            id: {
+              type: 'string',
+              description: 'The ID of the task to retrieve',
+            },
+          },
+          required: ['id'],
+        },
+      },
     ],
   };
 });
@@ -1500,6 +1514,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       validateAirApiToken();
       const parsedArgs = DeleteTaskAssignmentArgsSchema.parse(args);
       return await assignmentTools.deleteTaskAssignment(parsedArgs);
+    } else if (name === 'get_task_by_id') {
+      validateAirApiToken();
+      const parsedArgs = GetTaskByIdArgsSchema.parse(args);
+      return await taskTools.getTaskById(parsedArgs);
     } else {
       throw new Error(`Unknown tool: ${name}`);
     }

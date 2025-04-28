@@ -31,6 +31,64 @@ export interface Task {
   recurrence: string | null;
   createdAt: string;
   updatedAt: string;
+  data?: {
+    profileId?: string;
+    profileName?: string;
+    windows?: {
+      evidenceTypes?: string[];
+      custom?: any[];
+      networkCapture?: {
+        enabled: boolean;
+        duration: number;
+        pcap?: {
+          enabled: boolean;
+        };
+        networkFlow?: {
+          enabled: boolean;
+        };
+      };
+    };
+    linux?: {
+      evidenceTypes?: string[];
+      custom?: any[];
+    };
+    config?: {
+      choice?: string;
+      saveTo?: {
+        windows?: {
+          location: string;
+          path: string;
+          useMostFreeVolume: boolean;
+          volume: string;
+          tmp: string;
+        };
+        linux?: {
+          location: string;
+          path: string;
+          useMostFreeVolume: boolean;
+          volume: string;
+          tmp: string;
+        };
+      };
+      cpu?: {
+        limit: number;
+      };
+      compression?: {
+        enabled: boolean;
+        encryption?: {
+          enabled: boolean;
+          password: string;
+        };
+      };
+    };
+    drone?: {
+      minScore: number;
+      autoPilot: boolean;
+      enabled: boolean;
+      analyzers: string[];
+      keywords: string[];
+    };
+  };
 }
 
 export interface TasksResponse {
@@ -55,6 +113,13 @@ export interface TasksResponse {
   errors: string[];
 }
 
+export interface TaskResponse {
+  success: boolean;
+  result: Task;
+  statusCode: number;
+  errors: string[];
+}
+
 export const api = {
   async getTasks(organizationIds: string | string[] = '0'): Promise<TasksResponse> {
     try {
@@ -74,6 +139,24 @@ export const api = {
       return response.data;
     } catch (error) {
       console.error('Error fetching tasks:', error);
+      throw error;
+    }
+  },
+
+  async getTaskById(id: string): Promise<TaskResponse> {
+    try {
+      const response = await axios.get(
+        `${config.airHost}/api/public/tasks/${id}`,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${config.airApiToken}`
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching task with ID ${id}:`, error);
       throw error;
     }
   },
