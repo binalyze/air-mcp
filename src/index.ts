@@ -31,10 +31,12 @@ import { AcquireBaselineArgsSchema, CompareBaselineArgsSchema, GetComparisonRepo
 import { baselineTools } from './tools/baseline';
 import { assignmentTools, CancelTaskAssignmentArgsSchema, DeleteTaskAssignmentArgsSchema } from './tools/assignments';
 import { GetTaskAssignmentsByIdArgsSchema } from './tools/assignments';
+import { triageTagTools } from './tools/triage-tags';
+import { ListTriageTagsArgsSchema } from './tools/triage-tags';
 
 const server = new Server({
   name: 'air-mcp',
-  version: '5.5.0'
+  version: '6.0.0'
 }, {
   capabilities: {
     tools: {}
@@ -1353,6 +1355,24 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: ['id'],
         },
       },
+      {
+        name: 'list_triage_tags',
+        description: 'List all triage rule tags in the system',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            organizationIds: {
+              type: 'string',
+              description: 'Organization IDs to filter triage tags by. Leave empty to use default (0).',
+            },
+            withCount: {
+              type: 'boolean',
+              description: 'Whether to include count of rules for each tag. Defaults to true.',
+            },
+          },
+          required: [],
+        },
+      },
     ],
   };
 });
@@ -1554,6 +1574,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       validateAirApiToken();
       const parsedArgs = DeleteTaskByIdArgsSchema.parse(args);
       return await taskTools.deleteTaskById(parsedArgs);
+    } else if (name === 'list_triage_tags') {
+      validateAirApiToken();
+      const parsedArgs = ListTriageTagsArgsSchema.parse(args);
+      return await triageTagTools.listTriageTags(parsedArgs);
     } else {
       throw new Error(`Unknown tool: ${name}`);
     }

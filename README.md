@@ -56,6 +56,7 @@ A Node.js server implementing **Model Context Protocol (MCP)** for Binalyze AIR,
 - **Policy Management** - List, create, update, and delete policies in your organization.
 - **Policy Match Statistics** - See which policies apply to your assets based on various criteria.
 - **Task Assignment Management** - View and manage task assignments.
+- **Triage Tags** - List available triage tags for threat detection.
 
 ## Overview
 
@@ -207,6 +208,7 @@ In Claude Desktop, or any MCP Client, you can use natural language commands:
 | `Get details about task with ID "40a9dc46-d401-4bd1-82d3-ca9cf97c9024"` | Displays detailed information about a specific task including evidence types and configuration |
 | `Cancel task with ID "abc123"` | Cancels a running task with the specified ID |
 | `Delete task with ID "abc123"` | Permanently deletes a specific task |
+| `List all triage tags` | You can work with triage rules and their associated tags |
 
 ### Viewing Acquisition Artifacts
 
@@ -483,3 +485,10 @@ You can check the status of task assignments:
 ```
 Show me all assignments for task abc-123-456
 ```
+
+### Listing Triage Tags
+
+This allows you to see the categorization used in your triage system and the number of rules associated with each tag.
+
+```
+List all triage tags
