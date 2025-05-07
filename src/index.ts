@@ -31,12 +31,12 @@ import { AcquireBaselineArgsSchema, CompareBaselineArgsSchema, GetComparisonRepo
 import { baselineTools } from './tools/baseline';
 import { assignmentTools, CancelTaskAssignmentArgsSchema, DeleteTaskAssignmentArgsSchema } from './tools/assignments';
 import { GetTaskAssignmentsByIdArgsSchema } from './tools/assignments';
-import { triageTagTools } from './tools/triage-tags';
+import { CreateTriageTagArgsSchema, triageTagTools } from './tools/triage-tags';
 import { ListTriageTagsArgsSchema } from './tools/triage-tags';
 
 const server = new Server({
   name: 'air-mcp',
-  version: '6.0.0'
+  version: '6.1.0'
 }, {
   capabilities: {
     tools: {}
@@ -1373,6 +1373,24 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: [],
         },
       },
+      {
+        name: 'create_triage_tag',
+        description: 'Create a new triage rule tag',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            name: {
+              type: 'string',
+              description: 'Name of the tag to create',
+            },
+            organizationId: {
+              oneOf: [{ type: 'string' }, { type: 'number' }],
+              description: 'Organization ID to associate the tag with. Defaults to 0.',
+            },
+          },
+          required: ['name'],
+        },
+      },
     ],
   };
 });
@@ -1578,6 +1596,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       validateAirApiToken();
       const parsedArgs = ListTriageTagsArgsSchema.parse(args);
       return await triageTagTools.listTriageTags(parsedArgs);
+    } else if (name === 'create_triage_tag') {
+      validateAirApiToken();
+      const parsedArgs = CreateTriageTagArgsSchema.parse(args);
+      return await triageTagTools.createTriageTag(parsedArgs);
     } else {
       throw new Error(`Unknown tool: ${name}`);
     }

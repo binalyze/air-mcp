@@ -25,6 +25,30 @@ export interface TriageTagsResponse {
 }
 
 export const api = {
+  async createTriageTag(
+    name: string,
+    organizationId: string | number = 0
+  ): Promise<boolean> {
+    try {
+      const response = await axios.post(
+        `${config.airHost}/api/public/triages/tags`,
+        {
+          name,
+          organizationId
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${config.airApiToken}`
+          }
+        }
+      );
+      return response.status >= 200 && response.status < 300;
+    } catch (error) {
+      console.error('Error creating triage tag:', error);
+      throw error;
+    }
+  },
   async getTriageTags(
     organizationId: string | string[] = '0', 
     withCount: boolean = true
