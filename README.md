@@ -112,6 +112,7 @@ A Node.js server implementing **Model Context Protocol (MCP)** for Binalyze AIR,
 - **Update Organization Deployment Token** - Update the deployment token for a specific organization.
 - **Delete Organization** - Delete an organization by its ID.
 - **Add Tags to Organization** - Add tags to an organization.
+- **Delete Tags from Organization** - Delete tags from an organization.
 
 ## Overview
 
@@ -322,4 +323,4 @@ In Claude Desktop, or any MCP Client, you can use natural language commands:
 | `Update deployment token for organization with ID 2` | Updates the deployment token for a specific organization |
 | `Delete organization with ID "123"` | Permanently removes an organization from the system |
 | `Add tags to organization with ID "123"` | Adds tags to an organization |
-
+| `Delete tags ["tag1", "tag2" ] from organization with ID "123"` | Removes tags from an organization |

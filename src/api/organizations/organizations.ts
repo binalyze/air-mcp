@@ -249,5 +249,23 @@ export const api = {
       console.error(`Error adding tags to organization with ID ${id}:`, error);
       throw error;
     }
+  },
+  async deleteTagsFromOrganization(id: number, tags: string[]): Promise<{ success: boolean; result: Organization; statusCode: number; errors: string[] }> {
+    try {
+      const response = await axios.delete(
+        `${config.airHost}/api/public/organizations/${id}/tags`,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${config.airApiToken}`
+          },
+          data: { tags }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error(`Error deleting tags from organization with ID ${id}:`, error);
+      throw error;
+    }
   }
 };

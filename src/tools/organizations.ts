@@ -64,6 +64,11 @@ export const AddTagsToOrganizationArgsSchema = z.object({
   tags: z.array(z.string()).describe('Array of tags to add to the organization')
 });
 
+export const DeleteTagsFromOrganizationArgsSchema = z.object({
+  id: z.number().describe('ID of the organization to delete tags from'),
+  tags: z.array(z.string()).describe('Array of tags to delete from the organization')
+});
+
 // Format organization for display
 function formatOrganization(org: Organization): string {
   return `
@@ -469,6 +474,42 @@ export const organizationTools = {
           {
             type: 'text',
             text: `Failed to add tags to organization: ${errorMessage}`
+          }
+        ]
+      };
+    }
+  },
+  async deleteTagsFromOrganization(args: z.infer<typeof DeleteTagsFromOrganizationArgsSchema>) {
+    try {
+      const response = await api.deleteTagsFromOrganization(args.id, args.tags);
+      
+      if (!response.success) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Error deleting tags from organization: ${response.errors.join(', ')}`
+            }
+          ]
+        };
+      }
+      
+      const org = response.result;
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Successfully deleted tags from organization ${org.name} (ID: ${org._id}).\nRemaining tags: ${org.tags?.join(', ') || 'None'}`
+          }
+        ]
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Failed to delete tags from organization: ${errorMessage}`
           }
         ]
       };
