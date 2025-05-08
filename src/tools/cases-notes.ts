@@ -14,6 +14,11 @@ export const UpdateNoteCaseArgsSchema = z.object({
   note: z.string().describe('The new content for the note'),
 });
 
+export const DeleteNoteFromCaseArgsSchema = z.object({
+  caseId: z.string().describe('The ID of the case containing the note (e.g., "C-2022-0002")'),
+  noteId: z.string().describe('The ID of the note to delete (e.g., "8d9baa16-9aa3-4e4f-a08e-a74341ce2f90")'),
+});
+
 export const caseNotesTools = {
   // Add a note to a case
   async addNoteToCase(args: z.infer<typeof AddNoteToCaseArgsSchema>) {
@@ -89,6 +94,41 @@ export const caseNotesTools = {
           {
             type: 'text',
             text: `Failed to update note in case: ${errorMessage}`
+          }
+        ]
+      };
+    }
+  },
+  async deleteNoteFromCase(args: z.infer<typeof DeleteNoteFromCaseArgsSchema>) {
+    try {
+      const response = await notesApi.deleteNote(args.caseId, args.noteId);
+      
+      if (!response.success) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Error deleting note from case: ${response.errors.join(', ')}`
+            }
+          ]
+        };
+      }
+      
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Successfully deleted note with ID ${args.noteId} from case ${args.caseId}`
+          }
+        ]
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Failed to delete note from case: ${errorMessage}`
           }
         ]
       };

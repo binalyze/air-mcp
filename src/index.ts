@@ -33,11 +33,11 @@ import { assignmentTools, CancelTaskAssignmentArgsSchema, DeleteTaskAssignmentAr
 import { GetTaskAssignmentsByIdArgsSchema } from './tools/assignments';
 import { CreateTriageTagArgsSchema, triageTagTools } from './tools/triage-tags';
 import { ListTriageTagsArgsSchema } from './tools/triage-tags';
-import { AddNoteToCaseArgsSchema, caseNotesTools, UpdateNoteCaseArgsSchema } from './tools/cases-notes';
+import { AddNoteToCaseArgsSchema, caseNotesTools, DeleteNoteFromCaseArgsSchema, UpdateNoteCaseArgsSchema } from './tools/cases-notes';
 
 const server = new Server({
   name: 'air-mcp',
-  version: '7.1.0'
+  version: '7.2.0'
 }, {
   capabilities: {
     tools: {}
@@ -1573,6 +1573,24 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: ['caseId', 'noteId', 'note'],
         },
       },
+      {
+        name: 'delete_note_from_case',
+        description: 'Delete a note from a case by its ID',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            caseId: {
+              type: 'string',
+              description: 'The ID of the case containing the note (e.g., "C-2022-0002")',
+            },
+            noteId: {
+              type: 'string',
+              description: 'The ID of the note to delete (e.g., "8d9baa16-9aa3-4e4f-a08e-a74341ce2f90")',
+            },
+          },
+          required: ['caseId', 'noteId'],
+        },
+      },
     ],
   };
 });
@@ -1814,6 +1832,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       validateAirApiToken();
       const parsedArgs = UpdateNoteCaseArgsSchema.parse(args);
       return await caseNotesTools.updateNoteInCase(parsedArgs);
+    } else if (name === 'delete_note_from_case') {
+      validateAirApiToken();
+      const parsedArgs = DeleteNoteFromCaseArgsSchema.parse(args);
+      return await caseNotesTools.deleteNoteFromCase(parsedArgs);
     } else {
       throw new Error(`Unknown tool: ${name}`);
     }

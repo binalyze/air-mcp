@@ -23,6 +23,13 @@ export interface UpdateNoteResponse {
   errors: string[];
 }
 
+export interface DeleteNoteResponse {
+  success: boolean;
+  result: null;
+  statusCode: number;
+  errors: string[];
+}
+
 export const notesApi = {
   async addNote(caseId: string, noteValue: string): Promise<AddNoteResponse> {
     try {
@@ -57,6 +64,23 @@ export const notesApi = {
       return response.data;
     } catch (error) {
       console.error('Error updating note in case:', error);
+      throw error;
+    }
+  },
+  async deleteNote(caseId: string, noteId: string): Promise<DeleteNoteResponse> {
+    try {
+      const response = await axios.delete(
+        `${config.airHost}/api/public/cases/${caseId}/notes/${noteId}`,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${config.airApiToken}`
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error deleting note from case:', error);
       throw error;
     }
   }
