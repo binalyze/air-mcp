@@ -37,7 +37,7 @@ import { AddNoteToCaseArgsSchema, caseNotesTools, DeleteNoteFromCaseArgsSchema, 
 import { casesExportTools, ExportCaseActivitiesArgsSchema, ExportCaseEndpointsArgsSchema, ExportCaseNotesArgsSchema, ExportCasesArgsSchema } from './tools/cases-export';
 import { CreateAmazonS3RepositoryArgsSchema, CreateAzureStorageRepositoryArgsSchema, CreateFtpsRepositoryArgsSchema, CreateSftpRepositoryArgsSchema, CreateSmbRepositoryArgsSchema, DeleteRepositoryArgsSchema, GetRepositoryByIdArgsSchema, ListRepositoriesArgsSchema, repositoryTools, UpdateAmazonS3RepositoryArgsSchema, UpdateAzureStorageRepositoryArgsSchema, UpdateFtpsRepositoryArgsSchema, UpdateSftpRepositoryArgsSchema, UpdateSmbRepositoryArgsSchema, ValidateAmazonS3RepositoryArgsSchema, ValidateAzureStorageRepositoryArgsSchema, ValidateFtpsRepositoryArgsSchema } from './tools/evidence-repositories';
 import { DownloadCasePpcArgsSchema, DownloadTaskReportArgsSchema, evidenceTools, GetReportFileInfoArgsSchema } from './tools/evidence';
-import { GetOrganizationUsersArgsSchema, organizationUsersTools } from './tools/organizations-users';
+import { AssignUsersToOrganizationArgsSchema, GetOrganizationUsersArgsSchema, organizationUsersTools } from './tools/organizations-users';
 
 const server = new Server({
   name: 'air-mcp',
@@ -2286,6 +2286,25 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: ['id'],
         },
       },
+      {
+        name: 'assign_users_to_organization',
+        description: 'Assign users to a specific organization',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            id: {
+              type: 'string',
+              description: 'The ID of the organization to assign users to',
+            },
+            userIds: {
+              type: 'array',
+              items: { type: 'string' },
+              description: 'Array of user IDs to assign to the organization',
+            },
+          },
+          required: ['id', 'userIds'],
+        },
+      },
     ],
   };
 });
@@ -2687,6 +2706,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       validateAirApiToken();
       const parsedArgs = GetOrganizationUsersArgsSchema.parse(args);
       return await organizationUsersTools.getOrganizationUsers(parsedArgs);
+    } else if (name === 'assign_users_to_organization') {
+      validateAirApiToken();
+      const parsedArgs = AssignUsersToOrganizationArgsSchema.parse(args);
+      return await organizationUsersTools.assignUsersToOrganization(parsedArgs);
     } else {
       throw new Error(`Unknown tool: ${name}`);
     }

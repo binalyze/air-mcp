@@ -70,4 +70,27 @@ export const api = {
       throw error;
     }
   },
+  async assignUsersToOrganization(organizationId: number | string, userIds: string[]): Promise<{
+    success: boolean;
+    result: null;
+    statusCode: number;
+    errors: string[];
+  }> {
+    try {
+      const response = await axios.post(
+        `${config.airHost}/api/public/organizations/${organizationId}/assign-users`,
+        { userIds },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${config.airApiToken}`
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error(`Error assigning users to organization ${organizationId}:`, error);
+      throw error;
+    }
+  }
 };

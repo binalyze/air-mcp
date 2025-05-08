@@ -6,6 +6,12 @@ export const GetOrganizationUsersArgsSchema = z.object({
   id: z.union([z.string(), z.number()]).describe('The ID of the organization to retrieve users for'),
 });
 
+// Schema for assign users to organization arguments
+export const AssignUsersToOrganizationArgsSchema = z.object({
+  id: z.union([z.string(), z.number()]).describe('The ID of the organization to assign users to'),
+  userIds: z.array(z.string()).describe('Array of user IDs to assign to the organization'),
+});
+
 // Format user for display
 function formatUser(user: User): string {
   return `
@@ -61,4 +67,39 @@ export const organizationUsersTools = {
       };
     }
   },
+  async assignUsersToOrganization(args: z.infer<typeof AssignUsersToOrganizationArgsSchema>) {
+    try {
+      const response = await api.assignUsersToOrganization(args.id, args.userIds);
+      
+      if (!response.success) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Error assigning users to organization: ${response.errors.join(', ')}`
+            }
+          ]
+        };
+      }
+      
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Successfully assigned ${args.userIds.length} user(s) to organization ${args.id}`
+          }
+        ]
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Failed to assign users to organization: ${errorMessage}`
+          }
+        ]
+      };
+    }
+  }
 };
