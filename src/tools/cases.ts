@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { api, Case, CaseEndpoint, CaseTask } from '../api/cases/cases';
+import { api, Case, CaseEndpoint, CaseTask, User } from '../api/cases/cases';
 
 // Schema for list cases arguments
 export const ListCasesArgsSchema = z.object({
@@ -63,6 +63,30 @@ export const GetCaseEndpointsArgsSchema = z.object({
     z.number()
   ]).default(0).describe('Organization IDs to filter endpoints by. Defaults to 0.')
 });
+
+// Schema for get case users arguments
+export const GetCaseUsersArgsSchema = z.object({
+  id: z.string().describe('The ID of the case to retrieve users for'),
+  organizationIds: z.string().optional().describe('Organization IDs to filter users by. Defaults to "0".')
+});
+
+// Format user for display
+function formatUser(user: User): string {
+  const organizationIds = Array.isArray(user.organizationIds) 
+    ? user.organizationIds.join(', ') 
+    : user.organizationIds;
+  
+  return `
+User: ${user.username} (ID: ${user._id})
+Email: ${user.email}
+Organizations: ${organizationIds}
+Roles: ${user.roles.map(role => role.name).join(', ')}
+Profile: ${user.profile.name} ${user.profile.surname} ${user.profile.department ? `(${user.profile.department})` : ''}
+TFA Enabled: ${user.tfaEnabled ? 'Yes' : 'No'}
+Created: ${new Date(user.createdAt).toLocaleString()}
+Last Updated: ${new Date(user.updatedAt).toLocaleString()}
+`;
+}
 
 export const GetCaseTasksByIdArgsSchema = z.object({
   id: z.string().describe('ID of the case to retrieve tasks for'),
@@ -651,6 +675,62 @@ export const caseTools = {
           {
             type: 'text',
             text: `Failed to fetch case tasks: ${errorMessage}`
+          }
+        ]
+      };
+    }
+  },
+  // Get users for a specific case
+  async getCaseUsers(args: z.infer<typeof GetCaseUsersArgsSchema>) {
+    try {
+      const { id, organizationIds = '0' } = args;
+      const response = await api.getCaseUsers(id, organizationIds);
+      
+      if (!response.success) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Error fetching case users: ${response.errors.join(', ')}`
+            }
+          ]
+        };
+      }
+      
+      if (response.result.entities.length === 0) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `No users found for case ${id}.`
+            }
+          ]
+        };
+      }
+      
+      // For a brief overview
+      const userList = response.result.entities.map(user => 
+        `${user._id}: ${user.username} (Email: ${user.email}, Roles: ${user.roles.map(r => r.name).join(', ')})`
+      ).join('\n');
+      
+      // For detailed information
+      const detailedUsers = response.result.entities.map(formatUser).join('\n---\n');
+      
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Found ${response.result.totalEntityCount} users for case ${id}:\n\n${userList}\n\nDetailed Information:\n${detailedUsers}`
+          }
+        ]
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Failed to fetch case users: ${errorMessage}`
           }
         ]
       };

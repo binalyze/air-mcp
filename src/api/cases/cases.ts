@@ -175,6 +175,57 @@ export interface CaseTasksResponse {
   errors: string[];
 }
 
+export interface UserProfile {
+  name: string;
+  surname: string;
+  department: string;
+}
+
+export interface Role {
+  _id: string;
+  name: string;
+  createdBy: string;
+  tag: string;
+  privilegeTypes: string[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface User {
+  _id: string;
+  email: string;
+  username: string;
+  organizationIds: number[] | string;
+  strategy: string;
+  profile: UserProfile;
+  tfaEnabled: boolean;
+  createdAt: string;
+  updatedAt: string;
+  roles: Role[];
+}
+
+export interface CaseUsersResponse {
+  success: boolean;
+  result: {
+    entities: User[];
+    filters: Array<{
+      name: string;
+      type: string;
+      options: string[];
+      filterUrl: string | null;
+    }>;
+    sortables: string[];
+    totalEntityCount: number;
+    currentPage: number;
+    pageSize: number;
+    previousPage: number;
+    totalPageCount: number;
+    nextPage: number;
+  };
+  statusCode: number;
+  errors: string[];
+}
+
 export const api = {
   async getCases(organizationIds: string | string[] = '0'): Promise<CasesResponse> {
     try {
@@ -375,10 +426,7 @@ export const api = {
       throw error;
     }
   },
-  async getCaseEndpoints(
-    id: string, 
-    organizationIds: string | number = 0
-  ): Promise<CaseEndpointsResponse> {
+  async getCaseEndpoints( id: string, organizationIds: string | number = 0): Promise<CaseEndpointsResponse> {
     try {
       const response = await axios.get(
         `${config.airHost}/api/public/cases/${id}/endpoints`,
@@ -399,10 +447,7 @@ export const api = {
     }
   },
 
-  async getCaseTasksById(
-    id: string,
-    organizationIds: string | number = 0
-  ): Promise<CaseTasksResponse> {
+  async getCaseTasksById( id: string,organizationIds: string | number = 0): Promise<CaseTasksResponse> {
     try {
       const response = await axios.get(
         `${config.airHost}/api/public/cases/${id}/tasks`,
@@ -421,5 +466,22 @@ export const api = {
       console.error(`Error fetching tasks for case with ID ${id}:`, error);
       throw error;
     }
-  }
+  },
+  async getCaseUsers(caseId: string, organizationIds: string = '0'): Promise<CaseUsersResponse> {
+    try {
+      const response = await axios.get(
+        `${config.airHost}/api/public/cases/${caseId}/users?filter[organizationIds]=${organizationIds}`,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${config.airApiToken}`
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching users for case ${caseId}:`, error);
+      throw error;
+    }
+  },
 };
