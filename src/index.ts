@@ -35,10 +35,11 @@ import { CreateTriageTagArgsSchema, triageTagTools } from './tools/triage-tags';
 import { ListTriageTagsArgsSchema } from './tools/triage-tags';
 import { AddNoteToCaseArgsSchema, caseNotesTools, DeleteNoteFromCaseArgsSchema, UpdateNoteCaseArgsSchema } from './tools/cases-notes';
 import { casesExportTools, ExportCaseActivitiesArgsSchema, ExportCaseEndpointsArgsSchema, ExportCaseNotesArgsSchema, ExportCasesArgsSchema } from './tools/cases-export';
+import { ListRepositoriesArgsSchema, repositoryTools } from './tools/evidence-repositories';
 
 const server = new Server({
   name: 'air-mcp',
-  version: '7.21.0'
+  version: '8.0.0'
 }, {
   capabilities: {
     tools: {}
@@ -1930,6 +1931,34 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: ['caseId', 'taskAssignmentIds'],
         },
       },
+      {
+        name: 'list_repositories',
+        description: 'List all evidence repositories in the system',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            organizationIds: {
+              type: 'string',
+              description: 'Organization IDs to filter repositories by. Leave empty to use default (0).',
+            },
+          },
+          required: [],
+        },
+      },
+      {
+        name: 'get_repository_by_id',
+        description: 'Get detailed information about a specific evidence repository by its ID',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            id: {
+              type: 'string',
+              description: 'The ID of the repository to retrieve',
+            },
+          },
+          required: ['id'],
+        },
+      },
     ],
   };
 });
@@ -2251,6 +2280,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       validateAirApiToken();
       const parsedArgs = ImportTaskAssignmentsToCaseArgsSchema.parse(args);
       return await caseTools.importTaskAssignmentsToCase(parsedArgs);
+    } else if (name === 'list_repositories') {
+      validateAirApiToken();
+      const parsedArgs = ListRepositoriesArgsSchema.parse(args);
+      return await repositoryTools.listRepositories(parsedArgs);
     } else {
       throw new Error(`Unknown tool: ${name}`);
     }
