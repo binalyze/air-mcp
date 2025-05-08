@@ -20,7 +20,7 @@ import { organizationTools } from './tools/organizations';
 import { caseTools, ListCasesArgsSchema } from './tools/cases';
 import { policyTools, ListPoliciesArgsSchema, CreatePolicyArgsSchema, UpdatePolicyArgsSchema, GetPolicyByIdArgsSchema, UpdatePolicyPrioritiesArgsSchema, PolicyMatchStatsArgsSchema, DeletePolicyByIdArgsSchema } from './tools/policies';
 import { taskTools, ListTasksArgsSchema, GetTaskByIdArgsSchema, CancelTaskByIdArgsSchema, DeleteTaskByIdArgsSchema } from './tools/tasks';
-import { triageTools, ListTriageRulesArgsSchema } from './tools/triages';
+import { triageTools, ListTriageRulesArgsSchema, CreateTriageRuleArgsSchema } from './tools/triages';
 import { userTools, ListUsersArgsSchema } from './tools/users';
 import { droneAnalyzerTools, acquisitionArtifactTools, eDiscoveryTools } from './tools/params';
 import { auditTools, ExportAuditLogsArgsSchema, ListAuditLogsArgsSchema } from './tools/audit';
@@ -36,7 +36,7 @@ import { ListTriageTagsArgsSchema } from './tools/triage-tags';
 
 const server = new Server({
   name: 'air-mcp',
-  version: '6.1.0'
+  version: '6.2.0'
 }, {
   capabilities: {
     tools: {}
@@ -1391,6 +1391,42 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: ['name'],
         },
       },
+      {
+        name: 'create_triage_rule',
+        description: 'Create a new triage rule',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            description: {
+              type: 'string',
+              description: 'A descriptive name for the triage rule',
+            },
+            rule: {
+              type: 'string',
+              description: 'The YARA rule content',
+            },
+            searchIn: {
+              type: 'string',
+              description: 'Where to search, e.g., "filesystem"',
+            },
+            engine: {
+              type: 'string',
+              description: 'Rule engine to use, e.g., "yara"',
+            },
+            organizationIds: {
+              type: 'array',
+              items: { 
+                oneOf: [
+                  { type: 'string' },
+                  { type: 'number' }
+                ]
+              },
+              description: 'Organization IDs to associate with this rule. Defaults to [0]',
+            },
+          },
+          required: ['description', 'rule', 'searchIn', 'engine'],
+        },
+      },      
     ],
   };
 });
@@ -1600,6 +1636,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       validateAirApiToken();
       const parsedArgs = CreateTriageTagArgsSchema.parse(args);
       return await triageTagTools.createTriageTag(parsedArgs);
+    } else if (name === 'create_triage_rule') {
+      validateAirApiToken();
+      const parsedArgs = CreateTriageRuleArgsSchema.parse(args);
+      return await triageTools.createTriageRule(parsedArgs);
     } else {
       throw new Error(`Unknown tool: ${name}`);
     }

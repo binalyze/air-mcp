@@ -9,6 +9,16 @@ export const ListTriageRulesArgsSchema = z.object({
   ]).optional().describe('Organization IDs to filter triage rules by. Defaults to "0" or specific IDs like "123" or ["123", "456"]'),
 });
 
+// Schema for create triage rule arguments
+export const CreateTriageRuleArgsSchema = z.object({
+  description: z.string().describe('A descriptive name for the triage rule'),
+  rule: z.string().describe('The YARA rule content'),
+  searchIn: z.string().describe('Where to search, e.g., "filesystem"'),
+  engine: z.string().describe('Rule engine to use, e.g., "yara"'),
+  organizationIds: z.array(z.union([z.string(), z.number()])).default([0])
+    .describe('Organization IDs to associate with this rule. Defaults to [0]'),
+});
+
 // Format triage rule for display
 function formatTriageRule(rule: TriageRule): string {
   return `
@@ -61,6 +71,47 @@ export const triageTools = {
           {
             type: 'text',
             text: `Failed to fetch triage rules: ${errorMessage}`
+          }
+        ]
+      };
+    }
+  },
+  async createTriageRule(args: z.infer<typeof CreateTriageRuleArgsSchema>) {
+    try {
+      const response = await api.createTriageRule({
+        description: args.description,
+        rule: args.rule,
+        searchIn: args.searchIn,
+        engine: args.engine,
+        organizationIds: args.organizationIds
+      });
+      
+      if (!response.success) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Error creating triage rule: ${response.errors.join(', ')}`
+            }
+          ]
+        };
+      }
+      
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Triage rule created successfully!\n${formatTriageRule(response.result)}\n\nRule ID: ${response.result._id}`
+          }
+        ]
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Failed to create triage rule: ${errorMessage}`
           }
         ]
       };
