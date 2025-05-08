@@ -17,7 +17,7 @@ import {
   CreateAcquisitionProfileArgsSchema
 } from './tools/acquisitions';
 import { organizationTools } from './tools/organizations';
-import { ArchiveCaseArgsSchema, caseTools, CloseCaseArgsSchema, CreateCaseArgsSchema, GetCaseByIdArgsSchema, ListCasesArgsSchema, OpenCaseArgsSchema, UpdateCaseArgsSchema } from './tools/cases';
+import { ArchiveCaseArgsSchema, caseTools, ChangeCaseOwnerArgsSchema, CloseCaseArgsSchema, CreateCaseArgsSchema, GetCaseByIdArgsSchema, ListCasesArgsSchema, OpenCaseArgsSchema, UpdateCaseArgsSchema } from './tools/cases';
 import { policyTools, ListPoliciesArgsSchema, CreatePolicyArgsSchema, UpdatePolicyArgsSchema, GetPolicyByIdArgsSchema, UpdatePolicyPrioritiesArgsSchema, PolicyMatchStatsArgsSchema, DeletePolicyByIdArgsSchema } from './tools/policies';
 import { taskTools, ListTasksArgsSchema, GetTaskByIdArgsSchema, CancelTaskByIdArgsSchema, DeleteTaskByIdArgsSchema } from './tools/tasks';
 import { triageTools, ListTriageRulesArgsSchema, CreateTriageRuleArgsSchema, UpdateTriageRuleArgsSchema, DeleteTriageRuleArgsSchema, GetTriageRuleByIdArgsSchema, ValidateTriageRuleArgsSchema, AssignTriageTaskArgsSchema } from './tools/triages';
@@ -38,7 +38,7 @@ import { casesExportTools, ExportCaseActivitiesArgsSchema, ExportCaseEndpointsAr
 
 const server = new Server({
   name: 'air-mcp',
-  version: '7.12.0'
+  version: '7.13.0'
 }, {
   capabilities: {
     tools: {}
@@ -1756,6 +1756,24 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: ['id'],
         },
       },
+      {
+        name: 'change_case_owner',
+        description: 'Change the owner of a case',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            id: {
+              type: 'string',
+              description: 'ID of the case to change owner for',
+            },
+            newOwnerId: {
+              type: 'string',
+              description: 'User ID of the new owner',
+            },
+          },
+          required: ['id', 'newOwnerId'],
+        },
+      },
     ],
   };
 });
@@ -2041,6 +2059,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       validateAirApiToken();
       const parsedArgs = ArchiveCaseArgsSchema.parse(args);
       return await caseTools.archiveCase(parsedArgs);
+    } else if (name === 'change_case_owner') {
+      validateAirApiToken();
+      const parsedArgs = ChangeCaseOwnerArgsSchema.parse(args);
+      return await caseTools.changeCaseOwner(parsedArgs);
     } else {
       throw new Error(`Unknown tool: ${name}`);
     }

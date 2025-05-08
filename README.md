@@ -245,4 +245,4 @@ In Claude Desktop, or any MCP Client, you can use natural language commands:
 | `Close case with ID "C-2022-0003"` | Closes a specific case by its ID |
 | `Open case with ID "C-2022-0003"` | Opens a specific case by its ID |
 | `Archive case with ID "C-2022-0003"` | Archives a specific case by its ID |
-
+| `Change case owner with ID "C-2022-0003" to user with ID "user123"` | Changes the owner of a specific case by its ID |

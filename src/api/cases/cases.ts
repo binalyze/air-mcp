@@ -197,5 +197,23 @@ export const api = {
       console.error(`Error archiving case with ID ${id}:`, error);
       throw error;
     }
+  },
+  async changeOwner(id: string, newOwnerId: string): Promise<{ success: boolean; result: Case; statusCode: number; errors: string[] }> {
+    try {
+      const response = await axios.post(
+        `${config.airHost}/api/public/cases/${id}/change-owner`,
+        { newOwnerId },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${config.airApiToken}`
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error(`Error changing owner for case with ID ${id}:`, error);
+      throw error;
+    }
   }
 };

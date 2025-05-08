@@ -43,6 +43,12 @@ export const ArchiveCaseArgsSchema = z.object({
   id: z.string().describe('ID of the case to archive'),
 });
 
+export const ChangeCaseOwnerArgsSchema = z.object({
+  id: z.string().describe('ID of the case to change owner for'),
+  newOwnerId: z.string().describe('User ID of the new owner')
+});
+
+
 // Format case for display
 function formatCase(caseItem: Case): string {
   return `
@@ -339,6 +345,40 @@ export const caseTools = {
         ]
       };
     }
+  },
+  async changeCaseOwner(args: z.infer<typeof ChangeCaseOwnerArgsSchema>) {
+    try {
+      const response = await api.changeOwner(args.id, args.newOwnerId);
+      
+      if (!response.success) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Error changing case owner: ${response.errors.join(', ')}`
+            }
+          ]
+        };
+      }
+      
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Case owner changed successfully:\n${formatCase(response.result)}`
+          }
+        ]
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Failed to change case owner: ${errorMessage}`
+          }
+        ]
+      };
+    }
   }
-  
 };
