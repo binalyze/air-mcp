@@ -39,11 +39,11 @@ import { CreateAmazonS3RepositoryArgsSchema, CreateAzureStorageRepositoryArgsSch
 import { DownloadCasePpcArgsSchema, DownloadTaskReportArgsSchema, evidenceTools, GetReportFileInfoArgsSchema } from './tools/evidence';
 import { AssignUsersToOrganizationArgsSchema, GetOrganizationUsersArgsSchema, organizationUsersTools, RemoveUserFromOrganizationArgsSchema } from './tools/organizations-users';
 import { UpdateOrganizationArgsSchema } from './tools/organizations';
-import { CallWebhookArgsSchema, webhookTools } from './tools/webhooks';
+import { CallWebhookArgsSchema, PostWebhookArgsSchema, webhookTools } from './tools/webhooks';
 
 const server = new Server({
   name: 'air-mcp',
-  version: '11.0.0'
+  version: '11.1.0'
 }, {
   capabilities: {
     tools: {}
@@ -2553,6 +2553,28 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: ['slug', 'data', 'token'],
         },
       },
+      {
+        name: 'post_webhook',
+        description: 'Post data to a webhook',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            slug: {
+              type: 'string',
+              description: 'The webhook slug (e.g., "air-generic-url-webhook")',
+            },
+            data: {
+              type: 'object',
+              description: 'The data to be sent in the request body',
+            },
+            token: {
+              type: 'string',
+              description: 'The webhook token for authentication',
+            },
+          },
+          required: ['slug', 'data', 'token'],
+        },
+      },
     ],
   };
 });
@@ -3010,6 +3032,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       validateAirApiToken();
       const parsedArgs = CallWebhookArgsSchema.parse(args);
       return await webhookTools.callWebhook(parsedArgs);
+    } else if (name === 'post_webhook') {
+      validateAirApiToken();
+      const parsedArgs = PostWebhookArgsSchema.parse(args);
+      return await webhookTools.postWebhook(parsedArgs);
     } else {
       throw new Error(`Unknown tool: ${name}`);
     }

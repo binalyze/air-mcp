@@ -8,6 +8,12 @@ export const CallWebhookArgsSchema = z.object({
   token: z.string().describe('The webhook token for authentication'),
 });
 
+export const PostWebhookArgsSchema = z.object({
+  slug: z.string().describe('The webhook slug (e.g., "air-generic-url-webhook")'),
+  data: z.any().describe('The data to be sent in the request body'),
+  token: z.string().describe('The webhook token for authentication'),
+});
+
 // Format webhook response for display
 function formatWebhookResponse(response: WebhookResponse): string {
   return `
@@ -39,6 +45,30 @@ export const webhookTools = {
           {
             type: 'text',
             text: `Failed to call webhook: ${errorMessage}`
+          }
+        ]
+      };
+    }
+  },
+  async postWebhook(args: z.infer<typeof PostWebhookArgsSchema>) {
+    try {
+      const statusCode = await api.postWebhook(args.slug, args.data, args.token);
+      
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Webhook POST request completed with status code: ${statusCode}`
+          }
+        ]
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Failed to post to webhook: ${errorMessage}`
           }
         ]
       };

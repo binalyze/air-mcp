@@ -38,5 +38,25 @@ export const api = {
       console.error(`Error calling webhook ${slug}:`, error);
       throw error;
     }
+  },
+  async postWebhook(slug: string, data: any, token: string): Promise<number> {
+    try {
+      const response = await axios.post(
+        `${config.airHost}/api/webhook/${slug}`,
+        data,
+        {
+          params: {
+            token
+          },
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      return response.status;
+    } catch (error) {
+      console.error(`Error posting to webhook ${slug}:`, error);
+      throw error;
+    }
   }
 };
