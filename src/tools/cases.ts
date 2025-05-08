@@ -48,6 +48,9 @@ export const ChangeCaseOwnerArgsSchema = z.object({
   newOwnerId: z.string().describe('User ID of the new owner')
 });
 
+export const CheckCaseNameArgsSchema = z.object({
+  name: z.string().describe('Name to check for availability'),
+});
 
 // Format case for display
 function formatCase(caseItem: Case): string {
@@ -376,6 +379,44 @@ export const caseTools = {
           {
             type: 'text',
             text: `Failed to change case owner: ${errorMessage}`
+          }
+        ]
+      };
+    }
+  },
+  async checkCaseName(args: z.infer<typeof CheckCaseNameArgsSchema>) {
+    try {
+      const response = await api.checkCaseName(args.name);
+      
+      if (!response.success) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Error checking case name: ${response.errors.join(', ')}`
+            }
+          ]
+        };
+      }
+      
+      const isAvailable = !response.result;
+      return {
+        content: [
+          {
+            type: 'text',
+            text: isAvailable 
+              ? `The case name "${args.name}" is available for use.` 
+              : `The case name "${args.name}" is already in use and not available.`
+          }
+        ]
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Failed to check case name: ${errorMessage}`
           }
         ]
       };

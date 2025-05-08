@@ -215,5 +215,25 @@ export const api = {
       console.error(`Error changing owner for case with ID ${id}:`, error);
       throw error;
     }
+  },
+  async checkCaseName(name: string): Promise<{ success: boolean; result: boolean; statusCode: number; errors: string[] }> {
+    try {
+      const response = await axios.get(
+        `${config.airHost}/api/public/cases/check`,
+        {
+          params: {
+            name: name
+          },
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${config.airApiToken}`
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error checking case name:', error);
+      throw error;
+    }
   }
 };
