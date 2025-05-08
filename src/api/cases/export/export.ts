@@ -14,6 +14,12 @@ export interface ExportCasesResponse {
   errors: string[];
 }
 
+export interface ExportCaseNotesResponse {
+    success: boolean;
+    statusCode: number;
+    errors: string[];
+}
+
 export const exportApi = {
   async exportCases(organizationIds: string | string[] = '0'): Promise<ExportCasesResponse> {
     try {
@@ -50,4 +56,35 @@ export const exportApi = {
       throw error;
     }
   },
+  async exportCaseNotes(caseId: string): Promise<ExportCaseNotesResponse> {
+    try {
+      const response = await axios.get(
+        `${config.airHost}/api/public/cases/${caseId}/notes/export`,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${config.airApiToken}`
+          }
+        }
+      );
+      
+      return {
+        success: response.status === 200,
+        statusCode: response.status,
+        errors: []
+      };
+    } catch (error) {
+      console.error('Error exporting case notes:', error);
+      
+      if (axios.isAxiosError(error) && error.response) {
+        return {
+          success: false,
+          statusCode: error.response.status,
+          errors: [error.message]
+        };
+      }
+      
+      throw error;
+    }
+  }
 };

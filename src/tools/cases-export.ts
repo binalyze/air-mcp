@@ -9,6 +9,10 @@ export const ExportCasesArgsSchema = z.object({
   ]).optional().describe('Organization IDs to filter cases by. Defaults to "0" or specific IDs like "123" or ["123", "456"]'),
 });
 
+export const ExportCaseNotesArgsSchema = z.object({
+  caseId: z.string().describe('ID of the case to export notes for'),
+});
+
 export const casesExportTools = {
   // Export cases
   async exportCases(args: z.infer<typeof ExportCasesArgsSchema>) {
@@ -50,4 +54,39 @@ export const casesExportTools = {
       };
     }
   },
+  async exportCaseNotes(args: z.infer<typeof ExportCaseNotesArgsSchema>) {
+    try {
+      const response = await exportApi.exportCaseNotes(args.caseId);
+      
+      if (!response.success) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Error exporting case notes: ${response.errors.join(', ')}`
+            }
+          ]
+        };
+      }
+      
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Case notes export initiated successfully. Status code: ${response.statusCode}`
+          }
+        ]
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Failed to export case notes: ${errorMessage}`
+          }
+        ]
+      };
+    }
+  }
 };

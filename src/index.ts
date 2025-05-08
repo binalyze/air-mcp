@@ -34,11 +34,11 @@ import { GetTaskAssignmentsByIdArgsSchema } from './tools/assignments';
 import { CreateTriageTagArgsSchema, triageTagTools } from './tools/triage-tags';
 import { ListTriageTagsArgsSchema } from './tools/triage-tags';
 import { AddNoteToCaseArgsSchema, caseNotesTools, DeleteNoteFromCaseArgsSchema, UpdateNoteCaseArgsSchema } from './tools/cases-notes';
-import { casesExportTools, ExportCasesArgsSchema } from './tools/cases-export';
+import { casesExportTools, ExportCaseNotesArgsSchema, ExportCasesArgsSchema } from './tools/cases-export';
 
 const server = new Server({
   name: 'air-mcp',
-  version: '7.3.0'
+  version: '7.4.0'
 }, {
   capabilities: {
     tools: {}
@@ -1606,6 +1606,20 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: [],
         },
       },
+      {
+        name: 'export_case_notes',
+        description: 'Export notes for a specific case by its ID',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            caseId: {
+              type: 'string',
+              description: 'The ID of the case to export notes for',
+            },
+          },
+          required: ['caseId'],
+        },
+      },
     ],
   };
 });
@@ -1855,6 +1869,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       validateAirApiToken();
       const parsedArgs = ExportCasesArgsSchema.parse(args);
       return await casesExportTools.exportCases(parsedArgs);
+    } else if (name === 'export_case_notes') {
+      validateAirApiToken();
+      const parsedArgs = ExportCaseNotesArgsSchema.parse(args);
+      return await casesExportTools.exportCaseNotes(parsedArgs);
     } else {
       throw new Error(`Unknown tool: ${name}`);
     }
