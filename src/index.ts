@@ -17,7 +17,7 @@ import {
   CreateAcquisitionProfileArgsSchema
 } from './tools/acquisitions';
 import { organizationTools } from './tools/organizations';
-import { ArchiveCaseArgsSchema, caseTools, ChangeCaseOwnerArgsSchema, CheckCaseNameArgsSchema, CloseCaseArgsSchema, CreateCaseArgsSchema, GetCaseActivitiesArgsSchema, GetCaseByIdArgsSchema, GetCaseEndpointsArgsSchema, GetCaseTasksByIdArgsSchema, GetCaseUsersArgsSchema, ListCasesArgsSchema, OpenCaseArgsSchema, RemoveEndpointsFromCaseArgsSchema, RemoveTaskAssignmentFromCaseArgsSchema, UpdateCaseArgsSchema } from './tools/cases';
+import { ArchiveCaseArgsSchema, caseTools, ChangeCaseOwnerArgsSchema, CheckCaseNameArgsSchema, CloseCaseArgsSchema, CreateCaseArgsSchema, GetCaseActivitiesArgsSchema, GetCaseByIdArgsSchema, GetCaseEndpointsArgsSchema, GetCaseTasksByIdArgsSchema, GetCaseUsersArgsSchema, ImportTaskAssignmentsToCaseArgsSchema, ListCasesArgsSchema, OpenCaseArgsSchema, RemoveEndpointsFromCaseArgsSchema, RemoveTaskAssignmentFromCaseArgsSchema, UpdateCaseArgsSchema } from './tools/cases';
 import { policyTools, ListPoliciesArgsSchema, CreatePolicyArgsSchema, UpdatePolicyArgsSchema, GetPolicyByIdArgsSchema, UpdatePolicyPrioritiesArgsSchema, PolicyMatchStatsArgsSchema, DeletePolicyByIdArgsSchema } from './tools/policies';
 import { taskTools, ListTasksArgsSchema, GetTaskByIdArgsSchema, CancelTaskByIdArgsSchema, DeleteTaskByIdArgsSchema } from './tools/tasks';
 import { triageTools, ListTriageRulesArgsSchema, CreateTriageRuleArgsSchema, UpdateTriageRuleArgsSchema, DeleteTriageRuleArgsSchema, GetTriageRuleByIdArgsSchema, ValidateTriageRuleArgsSchema, AssignTriageTaskArgsSchema } from './tools/triages';
@@ -38,7 +38,7 @@ import { casesExportTools, ExportCaseActivitiesArgsSchema, ExportCaseEndpointsAr
 
 const server = new Server({
   name: 'air-mcp',
-  version: '7.20.0'
+  version: '7.21.0'
 }, {
   capabilities: {
     tools: {}
@@ -1911,6 +1911,25 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: ['caseId', 'taskAssignmentId'],
         },
       },
+      {
+        name: 'import_task_assignments_to_case',
+        description: 'Import task assignments to a specific case',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            caseId: {
+              type: 'string',
+              description: 'ID of the case to import task assignments to',
+            },
+            taskAssignmentIds: {
+              type: 'array',
+              items: { type: 'string' },
+              description: 'Array of task assignment IDs to import to the case',
+            },
+          },
+          required: ['caseId', 'taskAssignmentIds'],
+        },
+      },
     ],
   };
 });
@@ -2228,6 +2247,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       validateAirApiToken();
       const parsedArgs = RemoveTaskAssignmentFromCaseArgsSchema.parse(args);
       return await caseTools.removeTaskAssignmentFromCase(parsedArgs);
+    } else if (name === 'import_task_assignments_to_case') {
+      validateAirApiToken();
+      const parsedArgs = ImportTaskAssignmentsToCaseArgsSchema.parse(args);
+      return await caseTools.importTaskAssignmentsToCase(parsedArgs);
     } else {
       throw new Error(`Unknown tool: ${name}`);
     }

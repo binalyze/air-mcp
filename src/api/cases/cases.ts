@@ -535,5 +535,23 @@ export const api = {
       console.error(`Error removing task assignment ${taskAssignmentId} from case ${caseId}:`, error);
       throw error;
     }
+  },
+  async importTaskAssignmentsToCase(caseId: string, taskAssignmentIds: string[]): Promise<{ success: boolean; result: null; statusCode: number; errors: string[] }> {
+    try {
+      const response = await axios.post(
+        `${config.airHost}/api/public/cases/${caseId}/import-task-assignments`,
+        { taskAssignmentIds },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${config.airApiToken}`
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error(`Error importing task assignments to case ${caseId}:`, error);
+      throw error;
+    }
   }
 };

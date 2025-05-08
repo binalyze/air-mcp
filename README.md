@@ -80,6 +80,7 @@ A Node.js server implementing **Model Context Protocol (MCP)** for Binalyze AIR,
 - **Get Case Users** - Get all users associated with a specific case by its ID.
 - **Remove Endpoints from Case** - Remove endpoints from a case based on specified filters.
 - **Remove Task Assignment from Case** - Remove a specific task assignment from a case.
+- **Import Task Assignments to Case** - Import task assignments to a specific case.
 
 ## Overview
 
@@ -260,3 +261,4 @@ In Claude Desktop, or any MCP Client, you can use natural language commands:
 | `Get users for case with ID "C-2022-0001"` | Retrieves all users associated with a specific case by its ID |
 | `Remove endpoints from case with ID "C-2022-0001"` | Removes endpoints from a case based on specified filters |
 | `Remove task assignment with ID "f04666c9-62c7-4cb0-8638-967f05eb7936" from case "C-2022-0001"` | Removes a specific task assignment from a case |
+| `Import task assignments to case with ID "C-2022-0001"` | Imports task assignments to a specific case |

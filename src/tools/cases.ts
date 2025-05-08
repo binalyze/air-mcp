@@ -70,6 +70,11 @@ export const GetCaseUsersArgsSchema = z.object({
   organizationIds: z.string().optional().describe('Organization IDs to filter users by. Defaults to "0".')
 });
 
+export const ImportTaskAssignmentsToCaseArgsSchema = z.object({
+  caseId: z.string().describe('ID of the case to import task assignments to'),
+  taskAssignmentIds: z.array(z.string()).describe('Array of task assignment IDs to import to the case')
+});
+
 // Format user for display
 function formatUser(user: User): string {
   const organizationIds = Array.isArray(user.organizationIds) 
@@ -822,6 +827,41 @@ export const caseTools = {
           {
             type: 'text',
             text: `Failed to remove task assignment from case: ${errorMessage}`
+          }
+        ]
+      };
+    }
+  },
+  async importTaskAssignmentsToCase(args: z.infer<typeof ImportTaskAssignmentsToCaseArgsSchema>) {
+    try {
+      const response = await api.importTaskAssignmentsToCase(args.caseId, args.taskAssignmentIds);
+      
+      if (!response.success) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Error importing task assignments to case: ${response.errors.join(', ')}`
+            }
+          ]
+        };
+      }
+      
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Successfully imported ${args.taskAssignmentIds.length} task assignment(s) to case ${args.caseId}.`
+          }
+        ]
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Failed to import task assignments to case: ${errorMessage}`
           }
         ]
       };
