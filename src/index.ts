@@ -16,7 +16,7 @@ import {
   AssignImageAcquisitionTaskArgsSchema,
   CreateAcquisitionProfileArgsSchema
 } from './tools/acquisitions';
-import { CheckOrganizationNameExistsArgsSchema, CreateOrganizationArgsSchema, GetOrganizationByIdArgsSchema, organizationTools } from './tools/organizations';
+import { CheckOrganizationNameExistsArgsSchema, CreateOrganizationArgsSchema, GetOrganizationByIdArgsSchema, GetShareableDeploymentInfoArgsSchema, organizationTools } from './tools/organizations';
 import { ArchiveCaseArgsSchema, caseTools, ChangeCaseOwnerArgsSchema, CheckCaseNameArgsSchema, CloseCaseArgsSchema, CreateCaseArgsSchema, GetCaseActivitiesArgsSchema, GetCaseByIdArgsSchema, GetCaseEndpointsArgsSchema, GetCaseTasksByIdArgsSchema, GetCaseUsersArgsSchema, ImportTaskAssignmentsToCaseArgsSchema, ListCasesArgsSchema, OpenCaseArgsSchema, RemoveEndpointsFromCaseArgsSchema, RemoveTaskAssignmentFromCaseArgsSchema, UpdateCaseArgsSchema } from './tools/cases';
 import { policyTools, ListPoliciesArgsSchema, CreatePolicyArgsSchema, UpdatePolicyArgsSchema, GetPolicyByIdArgsSchema, UpdatePolicyPrioritiesArgsSchema, PolicyMatchStatsArgsSchema, DeletePolicyByIdArgsSchema } from './tools/policies';
 import { taskTools, ListTasksArgsSchema, GetTaskByIdArgsSchema, CancelTaskByIdArgsSchema, DeleteTaskByIdArgsSchema } from './tools/tasks';
@@ -42,7 +42,7 @@ import { UpdateOrganizationArgsSchema } from './tools/organizations';
 
 const server = new Server({
   name: 'air-mcp',
-  version: '9.6.0'
+  version: '9.7.0'
 }, {
   capabilities: {
     tools: {}
@@ -2414,6 +2414,20 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: ['name'],
         },
       },
+      {
+        name: 'get_shareable_deployment_info',
+        description: 'Get shareable deployment information using a deployment token',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            deploymentToken: {
+              type: 'string',
+              description: 'The deployment token to retrieve information for',
+            },
+          },
+          required: ['deploymentToken'],
+        },
+      },
     ],
   };
 });
@@ -2839,6 +2853,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       validateAirApiToken();
       const parsedArgs = CheckOrganizationNameExistsArgsSchema.parse(args);
       return await organizationTools.checkOrganizationNameExists(parsedArgs);
+    } else if (name === 'get_shareable_deployment_info') {
+      validateAirApiToken();
+      const parsedArgs = GetShareableDeploymentInfoArgsSchema.parse(args);
+      return await organizationTools.getShareableDeploymentInfo(parsedArgs);
     } else {
       throw new Error(`Unknown tool: ${name}`);
     }

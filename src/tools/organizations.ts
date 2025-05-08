@@ -41,6 +41,10 @@ export const CheckOrganizationNameExistsArgsSchema = z.object({
   name: z.string().describe('Name of the organization to check')
 });
 
+export const GetShareableDeploymentInfoArgsSchema = z.object({
+  deploymentToken: z.string().describe('The deployment token to retrieve information for')
+});
+
 // Format organization for display
 function formatOrganization(org: Organization): string {
   return `
@@ -266,6 +270,45 @@ export const organizationTools = {
           {
             type: 'text',
             text: `Failed to check organization name: ${errorMessage}`
+          }
+        ]
+      };
+    }
+  },
+  async getShareableDeploymentInfo(args: z.infer<typeof GetShareableDeploymentInfoArgsSchema>) {
+    try {
+      const response = await api.getShareableDeploymentInfo(args.deploymentToken);
+      
+      if (!response.success) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Error fetching shareable deployment information: ${response.errors.join(', ')}`
+            }
+          ]
+        };
+      }
+      
+      const info = response.result;
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Shareable Deployment Information:
+  Organization ID: ${info.organizationId}
+  Console Address: ${info.consoleAddress}
+  Agent Version: ${info.agentVersion}`
+          }
+        ]
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Failed to fetch shareable deployment information: ${errorMessage}`
           }
         ]
       };

@@ -151,5 +151,31 @@ export const api = {
       console.error('Error checking organization name:', error);
       throw error;
     }
+  },
+  async getShareableDeploymentInfo(deploymentToken: string): Promise<{ 
+    success: boolean; 
+    result: { 
+      organizationId: number; 
+      consoleAddress: string; 
+      agentVersion: string; 
+    }; 
+    statusCode: number; 
+    errors: string[] 
+  }> {
+    try {
+      const response = await axios.get(
+        `${config.airHost}/api/public/organizations/shareable-deployment-info/${deploymentToken}`,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${config.airApiToken}`
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching shareable deployment info:', error);
+      throw error;
+    }
   }
 };
