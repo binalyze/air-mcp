@@ -20,7 +20,7 @@ import { organizationTools } from './tools/organizations';
 import { caseTools, ListCasesArgsSchema } from './tools/cases';
 import { policyTools, ListPoliciesArgsSchema, CreatePolicyArgsSchema, UpdatePolicyArgsSchema, GetPolicyByIdArgsSchema, UpdatePolicyPrioritiesArgsSchema, PolicyMatchStatsArgsSchema, DeletePolicyByIdArgsSchema } from './tools/policies';
 import { taskTools, ListTasksArgsSchema, GetTaskByIdArgsSchema, CancelTaskByIdArgsSchema, DeleteTaskByIdArgsSchema } from './tools/tasks';
-import { triageTools, ListTriageRulesArgsSchema, CreateTriageRuleArgsSchema, UpdateTriageRuleArgsSchema } from './tools/triages';
+import { triageTools, ListTriageRulesArgsSchema, CreateTriageRuleArgsSchema, UpdateTriageRuleArgsSchema, DeleteTriageRuleArgsSchema } from './tools/triages';
 import { userTools, ListUsersArgsSchema } from './tools/users';
 import { droneAnalyzerTools, acquisitionArtifactTools, eDiscoveryTools } from './tools/params';
 import { auditTools, ExportAuditLogsArgsSchema, ListAuditLogsArgsSchema } from './tools/audit';
@@ -36,7 +36,7 @@ import { ListTriageTagsArgsSchema } from './tools/triage-tags';
 
 const server = new Server({
   name: 'air-mcp',
-  version: '6.3.0'
+  version: '6.4.0'
 }, {
   capabilities: {
     tools: {}
@@ -1446,6 +1446,17 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: ['id', 'description', 'rule', 'searchIn'],
         },
       },   
+      {
+        name: 'delete_triage_rule',
+        description: 'Delete an existing triage rule by ID',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            id: { type: 'string', description: 'ID of the triage rule to delete' },
+          },
+          required: ['id'],
+        },
+      },
     ],
   };
 });
@@ -1663,6 +1674,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       validateAirApiToken();
       const parsedArgs = UpdateTriageRuleArgsSchema.parse(args);
       return await triageTools.updateTriageRule(parsedArgs);
+    } else if (name === 'delete_triage_rule') {
+      validateAirApiToken();
+      const parsedArgs = DeleteTriageRuleArgsSchema.parse(args);
+      return await triageTools.deleteTriageRule(parsedArgs);
     } else {
       throw new Error(`Unknown tool: ${name}`);
     }

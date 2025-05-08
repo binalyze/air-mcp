@@ -56,8 +56,7 @@ A Node.js server implementing **Model Context Protocol (MCP)** for Binalyze AIR,
 - **Policy Management** - List, create, update, and delete policies in your organization.
 - **Policy Match Statistics** - See which policies apply to your assets based on various criteria.
 - **Task Assignment Management** - View and manage task assignments.
-- **Triage Rules Management** - List and create triage rules for threat detection.
-- **Triage Rules Update** - Update an existing triage rule by ID.
+- **Triage Rules Management** - List, create, update, and delete triage rules for threat detection.
 - **Triage Tags Management** - List and create triage tags for threat detection.
 
 ## Overview
@@ -214,6 +213,7 @@ In Claude Desktop, or any MCP Client, you can use natural language commands:
 | `List all triage tags` | You can work with triage rules and their associated tags |
 | `Create triage tag named "My Tag"` | Creates a new triage tag |
 | `Update triage rule with ID "abc123"` | Updates an existing triage rule |
+| `Delete triage rule with ID "abc123"` | Permanently removes a triage rule |
 
 ### Viewing Acquisition Artifacts
 
@@ -521,4 +521,12 @@ You can update existing triage rules:
 
 ```
 Update triage rule with ID "abc123"
+```
+
+### Deleting Triage Rules
+
+You can delete existing triage rules:
+
+```
+Delete triage rule with ID "abc123"
 ```

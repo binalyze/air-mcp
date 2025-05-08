@@ -28,6 +28,10 @@ export const UpdateTriageRuleArgsSchema = z.object({
     .describe('Organization IDs to associate with this rule. Defaults to [0]'),
 });
 
+export const DeleteTriageRuleArgsSchema = z.object({
+  id: z.string().describe('ID of the triage rule to delete'),
+});
+
 // Format triage rule for display
 function formatTriageRule(rule: TriageRule): string {
   return `
@@ -161,6 +165,41 @@ export const triageTools = {
           {
             type: 'text',
             text: `Failed to update triage rule: ${errorMessage}`
+          }
+        ]
+      };
+    }
+  },
+  async deleteTriageRule(args: z.infer<typeof DeleteTriageRuleArgsSchema>) {
+    try {
+      const response = await api.deleteTriageRule(args.id);
+      
+      if (!response.success) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Error deleting triage rule: ${response.errors.join(', ')}`
+            }
+          ]
+        };
+      }
+      
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Triage rule with ID ${args.id} was successfully deleted.`
+          }
+        ]
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Failed to delete triage rule: ${errorMessage}`
           }
         ]
       };
