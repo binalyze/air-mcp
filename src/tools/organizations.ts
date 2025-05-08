@@ -45,6 +45,11 @@ export const GetShareableDeploymentInfoArgsSchema = z.object({
   deploymentToken: z.string().describe('The deployment token to retrieve information for')
 });
 
+export const UpdateOrganizationShareableDeploymentArgsSchema = z.object({
+  id: z.number().describe('ID of the organization to update'),
+  status: z.boolean().describe('Whether shareable deployment should be enabled (true) or disabled (false)')
+});
+
 // Format organization for display
 function formatOrganization(org: Organization): string {
   return `
@@ -309,6 +314,41 @@ export const organizationTools = {
           {
             type: 'text',
             text: `Failed to fetch shareable deployment information: ${errorMessage}`
+          }
+        ]
+      };
+    }
+  },
+  async updateOrganizationShareableDeployment(args: z.infer<typeof UpdateOrganizationShareableDeploymentArgsSchema>) {
+    try {
+      const response = await api.updateOrganizationShareableDeployment(args.id, args.status);
+      
+      if (!response.success) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Error updating organization shareable deployment: ${response.errors.join(', ')}`
+            }
+          ]
+        };
+      }
+      
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Successfully ${args.status ? 'enabled' : 'disabled'} shareable deployment for organization ID: ${args.id}`
+          }
+        ]
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Failed to update organization shareable deployment: ${errorMessage}`
           }
         ]
       };

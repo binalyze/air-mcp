@@ -177,5 +177,23 @@ export const api = {
       console.error('Error fetching shareable deployment info:', error);
       throw error;
     }
+  },
+  async updateOrganizationShareableDeployment(id: number, status: boolean): Promise<{ success: boolean; result: null; statusCode: number; errors: string[] }> {
+    try {
+      const response = await axios.post(
+        `${config.airHost}/api/public/organizations/${id}/shareable-deployment`,
+        { status },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${config.airApiToken}`
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error(`Error updating organization ${id} shareable deployment:`, error);
+      throw error;
+    }
   }
 };

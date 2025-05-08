@@ -16,7 +16,7 @@ import {
   AssignImageAcquisitionTaskArgsSchema,
   CreateAcquisitionProfileArgsSchema
 } from './tools/acquisitions';
-import { CheckOrganizationNameExistsArgsSchema, CreateOrganizationArgsSchema, GetOrganizationByIdArgsSchema, GetShareableDeploymentInfoArgsSchema, organizationTools } from './tools/organizations';
+import { CheckOrganizationNameExistsArgsSchema, CreateOrganizationArgsSchema, GetOrganizationByIdArgsSchema, GetShareableDeploymentInfoArgsSchema, organizationTools, UpdateOrganizationShareableDeploymentArgsSchema } from './tools/organizations';
 import { ArchiveCaseArgsSchema, caseTools, ChangeCaseOwnerArgsSchema, CheckCaseNameArgsSchema, CloseCaseArgsSchema, CreateCaseArgsSchema, GetCaseActivitiesArgsSchema, GetCaseByIdArgsSchema, GetCaseEndpointsArgsSchema, GetCaseTasksByIdArgsSchema, GetCaseUsersArgsSchema, ImportTaskAssignmentsToCaseArgsSchema, ListCasesArgsSchema, OpenCaseArgsSchema, RemoveEndpointsFromCaseArgsSchema, RemoveTaskAssignmentFromCaseArgsSchema, UpdateCaseArgsSchema } from './tools/cases';
 import { policyTools, ListPoliciesArgsSchema, CreatePolicyArgsSchema, UpdatePolicyArgsSchema, GetPolicyByIdArgsSchema, UpdatePolicyPrioritiesArgsSchema, PolicyMatchStatsArgsSchema, DeletePolicyByIdArgsSchema } from './tools/policies';
 import { taskTools, ListTasksArgsSchema, GetTaskByIdArgsSchema, CancelTaskByIdArgsSchema, DeleteTaskByIdArgsSchema } from './tools/tasks';
@@ -2428,6 +2428,24 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: ['deploymentToken'],
         },
       },
+      {
+        name: 'update_organization_shareable_deployment',
+        description: 'Update an organization\'s shareable deployment settings',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            id: {
+              type: 'number',
+              description: 'The ID of the organization to update',
+            },
+            status: {
+              type: 'boolean',
+              description: 'Whether shareable deployment should be enabled (true) or disabled (false)',
+            },
+          },
+          required: ['id', 'status'],
+        },
+      },
     ],
   };
 });
@@ -2857,6 +2875,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       validateAirApiToken();
       const parsedArgs = GetShareableDeploymentInfoArgsSchema.parse(args);
       return await organizationTools.getShareableDeploymentInfo(parsedArgs);
+    } else if (name === 'update_organization_shareable_deployment') {
+      validateAirApiToken();
+      const parsedArgs = UpdateOrganizationShareableDeploymentArgsSchema.parse(args);
+      return await organizationTools.updateOrganizationShareableDeployment(parsedArgs);
     } else {
       throw new Error(`Unknown tool: ${name}`);
     }
