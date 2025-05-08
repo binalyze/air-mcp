@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { api, Case, CaseEndpoint } from '../api/cases/cases';
+import { api, Case, CaseEndpoint, CaseTask } from '../api/cases/cases';
 
 // Schema for list cases arguments
 export const ListCasesArgsSchema = z.object({
@@ -63,6 +63,27 @@ export const GetCaseEndpointsArgsSchema = z.object({
     z.number()
   ]).default(0).describe('Organization IDs to filter endpoints by. Defaults to 0.')
 });
+
+export const GetCaseTasksByIdArgsSchema = z.object({
+  id: z.string().describe('ID of the case to retrieve tasks for'),
+  organizationIds: z.union([
+    z.string(),
+    z.number()
+  ]).default(0).describe('Organization IDs to filter tasks by. Defaults to 0.')
+});
+
+function formatTask(task: CaseTask): string {
+  return `
+Task: ${task.name} (ID: ${task._id})
+Type: ${task.type}
+Endpoint: ${task.endpointName} (ID: ${task.endpointId})
+Status: ${task.status}
+Progress: ${task.progress}%
+Comparable: ${task.isComparable ? 'Yes' : 'No'}
+Created: ${new Date(task.createdAt).toLocaleString()}
+Last Updated: ${new Date(task.updatedAt).toLocaleString()}
+`;
+}
 
 function formatEndpoint(endpoint: CaseEndpoint): string {
   return `
@@ -563,6 +584,73 @@ export const caseTools = {
           {
             type: 'text',
             text: `Failed to fetch case endpoints: ${errorMessage}`
+          }
+        ]
+      };
+    }
+  },
+
+  async getCaseTasksById(args: z.infer<typeof GetCaseTasksByIdArgsSchema>) {
+    try {
+      const response = await api.getCaseTasksById(args.id, args.organizationIds);
+      
+      if (!response.success) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Error fetching case tasks: ${response.errors.join(', ')}`
+            }
+          ]
+        };
+      }
+      
+      if (response.result.entities.length === 0) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `No tasks found for case with ID ${args.id}.`
+            }
+          ]
+        };
+      }
+      
+      // Group tasks by type for better organization
+      const tasksByType: Record<string, CaseTask[]> = {};
+      response.result.entities.forEach(task => {
+        const type = task.type || 'Unknown';
+        if (!tasksByType[type]) {
+          tasksByType[type] = [];
+        }
+        tasksByType[type].push(task);
+      });
+      
+      // Format summary by type
+      const summaryByType = Object.entries(tasksByType).map(([type, tasks]) => {
+        return `${type}: ${tasks.length} tasks`;
+      }).join('\n');
+      
+      // Format tasks list
+      const tasksList = response.result.entities.map(task => 
+        `${task._id}: ${task.name} (Type: ${task.type}, Endpoint: ${task.endpointName}, Status: ${task.status}, Progress: ${task.progress}%)`
+      ).join('\n');
+      
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Found ${response.result.totalEntityCount} tasks for case ${args.id}:\n\nSummary by Type:\n${summaryByType}\n\nTasks:\n${tasksList}`
+          }
+        ]
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Failed to fetch case tasks: ${errorMessage}`
           }
         ]
       };

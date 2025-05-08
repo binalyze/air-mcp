@@ -134,6 +134,47 @@ export interface CaseEndpointsResponse {
   errors: string[];
 }
 
+export interface CaseTask {
+  _id: string;
+  taskId: string;
+  name: string;
+  type: string;
+  endpointId: string;
+  endpointName: string;
+  organizationId: number;
+  status: string;
+  recurrence: string | null;
+  progress: number;
+  duration: number | null;
+  caseIds: string[];
+  isComparable: boolean;
+  createdAt: string;
+  updatedAt: string;
+  response: any | null;
+}
+
+export interface CaseTasksResponse {
+  success: boolean;
+  result: {
+    entities: CaseTask[];
+    filters: Array<{
+      name: string;
+      type: string;
+      options: string[];
+      filterUrl: string | null;
+    }>;
+    sortables: string[];
+    totalEntityCount: number;
+    currentPage: number;
+    pageSize: number;
+    previousPage: number;
+    totalPageCount: number;
+    nextPage: number;
+  };
+  statusCode: number;
+  errors: string[];
+}
+
 export const api = {
   async getCases(organizationIds: string | string[] = '0'): Promise<CasesResponse> {
     try {
@@ -354,6 +395,30 @@ export const api = {
       return response.data;
     } catch (error) {
       console.error(`Error fetching endpoints for case with ID ${id}:`, error);
+      throw error;
+    }
+  },
+
+  async getCaseTasksById(
+    id: string,
+    organizationIds: string | number = 0
+  ): Promise<CaseTasksResponse> {
+    try {
+      const response = await axios.get(
+        `${config.airHost}/api/public/cases/${id}/tasks`,
+        {
+          params: {
+            'filter[organizationIds]': organizationIds
+          },
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${config.airApiToken}`
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching tasks for case with ID ${id}:`, error);
       throw error;
     }
   }

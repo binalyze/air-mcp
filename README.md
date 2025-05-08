@@ -76,6 +76,7 @@ A Node.js server implementing **Model Context Protocol (MCP)** for Binalyze AIR,
 - **Check Case Name** - Check if a case name is already in use.
 - **Get Case Activities** - Get activity history for a specific case by its ID.
 - **Get Case Endpoints** - Get all endpoints associated with a specific case by its ID.
+- **Get Case Tasks by ID** - Get all tasks associated with a specific case by its ID.
 
 ## Overview
 
@@ -252,3 +253,4 @@ In Claude Desktop, or any MCP Client, you can use natural language commands:
 | `Check if case name "Incident 2023-05" is available` | Checks if a case name is already in use |
 | `Get case activities for case with ID "C-2022-0003"` | Displays the activity history for a specific case by its ID |
 | `Get endpoints for case with ID "C-2022-0001"` | Retrieves all endpoints associated with a specific case by its ID |
+| `Get tasks for case with ID "C-2022-0001"` | Displays all tasks associated with the specified case |
