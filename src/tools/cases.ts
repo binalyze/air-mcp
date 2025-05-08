@@ -9,6 +9,15 @@ export const ListCasesArgsSchema = z.object({
   ]).optional().describe('Organization IDs to filter cases by. Defaults to "0" or specific IDs like "123" or ["123", "456"]'),
 });
 
+export const CreateCaseArgsSchema = z.object({
+  organizationId: z.number().default(0).describe('Organization ID to create the case in. Defaults to 0.'),
+  name: z.string().describe('Name of the case'),
+  ownerUserId: z.string().describe('User ID of the case owner'),
+  visibility: z.string().default('public-to-organization').describe('Visibility of the case. Defaults to "public-to-organization"'),
+  assignedUserIds: z.array(z.string()).default([]).describe('Array of user IDs to assign to the case. Defaults to empty array.'),
+});
+
+
 // Format case for display
 function formatCase(caseItem: Case): string {
   return `
@@ -80,4 +89,45 @@ export const caseTools = {
       };
     }
   },
+  async createCase(args: z.infer<typeof CreateCaseArgsSchema>) {
+    try {
+      const response = await api.createCase({
+        organizationId: args.organizationId,
+        name: args.name,
+        ownerUserId: args.ownerUserId,
+        visibility: args.visibility,
+        assignedUserIds: args.assignedUserIds,
+      });
+      
+      if (!response.success) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Error creating case: ${response.errors.join(', ')}`
+            }
+          ]
+        };
+      }
+      
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Case created successfully:\n${formatCase(response.result)}`
+          }
+        ]
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Failed to create case: ${errorMessage}`
+          }
+        ]
+      };
+    }
+  }
 };

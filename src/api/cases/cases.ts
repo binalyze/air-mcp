@@ -75,4 +75,28 @@ export const api = {
       throw error;
     }
   },
+  async createCase(caseData: {
+    organizationId: number;
+    name: string;
+    ownerUserId: string;
+    visibility: string;
+    assignedUserIds: string[];
+  }): Promise<{ success: boolean; result: Case; statusCode: number; errors: string[] }> {
+    try {
+      const response = await axios.post(
+        `${config.airHost}/api/public/cases`,
+        caseData,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${config.airApiToken}`
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error creating case:', error);
+      throw error;
+    }
+  }
 };

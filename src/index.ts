@@ -17,7 +17,7 @@ import {
   CreateAcquisitionProfileArgsSchema
 } from './tools/acquisitions';
 import { organizationTools } from './tools/organizations';
-import { caseTools, ListCasesArgsSchema } from './tools/cases';
+import { caseTools, CreateCaseArgsSchema, ListCasesArgsSchema } from './tools/cases';
 import { policyTools, ListPoliciesArgsSchema, CreatePolicyArgsSchema, UpdatePolicyArgsSchema, GetPolicyByIdArgsSchema, UpdatePolicyPrioritiesArgsSchema, PolicyMatchStatsArgsSchema, DeletePolicyByIdArgsSchema } from './tools/policies';
 import { taskTools, ListTasksArgsSchema, GetTaskByIdArgsSchema, CancelTaskByIdArgsSchema, DeleteTaskByIdArgsSchema } from './tools/tasks';
 import { triageTools, ListTriageRulesArgsSchema, CreateTriageRuleArgsSchema, UpdateTriageRuleArgsSchema, DeleteTriageRuleArgsSchema, GetTriageRuleByIdArgsSchema, ValidateTriageRuleArgsSchema, AssignTriageTaskArgsSchema } from './tools/triages';
@@ -38,7 +38,7 @@ import { casesExportTools, ExportCaseActivitiesArgsSchema, ExportCaseEndpointsAr
 
 const server = new Server({
   name: 'air-mcp',
-  version: '7.6.0'
+  version: '7.7.0'
 }, {
   capabilities: {
     tools: {}
@@ -1652,6 +1652,37 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: ['caseId'],
         },
       },
+      {
+        name: 'create_case',
+        description: 'Create a new case in the system',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            organizationId: {
+              type: 'number',
+              description: 'Organization ID to create the case in. Defaults to 0.',
+            },
+            name: {
+              type: 'string',
+              description: 'Name of the case',
+            },
+            ownerUserId: {
+              type: 'string',
+              description: 'User ID of the case owner',
+            },
+            visibility: {
+              type: 'string',
+              description: 'Visibility of the case. Defaults to "public-to-organization"',
+            },
+            assignedUserIds: {
+              type: 'array',
+              items: { type: 'string' },
+              description: 'Array of user IDs to assign to the case. Defaults to empty array.',
+            },
+          },
+          required: ['name', 'ownerUserId'],
+        },
+      },
     ],
   };
 });
@@ -1913,6 +1944,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       validateAirApiToken();
       const parsedArgs = ExportCaseActivitiesArgsSchema.parse(args);
       return await casesExportTools.exportCaseActivities(parsedArgs);
+    } else if (name === 'create_case') {
+      validateAirApiToken();
+      const parsedArgs = CreateCaseArgsSchema.parse(args);
+      return await caseTools.createCase(parsedArgs);
     } else {
       throw new Error(`Unknown tool: ${name}`);
     }
