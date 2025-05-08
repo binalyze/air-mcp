@@ -33,6 +33,10 @@ export const UpdateOrganizationArgsSchema = z.object({
   note: z.string().optional().describe('Additional notes about the organization')
 });
 
+export const GetOrganizationByIdArgsSchema = z.object({
+  id: z.number().describe('ID of the organization to retrieve')
+});
+
 // Format organization for display
 function formatOrganization(org: Organization): string {
   return `
@@ -155,6 +159,74 @@ export const organizationTools = {
           {
             type: 'text',
             text: `Failed to update organization: ${errorMessage}`
+          }
+        ]
+      };
+    }
+  },
+  async getOrganizationById(args: z.infer<typeof GetOrganizationByIdArgsSchema>) {
+    try {
+      const response = await api.getOrganizationById(args.id);
+      
+      if (!response.success) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Error fetching organization: ${response.errors.join(', ')}`
+            }
+          ]
+        };
+      }
+      
+      const org = response.result;
+      
+      // Create a detailed view of the organization
+      let detailedView = formatOrganization(org);
+      
+      // Add contact information if available
+      if (org.contact) {
+        detailedView += `
+  Contact Information:
+    Name: ${org.contact.name}
+    Email: ${org.contact.email}
+    ${org.contact.title ? `Title: ${org.contact.title}` : ''}
+    ${org.contact.phone ? `Phone: ${org.contact.phone}` : ''}
+    ${org.contact.mobile ? `Mobile: ${org.contact.mobile}` : ''}
+  `;
+      }
+      
+      // Add note if available
+      if (org.note) {
+        detailedView += `
+  Note: ${org.note}
+  `;
+      }
+      
+      // Add statistics if available
+      if (org.statistics) {
+        detailedView += `
+  Statistics:
+    Endpoints: ${org.statistics.endpoint.total} total, ${org.statistics.endpoint.managed} managed
+    Cases: ${org.statistics.case.total} total (${org.statistics.case.open} open, ${org.statistics.case.closed} closed, ${org.statistics.case.archived} archived)
+  `;
+      }
+      
+      return {
+        content: [
+          {
+            type: 'text',
+            text: detailedView
+          }
+        ]
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Failed to fetch organization: ${errorMessage}`
           }
         ]
       };

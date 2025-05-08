@@ -105,6 +105,7 @@ A Node.js server implementing **Model Context Protocol (MCP)** for Binalyze AIR,
 - **Remove User from Organization** - Remove a user from a specific organization.
 - **Create Organization** - Create a new organization.
 - **Update Organization** - Update an existing organization.
+- **Get Organization by ID** - Get detailed information about a specific organization by its ID.
 
 ## Overview
 
@@ -308,3 +309,4 @@ In Claude Desktop, or any MCP Client, you can use natural language commands:
 | `Remove user with ID "user1" from organization "123"` | Removes a user from the specified organization |
 | `Create organization with name "My Organization" and contact information` | Creates a new organization with the specified name and contact information |
 | `Update organization with ID "123"` | Updates an existing organization with new settings |
+| `Get details about organization with ID 2` | Displays detailed information about a specific organization |

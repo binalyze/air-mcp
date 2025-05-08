@@ -116,5 +116,22 @@ export const api = {
       console.error('Error updating organization:', error);
       throw error;
     }
+  },
+  async getOrganizationById(id: number): Promise<{ success: boolean; result: Organization & { note?: string; contact?: OrganizationContact; statistics?: { endpoint: { total: number; managed: number }; case: { total: number; open: number; closed: number; archived: number } } }; statusCode: number; errors: string[] }> {
+    try {
+      const response = await axios.get(
+        `${config.airHost}/api/public/organizations/${id}`,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${config.airApiToken}`
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching organization with ID ${id}:`, error);
+      throw error;
+    }
   }
 };
