@@ -16,7 +16,7 @@ import {
   AssignImageAcquisitionTaskArgsSchema,
   CreateAcquisitionProfileArgsSchema
 } from './tools/acquisitions';
-import { CheckOrganizationNameExistsArgsSchema, CreateOrganizationArgsSchema, GetOrganizationByIdArgsSchema, GetShareableDeploymentInfoArgsSchema, organizationTools, UpdateOrganizationDeploymentTokenArgsSchema, UpdateOrganizationShareableDeploymentArgsSchema } from './tools/organizations';
+import { CheckOrganizationNameExistsArgsSchema, CreateOrganizationArgsSchema, DeleteOrganizationArgsSchema, GetOrganizationByIdArgsSchema, GetShareableDeploymentInfoArgsSchema, organizationTools, UpdateOrganizationDeploymentTokenArgsSchema, UpdateOrganizationShareableDeploymentArgsSchema } from './tools/organizations';
 import { ArchiveCaseArgsSchema, caseTools, ChangeCaseOwnerArgsSchema, CheckCaseNameArgsSchema, CloseCaseArgsSchema, CreateCaseArgsSchema, GetCaseActivitiesArgsSchema, GetCaseByIdArgsSchema, GetCaseEndpointsArgsSchema, GetCaseTasksByIdArgsSchema, GetCaseUsersArgsSchema, ImportTaskAssignmentsToCaseArgsSchema, ListCasesArgsSchema, OpenCaseArgsSchema, RemoveEndpointsFromCaseArgsSchema, RemoveTaskAssignmentFromCaseArgsSchema, UpdateCaseArgsSchema } from './tools/cases';
 import { policyTools, ListPoliciesArgsSchema, CreatePolicyArgsSchema, UpdatePolicyArgsSchema, GetPolicyByIdArgsSchema, UpdatePolicyPrioritiesArgsSchema, PolicyMatchStatsArgsSchema, DeletePolicyByIdArgsSchema } from './tools/policies';
 import { taskTools, ListTasksArgsSchema, GetTaskByIdArgsSchema, CancelTaskByIdArgsSchema, DeleteTaskByIdArgsSchema } from './tools/tasks';
@@ -42,7 +42,7 @@ import { UpdateOrganizationArgsSchema } from './tools/organizations';
 
 const server = new Server({
   name: 'air-mcp',
-  version: '9.9.0'
+  version: '9.10.0'
 }, {
   capabilities: {
     tools: {}
@@ -2464,7 +2464,20 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: ['id', 'deploymentToken'],
         },
       },
-      
+      {
+        name: 'delete_organization',
+        description: 'Delete an organization by its ID',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            id: {
+              type: 'number',
+              description: 'The ID of the organization to delete',
+            },
+          },
+          required: ['id'],
+        },
+      },
     ],
   };
 });
@@ -2902,6 +2915,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       validateAirApiToken();
       const parsedArgs = UpdateOrganizationDeploymentTokenArgsSchema.parse(args);
       return await organizationTools.updateOrganizationDeploymentToken(parsedArgs);
+    } else if (name === 'delete_organization') {
+      validateAirApiToken();
+      const parsedArgs = DeleteOrganizationArgsSchema.parse(args);
+      return await organizationTools.deleteOrganization(parsedArgs);
     } else {
       throw new Error(`Unknown tool: ${name}`);
     }

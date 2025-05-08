@@ -213,5 +213,22 @@ export const api = {
       console.error(`Error updating organization ${id} deployment token:`, error);
       throw error;
     }
+  },
+  async deleteOrganization(id: number): Promise<{ success: boolean; result: null; statusCode: number; errors: string[] }> {
+    try {
+      const response = await axios.delete(
+        `${config.airHost}/api/public/organizations/${id}`,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${config.airApiToken}`
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error(`Error deleting organization with ID ${id}:`, error);
+      throw error;
+    }
   }
 };

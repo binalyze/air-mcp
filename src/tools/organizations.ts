@@ -55,6 +55,10 @@ export const UpdateOrganizationDeploymentTokenArgsSchema = z.object({
   deploymentToken: z.string().describe('New deployment token for the organization')
 });
 
+export const DeleteOrganizationArgsSchema = z.object({
+  id: z.number().describe('ID of the organization to delete')
+});
+
 // Format organization for display
 function formatOrganization(org: Organization): string {
   return `
@@ -389,6 +393,41 @@ export const organizationTools = {
           {
             type: 'text',
             text: `Failed to update organization deployment token: ${errorMessage}`
+          }
+        ]
+      };
+    }
+  },
+  async deleteOrganization(args: z.infer<typeof DeleteOrganizationArgsSchema>) {
+    try {
+      const response = await api.deleteOrganization(args.id);
+      
+      if (!response.success) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Error deleting organization: ${response.errors.join(', ')}`
+            }
+          ]
+        };
+      }
+      
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Successfully deleted organization with ID: ${args.id}`
+          }
+        ]
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Failed to delete organization: ${errorMessage}`
           }
         ]
       };
