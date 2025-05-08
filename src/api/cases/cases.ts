@@ -518,5 +518,22 @@ export const api = {
       console.error(`Error removing endpoints from case with ID ${id}:`, error);
       throw error;
     }
+  },
+  async removeTaskAssignmentFromCase(caseId: string, taskAssignmentId: string): Promise<{ success: boolean; result: null; statusCode: number; errors: string[] }> {
+    try {
+      const response = await axios.delete(
+        `${config.airHost}/api/public/cases/${caseId}/task-assignments/${taskAssignmentId}`,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${config.airApiToken}`
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error(`Error removing task assignment ${taskAssignmentId} from case ${caseId}:`, error);
+      throw error;
+    }
   }
 };

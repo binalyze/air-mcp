@@ -112,10 +112,16 @@ export const RemoveEndpointsFromCaseArgsSchema = z.object({
     tags: z.array(z.string()).optional().describe('Filter by tags'),
     version: z.string().optional().describe('Filter by agent version'),
     policy: z.string().optional().describe('Filter by policy'),
-    includedEndpointIds: z.array(z.string()).optional().describe('Array of endpoint IDs to remove'),
+    includedEndpointIds: z.array(z.string()).optional().describe('Array of endpoint IDs to include'),
     excludedEndpointIds: z.array(z.string()).optional().describe('Array of endpoint IDs to exclude'),
     organizationIds: z.array(z.union([z.number(), z.string().transform(val => parseInt(val))])).optional().describe('Organization IDs filter. Defaults to [0]'),
   }).describe('Filter object to specify which endpoints to remove')
+});
+
+// Schema for removing task assignment from case
+export const RemoveTaskAssignmentFromCaseArgsSchema = z.object({
+  caseId: z.string().describe('ID of the case to remove the task assignment from'),
+  taskAssignmentId: z.string().describe('ID of the task assignment to remove')
 });
 
 // Format case for display
@@ -779,6 +785,43 @@ export const caseTools = {
           {
             type: 'text',
             text: `Failed to remove endpoints from case: ${errorMessage}`
+          }
+        ]
+      };
+    }
+  },
+
+  async removeTaskAssignmentFromCase(args: z.infer<typeof RemoveTaskAssignmentFromCaseArgsSchema>) {
+    try {
+      const { caseId, taskAssignmentId } = args;
+      const response = await api.removeTaskAssignmentFromCase(caseId, taskAssignmentId);
+      
+      if (!response.success) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Error removing task assignment from case: ${response.errors.join(', ')}`
+            }
+          ]
+        };
+      }
+      
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Successfully removed task assignment ${taskAssignmentId} from case ${caseId}.`
+          }
+        ]
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Failed to remove task assignment from case: ${errorMessage}`
           }
         ]
       };
