@@ -25,6 +25,17 @@ export const UpdateSmbRepositoryArgsSchema = z.object({
   organizationIds: z.array(z.number()).optional().default([]).describe('Updated organization IDs to associate the repository with')
 });
 
+// Schema for create SFTP repository arguments
+export const CreateSftpRepositoryArgsSchema = z.object({
+  name: z.string().describe('Name for the SFTP repository'),
+  host: z.string().describe('SFTP server hostname or IP address'),
+  port: z.number().default(22).describe('SFTP server port (default: 22)'),
+  path: z.string().describe('Path on the SFTP server (e.g. /)'),
+  username: z.string().describe('Username for SFTP authentication'),
+  password: z.string().describe('Password for SFTP authentication'),
+  organizationIds: z.array(z.number()).optional().default([]).describe('Organization IDs to associate the repository with')
+});
+
 // Format repository for display
 function formatRepository(repo: Repository): string {
   return `
@@ -146,6 +157,38 @@ export const repositoryTools = {
           {
             type: 'text',
             text: `Failed to update SMB repository: ${errorMessage}`
+          }
+        ]
+      };
+    }
+  },
+  async createSftpRepository(args: z.infer<typeof CreateSftpRepositoryArgsSchema>) {
+    try {
+      const repository = await api.createSftpRepository({
+        name: args.name,
+        host: args.host,
+        port: args.port,
+        path: args.path,
+        username: args.username,
+        password: args.password,
+        organizationIds: args.organizationIds || []
+      });
+      
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Successfully created SFTP repository:\n${formatRepository(repository)}`
+          }
+        ]
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Failed to create SFTP repository: ${errorMessage}`
           }
         ]
       };

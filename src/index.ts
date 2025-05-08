@@ -35,11 +35,11 @@ import { CreateTriageTagArgsSchema, triageTagTools } from './tools/triage-tags';
 import { ListTriageTagsArgsSchema } from './tools/triage-tags';
 import { AddNoteToCaseArgsSchema, caseNotesTools, DeleteNoteFromCaseArgsSchema, UpdateNoteCaseArgsSchema } from './tools/cases-notes';
 import { casesExportTools, ExportCaseActivitiesArgsSchema, ExportCaseEndpointsArgsSchema, ExportCaseNotesArgsSchema, ExportCasesArgsSchema } from './tools/cases-export';
-import { CreateSmbRepositoryArgsSchema, ListRepositoriesArgsSchema, repositoryTools, UpdateSmbRepositoryArgsSchema } from './tools/evidence-repositories';
+import { CreateSftpRepositoryArgsSchema, CreateSmbRepositoryArgsSchema, ListRepositoriesArgsSchema, repositoryTools, UpdateSmbRepositoryArgsSchema } from './tools/evidence-repositories';
 
 const server = new Server({
   name: 'air-mcp',
-  version: '8.2.0'
+  version: '8.3.0'
 }, {
   capabilities: {
     tools: {}
@@ -2006,6 +2006,23 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: ['id', 'name', 'path', 'username', 'password'],
         },
       },
+      {
+        name: 'create_sftp_repository',
+        description: 'Create a new SFTP evidence repository',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            name: { type: 'string', description: 'Name for the SFTP repository' },
+            host: { type: 'string', description: 'SFTP server hostname or IP address' },
+            port: { type: 'number', description: 'SFTP server port (default: 22)' },
+            path: { type: 'string', description: 'Path on the SFTP server (e.g. /)' },
+            username: { type: 'string', description: 'Username for SFTP authentication' },
+            password: { type: 'string', description: 'Password for SFTP authentication' },
+            organizationIds: { type: 'array', items: { type: 'number' }, description: 'Organization IDs to associate the repository with' },
+          },
+          required: ['name', 'host', 'path', 'username', 'password'],
+        },
+      },
     ],
   };
 });
@@ -2333,12 +2350,16 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       return await repositoryTools.listRepositories(parsedArgs);
     } else if (name === 'create_smb_repository') {
       validateAirApiToken();
-      const parsedArgs = CreateSmbRepositoryArgsSchema.parse(args);
+      const parsedArgs = CreateSmbRepositoryArgsSchema.parse(args); 
       return await repositoryTools.createSmbRepository(parsedArgs);
     } else if (name === 'update_smb_repository') {
       validateAirApiToken();
       const parsedArgs = UpdateSmbRepositoryArgsSchema.parse(args);
       return await repositoryTools.updateSmbRepository(parsedArgs);
+    }else if (name === 'create_sftp_repository') {
+      validateAirApiToken();
+      const parsedArgs = CreateSftpRepositoryArgsSchema.parse(args);
+      return await repositoryTools.createSftpRepository(parsedArgs);
     }else {
       throw new Error(`Unknown tool: ${name}`);
     }
