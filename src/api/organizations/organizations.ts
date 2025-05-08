@@ -23,6 +23,7 @@ export interface Organization {
   isDefault: boolean;
   updatedAt: string;
   createdAt: string;
+  tags?: string[];
 }
 
 export interface OrganizationsResponse {
@@ -228,6 +229,24 @@ export const api = {
       return response.data;
     } catch (error) {
       console.error(`Error deleting organization with ID ${id}:`, error);
+      throw error;
+    }
+  },
+  async addTagsToOrganization(id: number, tags: string[]): Promise<{ success: boolean; result: Organization; statusCode: number; errors: string[] }> {
+    try {
+      const response = await axios.patch(
+        `${config.airHost}/api/public/organizations/${id}/tags`,
+        { tags },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${config.airApiToken}`
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error(`Error adding tags to organization with ID ${id}:`, error);
       throw error;
     }
   }

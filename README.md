@@ -110,6 +110,8 @@ A Node.js server implementing **Model Context Protocol (MCP)** for Binalyze AIR,
 - **Get Shareable Deployment Info** - Get information about a shareable deployment using a deployment token.
 - **Update Organization Shareable Deployment** - Update an organization's shareable deployment settings.
 - **Update Organization Deployment Token** - Update the deployment token for a specific organization.
+- **Delete Organization** - Delete an organization by its ID.
+- **Add Tags to Organization** - Add tags to an organization.
 
 ## Overview
 
@@ -318,3 +320,6 @@ In Claude Desktop, or any MCP Client, you can use natural language commands:
 | `Get shareable deployment information using deployment token "token123"` | Retrieves information about a shareable deployment using a deployment token |
 | `Update organization shareable deployment with ID "123" to be enabled` | Updates an organization's shareable deployment settings |
 | `Update deployment token for organization with ID 2` | Updates the deployment token for a specific organization |
+| `Delete organization with ID "123"` | Permanently removes an organization from the system |
+| `Add tags to organization with ID "123"` | Adds tags to an organization |
+
