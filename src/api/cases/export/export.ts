@@ -26,6 +26,12 @@ export interface ExportCaseEndpointsResponse {
     errors: string[];
 }
 
+export interface ExportCaseActivitiesResponse {
+    success: boolean;
+    statusCode: number;
+    errors: string[];
+}
+
 export const exportApi = {
   async exportCases(organizationIds: string | string[] = '0'): Promise<ExportCasesResponse> {
     try {
@@ -116,6 +122,37 @@ export const exportApi = {
       };
     } catch (error) {
       console.error('Error exporting case endpoints:', error);
+      
+      if (axios.isAxiosError(error) && error.response) {
+        return {
+          success: false,
+          statusCode: error.response.status,
+          errors: [error.message]
+        };
+      }
+      
+      throw error;
+    }
+  },
+  async exportCaseActivities(caseId: string): Promise<ExportCaseActivitiesResponse> {
+    try {
+      const response = await axios.get(
+        `${config.airHost}/api/public/cases/${caseId}/activities/export`,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${config.airApiToken}`
+          }
+        }
+      );
+      
+      return {
+        success: response.status === 200,
+        statusCode: response.status,
+        errors: []
+      };
+    } catch (error) {
+      console.error('Error exporting case activities:', error);
       
       if (axios.isAxiosError(error) && error.response) {
         return {

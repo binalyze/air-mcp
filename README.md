@@ -66,6 +66,7 @@ A Node.js server implementing **Model Context Protocol (MCP)** for Binalyze AIR,
 - **Export Cases** - Export cases data from the system.
 - **Export Case Notes** - Export notes for a specific case by its ID.
 - **Export Case Endpoints** - Export endpoints for a specific case by its ID.
+- **Export Case Activities** - Export activities for a specific case by its ID.
 
 ## Overview
 
@@ -231,4 +232,5 @@ In Claude Desktop, or any MCP Client, you can use natural language commands:
 | `Export cases data` | Initiates an export of cases data for your organization |
 | `Export notes for case with ID "case123"` | Initiates an export of notes for a specific case by its ID |
 | `Export endpoints for case with ID "case123"` | Initiates an export of endpoints for a specific case by its ID |
+| `Export activities for case with ID "case123"` | Initiates an export of activities for a specific case by its ID |
 

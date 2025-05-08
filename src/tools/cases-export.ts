@@ -21,6 +21,10 @@ export const ExportCaseEndpointsArgsSchema = z.object({
   ]).optional().describe('Organization IDs to filter by. Defaults to "0" or specific IDs like "123" or ["123", "456"]'),
 });
 
+export const ExportCaseActivitiesArgsSchema = z.object({
+  caseId: z.string().describe('ID of the case to export activities for'),
+});
+
 
 export const casesExportTools = {
   // Export cases
@@ -132,6 +136,41 @@ export const casesExportTools = {
           {
             type: 'text',
             text: `Failed to export case endpoints: ${errorMessage}`
+          }
+        ]
+      };
+    }
+  },
+  async exportCaseActivities(args: z.infer<typeof ExportCaseActivitiesArgsSchema>) {
+    try {
+      const response = await exportApi.exportCaseActivities(args.caseId);
+      
+      if (!response.success) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Error exporting case activities: ${response.errors.join(', ')}`
+            }
+          ]
+        };
+      }
+      
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Case activities export initiated successfully. Status code: ${response.statusCode}`
+          }
+        ]
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Failed to export case activities: ${errorMessage}`
           }
         ]
       };
