@@ -214,6 +214,7 @@ In Claude Desktop, or any MCP Client, you can use natural language commands:
 | `Create triage tag named "My Tag"` | Creates a new triage tag |
 | `Update triage rule with ID "abc123"` | Updates an existing triage rule |
 | `Delete triage rule with ID "abc123"` | Permanently removes a triage rule |
+| `Get triage rule with ID "abc123"` | Retrieves the details of a specific triage rule |
 
 ### Viewing Acquisition Artifacts
 
@@ -530,3 +531,12 @@ You can delete existing triage rules:
 ```
 Delete triage rule with ID "abc123"
 ```
+
+### Getting Triage Rule Details
+
+You can retrieve the details of a specific triage rule by its ID:
+
+```
+Get triage rule with ID "abc123"
+```
+

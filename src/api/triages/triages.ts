@@ -88,6 +88,16 @@ export interface DeleteTriageRuleResponse {
   errors: string[];
 }
 
+export interface GetTriageRuleResponse {
+  success: boolean;
+  result: TriageRule & {
+    rule: string;
+    type: string;
+  };
+  statusCode: number;
+  errors: string[];
+}
+
 export const api = {
   async getTriageRules(organizationIds: string | string[] = '0'): Promise<TriageRulesResponse> {
     try {
@@ -160,6 +170,23 @@ export const api = {
       return response.data;
     } catch (error) {
       console.error('Error deleting triage rule:', error);
+      throw error;
+    }
+  },
+  async getTriageRuleById(id: string): Promise<GetTriageRuleResponse> {
+    try {
+      const response = await axios.get(
+        `${config.airHost}/api/public/triages/rules/${id}`,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${config.airApiToken}`
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching triage rule with ID ${id}:`, error);
       throw error;
     }
   }

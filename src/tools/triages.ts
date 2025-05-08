@@ -32,6 +32,10 @@ export const DeleteTriageRuleArgsSchema = z.object({
   id: z.string().describe('ID of the triage rule to delete'),
 });
 
+export const GetTriageRuleByIdArgsSchema = z.object({
+  id: z.string().describe('ID of the triage rule to retrieve'),
+});
+
 // Format triage rule for display
 function formatTriageRule(rule: TriageRule): string {
   return `
@@ -200,6 +204,55 @@ export const triageTools = {
           {
             type: 'text',
             text: `Failed to delete triage rule: ${errorMessage}`
+          }
+        ]
+      };
+    }
+  },
+  async getTriageRuleById(args: z.infer<typeof GetTriageRuleByIdArgsSchema>) {
+    try {
+      const response = await api.getTriageRuleById(args.id);
+      
+      if (!response.success) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Error fetching triage rule: ${response.errors.join(', ')}`
+            }
+          ]
+        };
+      }
+      
+      // Format the rule content for better readability
+      const formattedRule = `
+  Rule ID: ${response.result._id}
+  Description: ${response.result.description}
+  Engine: ${response.result.engine}
+  Search In: ${response.result.searchIn}
+  Created by: ${response.result.createdBy}
+  Type: ${response.result.type}
+  Deletable: ${response.result.deletable ? 'Yes' : 'No'}
+  
+  Rule Content:
+  ${response.result.rule}
+  `;
+      
+      return {
+        content: [
+          {
+            type: 'text',
+            text: formattedRule
+          }
+        ]
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Failed to fetch triage rule: ${errorMessage}`
           }
         ]
       };
