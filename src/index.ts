@@ -36,11 +36,11 @@ import { ListTriageTagsArgsSchema } from './tools/triage-tags';
 import { AddNoteToCaseArgsSchema, caseNotesTools, DeleteNoteFromCaseArgsSchema, UpdateNoteCaseArgsSchema } from './tools/cases-notes';
 import { casesExportTools, ExportCaseActivitiesArgsSchema, ExportCaseEndpointsArgsSchema, ExportCaseNotesArgsSchema, ExportCasesArgsSchema } from './tools/cases-export';
 import { CreateAmazonS3RepositoryArgsSchema, CreateAzureStorageRepositoryArgsSchema, CreateFtpsRepositoryArgsSchema, CreateSftpRepositoryArgsSchema, CreateSmbRepositoryArgsSchema, DeleteRepositoryArgsSchema, GetRepositoryByIdArgsSchema, ListRepositoriesArgsSchema, repositoryTools, UpdateAmazonS3RepositoryArgsSchema, UpdateAzureStorageRepositoryArgsSchema, UpdateFtpsRepositoryArgsSchema, UpdateSftpRepositoryArgsSchema, UpdateSmbRepositoryArgsSchema, ValidateAmazonS3RepositoryArgsSchema, ValidateAzureStorageRepositoryArgsSchema, ValidateFtpsRepositoryArgsSchema } from './tools/evidence-repositories';
-import { DownloadCasePpcArgsSchema, DownloadTaskReportArgsSchema, evidenceTools } from './tools/evidence';
+import { DownloadCasePpcArgsSchema, DownloadTaskReportArgsSchema, evidenceTools, GetReportFileInfoArgsSchema } from './tools/evidence';
 
 const server = new Server({
   name: 'air-mcp',
-  version: '8.13.0'
+  version: '8.14.0'
 }, {
   capabilities: {
     tools: {}
@@ -2253,6 +2253,24 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: ['endpointId', 'taskId'],
         },
       },
+      {
+        name: 'get_report_file_info',
+        description: 'Get information about a PPC file for a specific endpoint and task',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            endpointId: {
+              type: 'string',
+              description: 'The ID of the endpoint to get report file information for',
+            },
+            taskId: {
+              type: 'string',
+              description: 'The ID of the task to get report file information for',
+            },
+          },
+          required: ['endpointId', 'taskId'],
+        },
+      },
     ],
   };
 });
@@ -2646,6 +2664,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       validateAirApiToken();
       const parsedArgs = DownloadTaskReportArgsSchema.parse(args);
       return await evidenceTools.downloadTaskReport(parsedArgs);
+    } else if (name === 'get_report_file_info') {
+      validateAirApiToken();
+      const parsedArgs = GetReportFileInfoArgsSchema.parse(args);
+      return await evidenceTools.getReportFileInfo(parsedArgs);
     } else {
       throw new Error(`Unknown tool: ${name}`);
     }
