@@ -35,6 +35,9 @@ export const CloseCaseArgsSchema = z.object({
   id: z.string().describe('ID of the case to close'),
 });
 
+export const OpenCaseArgsSchema = z.object({
+  id: z.string().describe('ID of the case to open'),
+});
 // Format case for display
 function formatCase(caseItem: Case): string {
   return `
@@ -257,6 +260,41 @@ export const caseTools = {
           {
             type: 'text',
             text: `Failed to close case: ${errorMessage}`
+          }
+        ]
+      };
+    }
+  },
+  async openCase(args: z.infer<typeof OpenCaseArgsSchema>) {
+    try {
+      const response = await api.openCase(args.id);
+      
+      if (!response.success) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Error opening case: ${response.errors.join(', ')}`
+            }
+          ]
+        };
+      }
+      
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Case opened successfully:\n${formatCase(response.result)}`
+          }
+        ]
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Failed to open case: ${errorMessage}`
           }
         ]
       };
