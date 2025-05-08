@@ -35,11 +35,11 @@ import { CreateTriageTagArgsSchema, triageTagTools } from './tools/triage-tags';
 import { ListTriageTagsArgsSchema } from './tools/triage-tags';
 import { AddNoteToCaseArgsSchema, caseNotesTools, DeleteNoteFromCaseArgsSchema, UpdateNoteCaseArgsSchema } from './tools/cases-notes';
 import { casesExportTools, ExportCaseActivitiesArgsSchema, ExportCaseEndpointsArgsSchema, ExportCaseNotesArgsSchema, ExportCasesArgsSchema } from './tools/cases-export';
-import { CreateAzureStorageRepositoryArgsSchema, CreateFtpsRepositoryArgsSchema, CreateSftpRepositoryArgsSchema, CreateSmbRepositoryArgsSchema, ListRepositoriesArgsSchema, repositoryTools, UpdateAzureStorageRepositoryArgsSchema, UpdateFtpsRepositoryArgsSchema, UpdateSftpRepositoryArgsSchema, UpdateSmbRepositoryArgsSchema, ValidateAzureStorageRepositoryArgsSchema, ValidateFtpsRepositoryArgsSchema } from './tools/evidence-repositories';
+import { CreateAmazonS3RepositoryArgsSchema, CreateAzureStorageRepositoryArgsSchema, CreateFtpsRepositoryArgsSchema, CreateSftpRepositoryArgsSchema, CreateSmbRepositoryArgsSchema, ListRepositoriesArgsSchema, repositoryTools, UpdateAmazonS3RepositoryArgsSchema, UpdateAzureStorageRepositoryArgsSchema, UpdateFtpsRepositoryArgsSchema, UpdateSftpRepositoryArgsSchema, UpdateSmbRepositoryArgsSchema, ValidateAmazonS3RepositoryArgsSchema, ValidateAzureStorageRepositoryArgsSchema, ValidateFtpsRepositoryArgsSchema } from './tools/evidence-repositories';
 
 const server = new Server({
   name: 'air-mcp',
-  version: '8.8.0'
+  version: '8.9.0'
 }, {
   capabilities: {
     tools: {}
@@ -2139,6 +2139,55 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: ['SASUrl'],
         },
       },
+      {
+        name: 'create_amazon_s3_repository',
+        description: 'Create a new Amazon S3 repository for evidence storage',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            name: { type: 'string', description: 'Name for the Amazon S3 repository' },
+            region: { type: 'string', description: 'AWS region (e.g. eu-west-1)' },
+            bucket: { type: 'string', description: 'S3 bucket name' },
+            accessKeyId: { type: 'string', description: 'AWS access key ID' },
+            secretAccessKey: { type: 'string', description: 'AWS secret access key' },
+            organizationIds: { type: 'array', items: { type: 'number' }, description: 'Organization IDs to associate the repository with. Defaults to empty array.' }
+          },
+          required: ['name', 'region', 'bucket', 'accessKeyId', 'secretAccessKey'],
+        },
+      },
+      {
+        name: 'update_amazon_s3_repository',
+        description: 'Update an existing Amazon S3 repository',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            id: { type: 'string', description: 'ID of the Amazon S3 repository to update' },
+            name: { type: 'string', description: 'Updated name for the Amazon S3 repository' },
+            region: { type: 'string', description: 'Updated AWS region (e.g. eu-west-1)' },
+            bucket: { type: 'string', description: 'Updated S3 bucket name' },
+            accessKeyId: { type: 'string', description: 'Updated AWS access key ID' },
+            secretAccessKey: { type: 'string', description: 'Updated AWS secret access key' },
+            organizationIds: { type: 'array', items: { type: 'number' }, description: 'Updated organization IDs to associate the repository with. Defaults to empty array.' }
+          },
+          required: ['id', 'name', 'region', 'bucket', 'accessKeyId', 'secretAccessKey'],
+        },
+      },
+      {
+        name: 'validate_amazon_s3_repository',
+        description: 'Validate Amazon S3 repository configuration',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            name: { type: 'string', description: 'Name for the Amazon S3 repository' },
+            region: { type: 'string', description: 'AWS region (e.g. eu-west-1)' },
+            bucket: { type: 'string', description: 'S3 bucket name' },
+            accessKeyId: { type: 'string', description: 'AWS access key ID' },
+            secretAccessKey: { type: 'string', description: 'AWS secret access key' },
+            organizationIds: { type: 'array', items: { type: 'number' }, description: 'Organization IDs to associate the repository with. Defaults to empty array.' }
+          },
+          required: ['name', 'region', 'bucket', 'accessKeyId', 'secretAccessKey'],
+        },
+      },
     ],
   };
 });
@@ -2504,6 +2553,18 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       validateAirApiToken();
       const parsedArgs = ValidateAzureStorageRepositoryArgsSchema.parse(args);
       return await repositoryTools.validateAzureStorageRepository(parsedArgs);
+    } else if (name === 'create_amazon_s3_repository') {
+      validateAirApiToken();
+      const parsedArgs = CreateAmazonS3RepositoryArgsSchema.parse(args);
+      return await repositoryTools.createAmazonS3Repository(parsedArgs);
+    } else if (name === 'update_amazon_s3_repository') {
+      validateAirApiToken();
+      const parsedArgs = UpdateAmazonS3RepositoryArgsSchema.parse(args);
+      return await repositoryTools.updateAmazonS3Repository(parsedArgs);
+    } else if (name === 'validate_amazon_s3_repository') {
+      validateAirApiToken();
+      const parsedArgs = ValidateAmazonS3RepositoryArgsSchema.parse(args);
+      return await repositoryTools.validateAmazonS3Repository(parsedArgs);
     } else {
       throw new Error(`Unknown tool: ${name}`);
     }

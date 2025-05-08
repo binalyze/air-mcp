@@ -106,6 +106,37 @@ export const ValidateAzureStorageRepositoryArgsSchema = z.object({
   SASUrl: z.string().describe('SAS URL for Azure Storage access')
 });
 
+// Schema for create Amazon S3 repository arguments
+export const CreateAmazonS3RepositoryArgsSchema = z.object({
+  name: z.string().describe('Name for the Amazon S3 repository'),
+  region: z.string().describe('AWS region (e.g. eu-west-1)'),
+  bucket: z.string().describe('S3 bucket name'),
+  accessKeyId: z.string().describe('AWS access key ID'),
+  secretAccessKey: z.string().describe('AWS secret access key'),
+  organizationIds: z.array(z.number()).optional().default([]).describe('Organization IDs to associate the repository with')
+});
+
+// Schema for update Amazon S3 repository arguments
+export const UpdateAmazonS3RepositoryArgsSchema = z.object({
+  id: z.string().describe('ID of the Amazon S3 repository to update'),
+  name: z.string().describe('Updated name for the Amazon S3 repository'),
+  region: z.string().describe('Updated AWS region (e.g. eu-west-1)'),
+  bucket: z.string().describe('Updated S3 bucket name'),
+  accessKeyId: z.string().describe('Updated AWS access key ID'),
+  secretAccessKey: z.string().describe('Updated AWS secret access key'),
+  organizationIds: z.array(z.number()).optional().default([]).describe('Updated organization IDs to associate the repository with')
+});
+
+// Schema for validate Amazon S3 repository arguments
+export const ValidateAmazonS3RepositoryArgsSchema = z.object({
+  name: z.string().describe('Name for the Amazon S3 repository'),
+  region: z.string().describe('AWS region (e.g. eu-west-1)'),
+  bucket: z.string().describe('S3 bucket name'),
+  accessKeyId: z.string().describe('AWS access key ID'),
+  secretAccessKey: z.string().describe('AWS secret access key'),
+  organizationIds: z.array(z.number()).optional().default([]).describe('Organization IDs to associate the repository with')
+});
+
 // Format repository for display
 function formatRepository(repo: Repository): string {
   return `
@@ -496,6 +527,110 @@ export const repositoryTools = {
           {
             type: 'text',
             text: `Failed to validate Azure Storage repository: ${errorMessage}`
+          }
+        ]
+      };
+    }
+  },
+  async createAmazonS3Repository(args: z.infer<typeof CreateAmazonS3RepositoryArgsSchema>) {
+    try {
+      const repository = await api.createAmazonS3Repository({
+        name: args.name,
+        region: args.region,
+        bucket: args.bucket,
+        accessKeyId: args.accessKeyId,
+        secretAccessKey: args.secretAccessKey,
+        organizationIds: args.organizationIds || []
+      });
+      
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Successfully created Amazon S3 repository:\n${formatRepository(repository)}`
+          }
+        ]
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Failed to create Amazon S3 repository: ${errorMessage}`
+          }
+        ]
+      };
+    }
+  },
+  async updateAmazonS3Repository(args: z.infer<typeof UpdateAmazonS3RepositoryArgsSchema>) {
+    try {
+      const repository = await api.updateAmazonS3Repository(args.id, {
+        name: args.name,
+        region: args.region,
+        bucket: args.bucket,
+        accessKeyId: args.accessKeyId,
+        secretAccessKey: args.secretAccessKey,
+        organizationIds: args.organizationIds || []
+      });
+      
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Successfully updated Amazon S3 repository:\n${formatRepository(repository)}`
+          }
+        ]
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Failed to update Amazon S3 repository: ${errorMessage}`
+          }
+        ]
+      };
+    }
+  },
+  async validateAmazonS3Repository(args: z.infer<typeof ValidateAmazonS3RepositoryArgsSchema>) {
+    try {
+      const result = await api.validateAmazonS3Repository({
+        name: args.name,
+        region: args.region,
+        bucket: args.bucket,
+        accessKeyId: args.accessKeyId,
+        secretAccessKey: args.secretAccessKey,
+        organizationIds: args.organizationIds || []
+      });
+      
+      if (result.success) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: 'Amazon S3 repository configuration is valid.'
+            }
+          ]
+        };
+      } else {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Amazon S3 repository validation failed: ${result.errors.join(', ')}`
+            }
+          ]
+        };
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Failed to validate Amazon S3 repository: ${errorMessage}`
           }
         ]
       };

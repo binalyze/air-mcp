@@ -92,6 +92,9 @@ A Node.js server implementing **Model Context Protocol (MCP)** for Binalyze AIR,
 - **Create Azure Storage Repository** - Create a new Azure Storage evidence repository.
 - **Update Azure Storage Repository** - Update an existing Azure Storage evidence repository.
 - **Validate Azure Storage Repository** - Validate Azure Storage repository configuration without creating it.
+- **Create Amazon S3 Repository** - Create a new Amazon S3 evidence repository.
+- **Update Amazon S3 Repository** - Update an existing Amazon S3 evidence repository.
+- **Validate Amazon S3 Repository** - Validate Amazon S3 repository configuration without creating it.
 
 ## Overview
 
@@ -282,4 +285,6 @@ In Claude Desktop, or any MCP Client, you can use natural language commands:
 | `Create Azure Storage repository with name "My Azure Storage Repository"` | Creates a new Azure Storage evidence repository with specified credentials |
 | `Update Azure Storage repository with ID "abc123"` | Updates an existing Azure Storage repository's configuration |
 | `Validate Azure Storage repository with SAS URL` | Checks if the provided SAS URL is valid for Azure Storage access |
-
+| `Create a new Amazon S3 repository` | Sets up a new S3 bucket as an evidence repository |
+| `Update Amazon S3 repository with ID "abc123"` | Modifies an existing S3 repository configuration |
+| `Validate Amazon S3 repository configuration` | Checks if S3 credentials and bucket are valid |

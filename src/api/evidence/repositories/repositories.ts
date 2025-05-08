@@ -328,5 +328,84 @@ export const api = {
       console.error('Error validating Azure Storage repository:', error);
       throw error;
     }
+  },
+  async createAmazonS3Repository(data: {
+    name: string;
+    region: string;
+    bucket: string;
+    accessKeyId: string;
+    secretAccessKey: string;
+    organizationIds: number[];
+  }): Promise<Repository> {
+    try {
+      const response = await axios.post(
+        `${config.airHost}/api/public/evidences/repositories/amazon-s3`,
+        data,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${config.airApiToken}`
+          }
+        }
+      );
+      return response.data.result;
+    } catch (error) {
+      console.error('Error creating Amazon S3 repository:', error);
+      throw error;
+    }
+  },
+  async updateAmazonS3Repository(id: string, data: {
+    name: string;
+    region: string;
+    bucket: string;
+    accessKeyId: string;
+    secretAccessKey: string;
+    organizationIds: number[];
+  }): Promise<Repository> {
+    try {
+      const response = await axios.put(
+        `${config.airHost}/api/public/evidences/repositories/amazon-s3/${id}`,
+        data,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${config.airApiToken}`
+          }
+        }
+      );
+      return response.data.result;
+    } catch (error) {
+      console.error('Error updating Amazon S3 repository:', error);
+      throw error;
+    }
+  },
+  async validateAmazonS3Repository(data: {
+    name: string;
+    region: string;
+    bucket: string;
+    accessKeyId: string;
+    secretAccessKey: string;
+    organizationIds: number[];
+  }): Promise<{ success: boolean; errors: string[]; statusCode: number }> {
+    try {
+      const response = await axios.post(
+        `${config.airHost}/api/public/evidences/repositories/validate/amazon-s3`,
+        data,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${config.airApiToken}`
+          }
+        }
+      );
+      return {
+        success: response.data.success,
+        errors: response.data.errors,
+        statusCode: response.data.statusCode
+      };
+    } catch (error) {
+      console.error('Error validating Amazon S3 repository:', error);
+      throw error;
+    }
   }
 };
