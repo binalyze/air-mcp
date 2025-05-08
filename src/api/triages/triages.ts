@@ -64,6 +64,23 @@ export interface CreateTriageRuleResponse {
   errors: string[];
 }
 
+export interface UpdateTriageRuleRequest {
+  description: string;
+  rule: string;
+  searchIn: string;
+  organizationIds: (string | number)[];
+}
+
+export interface UpdateTriageRuleResponse {
+  success: boolean;
+  result: TriageRule & {
+    rule: string;
+    type: string;
+  };
+  statusCode: number;
+  errors: string[];
+}
+
 export const api = {
   async getTriageRules(organizationIds: string | string[] = '0'): Promise<TriageRulesResponse> {
     try {
@@ -104,4 +121,22 @@ export const api = {
       throw error;
     }
   },
+  async updateTriageRule(id: string, data: UpdateTriageRuleRequest): Promise<UpdateTriageRuleResponse> {
+    try {
+      const response = await axios.put(
+        `${config.airHost}/api/public/triages/rules/${id}`,
+        data,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${config.airApiToken}`
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error updating triage rule:', error);
+      throw error;
+    }
+  }
 }; 

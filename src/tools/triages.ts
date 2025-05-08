@@ -19,6 +19,15 @@ export const CreateTriageRuleArgsSchema = z.object({
     .describe('Organization IDs to associate with this rule. Defaults to [0]'),
 });
 
+export const UpdateTriageRuleArgsSchema = z.object({
+  id: z.string().describe('ID of the triage rule to update'),
+  description: z.string().describe('A descriptive name for the triage rule'),
+  rule: z.string().describe('The YARA rule content'),
+  searchIn: z.string().describe('Where to search, e.g., "filesystem"'),
+  organizationIds: z.array(z.union([z.string(), z.number()])).default([0])
+    .describe('Organization IDs to associate with this rule. Defaults to [0]'),
+});
+
 // Format triage rule for display
 function formatTriageRule(rule: TriageRule): string {
   return `
@@ -117,4 +126,44 @@ export const triageTools = {
       };
     }
   },
+  async updateTriageRule(args: z.infer<typeof UpdateTriageRuleArgsSchema>) {
+    try {
+      const response = await api.updateTriageRule(args.id, {
+        description: args.description,
+        rule: args.rule,
+        searchIn: args.searchIn,
+        organizationIds: args.organizationIds
+      });
+      
+      if (!response.success) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Error updating triage rule: ${response.errors.join(', ')}`
+            }
+          ]
+        };
+      }
+      
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Triage rule updated successfully!\n${formatTriageRule(response.result)}\n\nRule ID: ${response.result._id}`
+          }
+        ]
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Failed to update triage rule: ${errorMessage}`
+          }
+        ]
+      };
+    }
+  }
 }; 
