@@ -65,6 +65,7 @@ A Node.js server implementing **Model Context Protocol (MCP)** for Binalyze AIR,
 - **Delete Note from Case** - Delete a note from a case by its ID.
 - **Export Cases** - Export cases data from the system.
 - **Export Case Notes** - Export notes for a specific case by its ID.
+- **Export Case Endpoints** - Export endpoints for a specific case by its ID.
 
 ## Overview
 
@@ -229,3 +230,5 @@ In Claude Desktop, or any MCP Client, you can use natural language commands:
 | `Delete note with ID "8d9baa16-9aa3-4e4f-a08e-a74341ce2f90" from case "C-2022-0002"` | Deletes a specific note from a case by its ID |
 | `Export cases data` | Initiates an export of cases data for your organization |
 | `Export notes for case with ID "case123"` | Initiates an export of notes for a specific case by its ID |
+| `Export endpoints for case with ID "case123"` | Initiates an export of endpoints for a specific case by its ID |
+
