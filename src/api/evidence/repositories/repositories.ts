@@ -304,5 +304,29 @@ export const api = {
       console.error('Error validating FTPS repository:', error);
       throw error;
     }
+  },
+  async validateAzureStorageRepository(data: {
+    SASUrl: string;
+  }): Promise<{ success: boolean; errors: string[]; statusCode: number }> {
+    try {
+      const response = await axios.post(
+        `${config.airHost}/api/public/evidences/repositories/validate/azure-storage`,
+        data,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${config.airApiToken}`
+          }
+        }
+      );
+      return {
+        success: response.data.success,
+        errors: response.data.errors,
+        statusCode: response.data.statusCode
+      };
+    } catch (error) {
+      console.error('Error validating Azure Storage repository:', error);
+      throw error;
+    }
   }
 };

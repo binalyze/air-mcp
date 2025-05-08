@@ -102,6 +102,10 @@ export const UpdateAzureStorageRepositoryArgsSchema = z.object({
   organizationIds: z.array(z.number()).optional().default([]).describe('Updated organization IDs to associate the repository with')
 });
 
+export const ValidateAzureStorageRepositoryArgsSchema = z.object({
+  SASUrl: z.string().describe('SAS URL for Azure Storage access')
+});
+
 // Format repository for display
 function formatRepository(repo: Repository): string {
   return `
@@ -455,6 +459,43 @@ export const repositoryTools = {
           {
             type: 'text',
             text: `Failed to update Azure Storage repository: ${errorMessage}`
+          }
+        ]
+      };
+    }
+  },
+  async validateAzureStorageRepository(args: z.infer<typeof ValidateAzureStorageRepositoryArgsSchema>) {
+    try {
+      const result = await api.validateAzureStorageRepository({
+        SASUrl: args.SASUrl
+      });
+      
+      if (result.success) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: 'Azure Storage repository configuration is valid.'
+            }
+          ]
+        };
+      } else {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Azure Storage repository validation failed: ${result.errors.join(', ')}`
+            }
+          ]
+        };
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Failed to validate Azure Storage repository: ${errorMessage}`
           }
         ]
       };

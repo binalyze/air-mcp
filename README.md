@@ -91,6 +91,7 @@ A Node.js server implementing **Model Context Protocol (MCP)** for Binalyze AIR,
 - **Validate FTPS Repository** - Validate FTPS repository configuration without creating it.
 - **Create Azure Storage Repository** - Create a new Azure Storage evidence repository.
 - **Update Azure Storage Repository** - Update an existing Azure Storage evidence repository.
+- **Validate Azure Storage Repository** - Validate Azure Storage repository configuration without creating it.
 
 ## Overview
 
@@ -280,3 +281,5 @@ In Claude Desktop, or any MCP Client, you can use natural language commands:
 | `Validate FTPS repository configuration` | Tests if a FTPS repository configuration is valid without creating it |
 | `Create Azure Storage repository with name "My Azure Storage Repository"` | Creates a new Azure Storage evidence repository with specified credentials |
 | `Update Azure Storage repository with ID "abc123"` | Updates an existing Azure Storage repository's configuration |
+| `Validate Azure Storage repository with SAS URL` | Checks if the provided SAS URL is valid for Azure Storage access |
+

@@ -35,11 +35,11 @@ import { CreateTriageTagArgsSchema, triageTagTools } from './tools/triage-tags';
 import { ListTriageTagsArgsSchema } from './tools/triage-tags';
 import { AddNoteToCaseArgsSchema, caseNotesTools, DeleteNoteFromCaseArgsSchema, UpdateNoteCaseArgsSchema } from './tools/cases-notes';
 import { casesExportTools, ExportCaseActivitiesArgsSchema, ExportCaseEndpointsArgsSchema, ExportCaseNotesArgsSchema, ExportCasesArgsSchema } from './tools/cases-export';
-import { CreateAzureStorageRepositoryArgsSchema, CreateFtpsRepositoryArgsSchema, CreateSftpRepositoryArgsSchema, CreateSmbRepositoryArgsSchema, ListRepositoriesArgsSchema, repositoryTools, UpdateAzureStorageRepositoryArgsSchema, UpdateFtpsRepositoryArgsSchema, UpdateSftpRepositoryArgsSchema, UpdateSmbRepositoryArgsSchema, ValidateFtpsRepositoryArgsSchema } from './tools/evidence-repositories';
+import { CreateAzureStorageRepositoryArgsSchema, CreateFtpsRepositoryArgsSchema, CreateSftpRepositoryArgsSchema, CreateSmbRepositoryArgsSchema, ListRepositoriesArgsSchema, repositoryTools, UpdateAzureStorageRepositoryArgsSchema, UpdateFtpsRepositoryArgsSchema, UpdateSftpRepositoryArgsSchema, UpdateSmbRepositoryArgsSchema, ValidateAzureStorageRepositoryArgsSchema, ValidateFtpsRepositoryArgsSchema } from './tools/evidence-repositories';
 
 const server = new Server({
   name: 'air-mcp',
-  version: '8.7.0'
+  version: '8.8.0'
 }, {
   capabilities: {
     tools: {}
@@ -2125,6 +2125,20 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: ['id', 'name', 'SASUrl'],
         },
       },
+      {
+        name: 'validate_azure_storage_repository',
+        description: 'Validate an Azure Storage repository configuration',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            SASUrl: {
+              type: 'string',
+              description: 'SAS URL for Azure Storage access',
+            },
+          },
+          required: ['SASUrl'],
+        },
+      },
     ],
   };
 });
@@ -2486,6 +2500,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       validateAirApiToken();
       const parsedArgs = UpdateAzureStorageRepositoryArgsSchema.parse(args);
       return await repositoryTools.updateAzureStorageRepository(parsedArgs);
+    } else if (name === 'validate_azure_storage_repository') {
+      validateAirApiToken();
+      const parsedArgs = ValidateAzureStorageRepositoryArgsSchema.parse(args);
+      return await repositoryTools.validateAzureStorageRepository(parsedArgs);
     } else {
       throw new Error(`Unknown tool: ${name}`);
     }
