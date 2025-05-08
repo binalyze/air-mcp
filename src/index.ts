@@ -37,10 +37,11 @@ import { AddNoteToCaseArgsSchema, caseNotesTools, DeleteNoteFromCaseArgsSchema, 
 import { casesExportTools, ExportCaseActivitiesArgsSchema, ExportCaseEndpointsArgsSchema, ExportCaseNotesArgsSchema, ExportCasesArgsSchema } from './tools/cases-export';
 import { CreateAmazonS3RepositoryArgsSchema, CreateAzureStorageRepositoryArgsSchema, CreateFtpsRepositoryArgsSchema, CreateSftpRepositoryArgsSchema, CreateSmbRepositoryArgsSchema, DeleteRepositoryArgsSchema, GetRepositoryByIdArgsSchema, ListRepositoriesArgsSchema, repositoryTools, UpdateAmazonS3RepositoryArgsSchema, UpdateAzureStorageRepositoryArgsSchema, UpdateFtpsRepositoryArgsSchema, UpdateSftpRepositoryArgsSchema, UpdateSmbRepositoryArgsSchema, ValidateAmazonS3RepositoryArgsSchema, ValidateAzureStorageRepositoryArgsSchema, ValidateFtpsRepositoryArgsSchema } from './tools/evidence-repositories';
 import { DownloadCasePpcArgsSchema, DownloadTaskReportArgsSchema, evidenceTools, GetReportFileInfoArgsSchema } from './tools/evidence';
+import { GetOrganizationUsersArgsSchema, organizationUsersTools } from './tools/organizations-users';
 
 const server = new Server({
   name: 'air-mcp',
-  version: '8.14.0'
+  version: '9.0.0'
 }, {
   capabilities: {
     tools: {}
@@ -2271,6 +2272,20 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: ['endpointId', 'taskId'],
         },
       },
+      {
+        name: 'get_organization_users',
+        description: 'Get users for a specific organization by its ID',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            id: {
+              type: 'string',
+              description: 'The ID of the organization to retrieve users for',
+            },
+          },
+          required: ['id'],
+        },
+      },
     ],
   };
 });
@@ -2668,6 +2683,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       validateAirApiToken();
       const parsedArgs = GetReportFileInfoArgsSchema.parse(args);
       return await evidenceTools.getReportFileInfo(parsedArgs);
+    } else if (name === 'get_organization_users') {
+      validateAirApiToken();
+      const parsedArgs = GetOrganizationUsersArgsSchema.parse(args);
+      return await organizationUsersTools.getOrganizationUsers(parsedArgs);
     } else {
       throw new Error(`Unknown tool: ${name}`);
     }
