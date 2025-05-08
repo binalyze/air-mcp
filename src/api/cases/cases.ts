@@ -86,6 +86,54 @@ export interface CaseActivitiesResponse {
   errors: string[];
 }
 
+export interface CaseEndpoint {
+  platform: string;
+  tags: string[];
+  isolationStatus: string;
+  _id: string;
+  createdAt: string;
+  updatedAt: string;
+  organizationId: number;
+  ipAddress: string;
+  name: string;
+  groupId: string;
+  groupFullPath: string;
+  os: string;
+  isServer: boolean;
+  isManaged: boolean;
+  lastSeen: string;
+  version: string;
+  versionNo: number;
+  registeredAt: string;
+  securityToken: string;
+  onlineStatus: string;
+  issues: string[];
+  label: string | null;
+  waitingForVersionUpdateFix: boolean;
+}
+
+export interface CaseEndpointsResponse {
+  success: boolean;
+  result: {
+    entities: CaseEndpoint[];
+    filters: Array<{
+      name: string;
+      type: string;
+      options: any[];
+      filterUrl: string | null;
+    }>;
+    sortables: string[];
+    totalEntityCount: number;
+    currentPage: number;
+    pageSize: number;
+    previousPage: number;
+    totalPageCount: number;
+    nextPage: number;
+  };
+  statusCode: number;
+  errors: string[];
+}
+
 export const api = {
   async getCases(organizationIds: string | string[] = '0'): Promise<CasesResponse> {
     try {
@@ -283,6 +331,29 @@ export const api = {
       return response.data;
     } catch (error) {
       console.error(`Error fetching activities for case with ID ${id}:`, error);
+      throw error;
+    }
+  },
+  async getCaseEndpoints(
+    id: string, 
+    organizationIds: string | number = 0
+  ): Promise<CaseEndpointsResponse> {
+    try {
+      const response = await axios.get(
+        `${config.airHost}/api/public/cases/${id}/endpoints`,
+        {
+          params: {
+            'filter[organizationIds]': organizationIds
+          },
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${config.airApiToken}`
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching endpoints for case with ID ${id}:`, error);
       throw error;
     }
   }

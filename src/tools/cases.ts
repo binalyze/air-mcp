@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { api, Case } from '../api/cases/cases';
+import { api, Case, CaseEndpoint } from '../api/cases/cases';
 
 // Schema for list cases arguments
 export const ListCasesArgsSchema = z.object({
@@ -55,6 +55,30 @@ export const CheckCaseNameArgsSchema = z.object({
 export const GetCaseActivitiesArgsSchema = z.object({
   id: z.string().describe('ID of the case to retrieve activities for'),
 });
+
+export const GetCaseEndpointsArgsSchema = z.object({
+  id: z.string().describe('ID of the case to retrieve endpoints for'),
+  organizationIds: z.union([
+    z.string(),
+    z.number()
+  ]).default(0).describe('Organization IDs to filter endpoints by. Defaults to 0.')
+});
+
+function formatEndpoint(endpoint: CaseEndpoint): string {
+  return `
+Endpoint: ${endpoint.name} (ID: ${endpoint._id})
+Platform: ${endpoint.platform}
+OS: ${endpoint.os}
+IP Address: ${endpoint.ipAddress}
+Group: ${endpoint.groupFullPath}
+Status: ${endpoint.onlineStatus} (${endpoint.isolationStatus})
+Last Seen: ${new Date(endpoint.lastSeen).toLocaleString()}
+Version: ${endpoint.version}
+Managed: ${endpoint.isManaged ? 'Yes' : 'No'}
+Server: ${endpoint.isServer ? 'Yes' : 'No'}
+Tags: ${endpoint.tags.length > 0 ? endpoint.tags.join(', ') : 'None'}
+`;
+}
 
 // Format case for display
 function formatCase(caseItem: Case): string {
@@ -473,6 +497,72 @@ export const caseTools = {
           {
             type: 'text',
             text: `Failed to fetch case activities: ${errorMessage}`
+          }
+        ]
+      };
+    }
+  },
+  async getCaseEndpoints(args: z.infer<typeof GetCaseEndpointsArgsSchema>) {
+    try {
+      const response = await api.getCaseEndpoints(args.id, args.organizationIds);
+      
+      if (!response.success) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Error fetching case endpoints: ${response.errors.join(', ')}`
+            }
+          ]
+        };
+      }
+      
+      if (response.result.entities.length === 0) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `No endpoints found for case with ID ${args.id}.`
+            }
+          ]
+        };
+      }
+      
+      // Group endpoints by OS for better organization
+      const endpointsByOs: Record<string, CaseEndpoint[]> = {};
+      response.result.entities.forEach(endpoint => {
+        const os = endpoint.os || 'Unknown';
+        if (!endpointsByOs[os]) {
+          endpointsByOs[os] = [];
+        }
+        endpointsByOs[os].push(endpoint);
+      });
+      
+      // Format summary by OS
+      const summaryByOs = Object.entries(endpointsByOs).map(([os, endpoints]) => {
+        return `${os}: ${endpoints.length} endpoints`;
+      }).join('\n');
+      
+      // Format endpoints list
+      const endpointsList = response.result.entities.map(endpoint => 
+        `${endpoint._id}: ${endpoint.name} (OS: ${endpoint.os}, Platform: ${endpoint.platform}, Status: ${endpoint.onlineStatus})`
+      ).join('\n');
+      
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Found ${response.result.totalEntityCount} endpoints for case ${args.id}:\n\nSummary by OS:\n${summaryByOs}\n\nEndpoints:\n${endpointsList}`
+          }
+        ]
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Failed to fetch case endpoints: ${errorMessage}`
           }
         ]
       };

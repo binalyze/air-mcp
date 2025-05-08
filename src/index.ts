@@ -17,7 +17,7 @@ import {
   CreateAcquisitionProfileArgsSchema
 } from './tools/acquisitions';
 import { organizationTools } from './tools/organizations';
-import { ArchiveCaseArgsSchema, caseTools, ChangeCaseOwnerArgsSchema, CheckCaseNameArgsSchema, CloseCaseArgsSchema, CreateCaseArgsSchema, GetCaseActivitiesArgsSchema, GetCaseByIdArgsSchema, ListCasesArgsSchema, OpenCaseArgsSchema, UpdateCaseArgsSchema } from './tools/cases';
+import { ArchiveCaseArgsSchema, caseTools, ChangeCaseOwnerArgsSchema, CheckCaseNameArgsSchema, CloseCaseArgsSchema, CreateCaseArgsSchema, GetCaseActivitiesArgsSchema, GetCaseByIdArgsSchema, GetCaseEndpointsArgsSchema, ListCasesArgsSchema, OpenCaseArgsSchema, UpdateCaseArgsSchema } from './tools/cases';
 import { policyTools, ListPoliciesArgsSchema, CreatePolicyArgsSchema, UpdatePolicyArgsSchema, GetPolicyByIdArgsSchema, UpdatePolicyPrioritiesArgsSchema, PolicyMatchStatsArgsSchema, DeletePolicyByIdArgsSchema } from './tools/policies';
 import { taskTools, ListTasksArgsSchema, GetTaskByIdArgsSchema, CancelTaskByIdArgsSchema, DeleteTaskByIdArgsSchema } from './tools/tasks';
 import { triageTools, ListTriageRulesArgsSchema, CreateTriageRuleArgsSchema, UpdateTriageRuleArgsSchema, DeleteTriageRuleArgsSchema, GetTriageRuleByIdArgsSchema, ValidateTriageRuleArgsSchema, AssignTriageTaskArgsSchema } from './tools/triages';
@@ -38,7 +38,7 @@ import { casesExportTools, ExportCaseActivitiesArgsSchema, ExportCaseEndpointsAr
 
 const server = new Server({
   name: 'air-mcp',
-  version: '7.15.0'
+  version: '7.16.0'
 }, {
   capabilities: {
     tools: {}
@@ -1802,6 +1802,24 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: ['id'],
         },
       },
+      {
+        name: 'get_case_endpoints',
+        description: 'Get all endpoints associated with a specific case by its ID',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            id: {
+              type: 'string',
+              description: 'The ID of the case to retrieve endpoints for',
+            },
+            organizationIds: {
+              type: 'string',
+              description: 'Organization IDs to filter endpoints by. Defaults to 0.',
+            },
+          },
+          required: ['id'],
+        },
+      },
     ],
   };
 });
@@ -2099,6 +2117,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       validateAirApiToken();
       const parsedArgs = GetCaseActivitiesArgsSchema.parse(args);
       return await caseTools.getCaseActivities(parsedArgs);
+    } else if (name === 'get_case_endpoints') {
+      validateAirApiToken();
+      const parsedArgs = GetCaseEndpointsArgsSchema.parse(args);
+      return await caseTools.getCaseEndpoints(parsedArgs);
     } else {
       throw new Error(`Unknown tool: ${name}`);
     }
