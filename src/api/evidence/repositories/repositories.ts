@@ -407,5 +407,22 @@ export const api = {
       console.error('Error validating Amazon S3 repository:', error);
       throw error;
     }
+  },
+  async getRepositoryById(id: string): Promise<Repository> {
+    try {
+      const response = await axios.get(
+        `${config.airHost}/api/public/evidences/repositories/${id}`,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${config.airApiToken}`
+          }
+        }
+      );
+      return response.data.result;
+    } catch (error) {
+      console.error('Error fetching repository by ID:', error);
+      throw error;
+    }
   }
 };

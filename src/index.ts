@@ -35,11 +35,11 @@ import { CreateTriageTagArgsSchema, triageTagTools } from './tools/triage-tags';
 import { ListTriageTagsArgsSchema } from './tools/triage-tags';
 import { AddNoteToCaseArgsSchema, caseNotesTools, DeleteNoteFromCaseArgsSchema, UpdateNoteCaseArgsSchema } from './tools/cases-notes';
 import { casesExportTools, ExportCaseActivitiesArgsSchema, ExportCaseEndpointsArgsSchema, ExportCaseNotesArgsSchema, ExportCasesArgsSchema } from './tools/cases-export';
-import { CreateAmazonS3RepositoryArgsSchema, CreateAzureStorageRepositoryArgsSchema, CreateFtpsRepositoryArgsSchema, CreateSftpRepositoryArgsSchema, CreateSmbRepositoryArgsSchema, ListRepositoriesArgsSchema, repositoryTools, UpdateAmazonS3RepositoryArgsSchema, UpdateAzureStorageRepositoryArgsSchema, UpdateFtpsRepositoryArgsSchema, UpdateSftpRepositoryArgsSchema, UpdateSmbRepositoryArgsSchema, ValidateAmazonS3RepositoryArgsSchema, ValidateAzureStorageRepositoryArgsSchema, ValidateFtpsRepositoryArgsSchema } from './tools/evidence-repositories';
+import { CreateAmazonS3RepositoryArgsSchema, CreateAzureStorageRepositoryArgsSchema, CreateFtpsRepositoryArgsSchema, CreateSftpRepositoryArgsSchema, CreateSmbRepositoryArgsSchema, GetRepositoryByIdArgsSchema, ListRepositoriesArgsSchema, repositoryTools, UpdateAmazonS3RepositoryArgsSchema, UpdateAzureStorageRepositoryArgsSchema, UpdateFtpsRepositoryArgsSchema, UpdateSftpRepositoryArgsSchema, UpdateSmbRepositoryArgsSchema, ValidateAmazonS3RepositoryArgsSchema, ValidateAzureStorageRepositoryArgsSchema, ValidateFtpsRepositoryArgsSchema } from './tools/evidence-repositories';
 
 const server = new Server({
   name: 'air-mcp',
-  version: '8.9.0'
+  version: '8.10.0'
 }, {
   capabilities: {
     tools: {}
@@ -2188,6 +2188,20 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: ['name', 'region', 'bucket', 'accessKeyId', 'secretAccessKey'],
         },
       },
+      {
+        name: 'get_repository_by_id',
+        description: 'Get detailed information about a specific evidence repository by its ID',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            id: {
+              type: 'string',
+              description: 'The ID of the repository to retrieve',
+            },
+          },
+          required: ['id'],
+        },
+      },
     ],
   };
 });
@@ -2565,6 +2579,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       validateAirApiToken();
       const parsedArgs = ValidateAmazonS3RepositoryArgsSchema.parse(args);
       return await repositoryTools.validateAmazonS3Repository(parsedArgs);
+    } else if (name === 'get_repository_by_id') {
+      validateAirApiToken();
+      const parsedArgs = GetRepositoryByIdArgsSchema.parse(args);
+      return await repositoryTools.getRepositoryById(parsedArgs);
     } else {
       throw new Error(`Unknown tool: ${name}`);
     }

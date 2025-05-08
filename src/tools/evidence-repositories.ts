@@ -137,6 +137,11 @@ export const ValidateAmazonS3RepositoryArgsSchema = z.object({
   organizationIds: z.array(z.number()).optional().default([]).describe('Organization IDs to associate the repository with')
 });
 
+// Schema for get repository by ID arguments
+export const GetRepositoryByIdArgsSchema = z.object({
+  id: z.string().describe('ID of the repository to retrieve')
+});
+
 // Format repository for display
 function formatRepository(repo: Repository): string {
   return `
@@ -631,6 +636,30 @@ export const repositoryTools = {
           {
             type: 'text',
             text: `Failed to validate Amazon S3 repository: ${errorMessage}`
+          }
+        ]
+      };
+    }
+  },
+  async getRepositoryById(args: z.infer<typeof GetRepositoryByIdArgsSchema>) {
+    try {
+      const repository = await api.getRepositoryById(args.id);
+      
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Repository details:\n${formatRepository(repository)}`
+          }
+        ]
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Failed to fetch repository: ${errorMessage}`
           }
         ]
       };
