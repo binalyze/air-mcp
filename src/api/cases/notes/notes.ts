@@ -1,0 +1,38 @@
+// First, let's implement the notes.ts API file
+import axios from 'axios';
+import { config } from '../../../config';
+
+export interface Note {
+  _id: string;
+  value: string;
+  writtenAt: string;
+  writtenBy: string;
+}
+
+export interface AddNoteResponse {
+  success: boolean;
+  result: Note;
+  statusCode: number;
+  errors: string[];
+}
+
+export const notesApi = {
+  async addNote(caseId: string, noteValue: string): Promise<AddNoteResponse> {
+    try {
+      const response = await axios.post(
+        `${config.airHost}/api/public/cases/${caseId}/notes`,
+        { value: noteValue },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${config.airApiToken}`
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error adding note to case:', error);
+      throw error;
+    }
+  },
+};

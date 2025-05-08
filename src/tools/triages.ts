@@ -40,6 +40,35 @@ export const ValidateTriageRuleArgsSchema = z.object({
   rule: z.string().describe('The YARA rule content to validate'),
 });
 
+export const AssignTriageTaskArgsSchema = z.object({
+  caseId: z.string().describe('Case ID for the triage task'),
+  triageRuleIds: z.array(z.string()).describe('Array of triage rule IDs to apply'),
+  taskConfig: z.object({
+    choice: z.string().describe('Configuration choice, e.g., "use-custom-options"')
+  }).describe('Task configuration options'),
+  mitreAttack: z.object({
+    enabled: z.boolean().describe('Whether to enable MITRE ATT&CK framework')
+  }).describe('MITRE ATT&CK configuration'),
+  filter: z.object({
+    searchTerm: z.string().optional().describe('Optional search term'),
+    name: z.string().optional().describe('Filter by asset name'),
+    ipAddress: z.string().optional().describe('Filter by IP address'),
+    groupId: z.string().optional().describe('Filter by group ID'),
+    groupFullPath: z.string().optional().describe('Filter by full group path'),
+    managedStatus: z.array(z.string()).optional().describe('Filter by managed status (e.g., ["managed"])'),
+    isolationStatus: z.array(z.string()).optional().describe('Filter by isolation status'),
+    platform: z.array(z.string()).optional().describe('Filter by platform (e.g., ["windows"])'),
+    issue: z.string().optional().describe('Filter by issue'),
+    onlineStatus: z.array(z.string()).optional().describe('Filter by online status'),
+    tags: z.array(z.string()).optional().describe('Filter by tags'),
+    version: z.string().optional().describe('Filter by agent version'),
+    policy: z.string().optional().describe('Filter by policy'),
+    includedEndpointIds: z.array(z.string()).optional().describe('Array of endpoint IDs to include'),
+    excludedEndpointIds: z.array(z.string()).optional().describe('Array of endpoint IDs to exclude'),
+    organizationIds: z.array(z.union([z.string(), z.number()])).optional().describe('Organization IDs filter')
+  }).describe('Filter criteria for selecting endpoints')
+});
+
 // Format triage rule for display
 function formatTriageRule(rule: TriageRule): string {
   return `
@@ -294,6 +323,45 @@ export const triageTools = {
           {
             type: 'text',
             text: `Failed to validate triage rule: ${errorMessage}`
+          }
+        ]
+      };
+    }
+  },
+  async assignTriageTask(args: z.infer<typeof AssignTriageTaskArgsSchema>) {
+    try {
+      const response = await api.assignTriageTask(args);
+      
+      if (!response.success) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Error assigning triage task: ${response.errors.join(', ')}`
+            }
+          ]
+        };
+      }
+      
+      const tasksInfo = response.result.map(task => 
+        `Task ID: ${task._id}\nName: ${task.name}\nOrganization ID: ${task.organizationId}`
+      ).join('\n\n');
+      
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Triage task assigned successfully!\n\n${tasksInfo}`
+          }
+        ]
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Failed to assign triage task: ${errorMessage}`
           }
         ]
       };

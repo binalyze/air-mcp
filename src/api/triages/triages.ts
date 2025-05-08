@@ -109,6 +109,46 @@ export interface ValidateTriageRuleResponse {
   errors: string[];
 }
 
+export interface AssignTriageTaskRequest {
+  caseId: string;
+  triageRuleIds: string[];
+  taskConfig: {
+    choice: string;
+  };
+  mitreAttack: {
+    enabled: boolean;
+  };
+  filter: {
+    searchTerm?: string;
+    name?: string;
+    ipAddress?: string;
+    groupId?: string;
+    groupFullPath?: string;
+    managedStatus?: string[];
+    isolationStatus?: string[];
+    platform?: string[];
+    issue?: string;
+    onlineStatus?: string[];
+    tags?: string[];
+    version?: string;
+    policy?: string;
+    includedEndpointIds?: string[];
+    excludedEndpointIds?: string[];
+    organizationIds?: (string | number)[];
+  };
+}
+
+export interface AssignTriageTaskResponse {
+  success: boolean;
+  result: Array<{
+    _id: string;
+    name: string;
+    organizationId: number;
+  }>;
+  statusCode: number;
+  errors: string[];
+}
+
 export const api = {
   async getTriageRules(organizationIds: string | string[] = '0'): Promise<TriageRulesResponse> {
     try {
@@ -216,6 +256,24 @@ export const api = {
       return response.data;
     } catch (error) {
       console.error('Error validating triage rule:', error);
+      throw error;
+    }
+  },
+  async assignTriageTask(data: AssignTriageTaskRequest): Promise<AssignTriageTaskResponse> {
+    try {
+      const response = await axios.post(
+        `${config.airHost}/api/public/triages/triage`,
+        data,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${config.airApiToken}`
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error assigning triage task:', error);
       throw error;
     }
   }

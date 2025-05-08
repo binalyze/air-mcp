@@ -59,6 +59,8 @@ A Node.js server implementing **Model Context Protocol (MCP)** for Binalyze AIR,
 - **Triage Rules Management** - List, create, update, and delete triage rules for threat detection.
 - **Triage Tags Management** - List and create triage tags for threat detection.
 - **Validate Triage Rule** - Validate a triage rule syntax without creating it.
+- **Assign Triage Task** - Assign a triage task to endpoints based on filter criteria.
+- **Add Note to Case** - Add a note to a specific case by its ID.
 
 ## Overview
 
@@ -217,6 +219,8 @@ In Claude Desktop, or any MCP Client, you can use natural language commands:
 | `Delete triage rule with ID "abc123"` | Permanently removes a triage rule |
 | `Get triage rule with ID "abc123"` | Retrieves the details of a specific triage rule |
 | `Validate triage rule syntax` | Validates a triage rule syntax without creating it |
+| `Assign triage task` | Assigns a triage task to endpoints based on filter criteria |
+| `Add note to case` | Adds a note to a specific case by its ID |
 
 ### Viewing Acquisition Artifacts
 
@@ -550,4 +554,19 @@ You can validate a triage rule syntax without creating it:
 Validate this YARA rule: rule test { condition: true }
 ```
 
+### Assign Triage Task
+
+You can assign a triage task to endpoints based on filter criteria:
+
+```
+Assign triage task to endpoints with IDs ["id1", "id2"]
+```
+
+### Add Note to Case
+
+You can add a note to a specific case by its ID:
+
+```
+Add note to case with ID "C-2022-0002"
+```
 

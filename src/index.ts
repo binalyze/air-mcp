@@ -20,7 +20,7 @@ import { organizationTools } from './tools/organizations';
 import { caseTools, ListCasesArgsSchema } from './tools/cases';
 import { policyTools, ListPoliciesArgsSchema, CreatePolicyArgsSchema, UpdatePolicyArgsSchema, GetPolicyByIdArgsSchema, UpdatePolicyPrioritiesArgsSchema, PolicyMatchStatsArgsSchema, DeletePolicyByIdArgsSchema } from './tools/policies';
 import { taskTools, ListTasksArgsSchema, GetTaskByIdArgsSchema, CancelTaskByIdArgsSchema, DeleteTaskByIdArgsSchema } from './tools/tasks';
-import { triageTools, ListTriageRulesArgsSchema, CreateTriageRuleArgsSchema, UpdateTriageRuleArgsSchema, DeleteTriageRuleArgsSchema, GetTriageRuleByIdArgsSchema, ValidateTriageRuleArgsSchema } from './tools/triages';
+import { triageTools, ListTriageRulesArgsSchema, CreateTriageRuleArgsSchema, UpdateTriageRuleArgsSchema, DeleteTriageRuleArgsSchema, GetTriageRuleByIdArgsSchema, ValidateTriageRuleArgsSchema, AssignTriageTaskArgsSchema } from './tools/triages';
 import { userTools, ListUsersArgsSchema } from './tools/users';
 import { droneAnalyzerTools, acquisitionArtifactTools, eDiscoveryTools } from './tools/params';
 import { auditTools, ExportAuditLogsArgsSchema, ListAuditLogsArgsSchema } from './tools/audit';
@@ -33,10 +33,11 @@ import { assignmentTools, CancelTaskAssignmentArgsSchema, DeleteTaskAssignmentAr
 import { GetTaskAssignmentsByIdArgsSchema } from './tools/assignments';
 import { CreateTriageTagArgsSchema, triageTagTools } from './tools/triage-tags';
 import { ListTriageTagsArgsSchema } from './tools/triage-tags';
+import { AddNoteToCaseArgsSchema, caseNotesTools } from './tools/cases-notes';
 
 const server = new Server({
   name: 'air-mcp',
-  version: '6.6.0'
+  version: '7.0.0'
 }, {
   capabilities: {
     tools: {}
@@ -1482,6 +1483,74 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: ['rule'],
         },
       },
+      {
+        name: 'assign_triage_task',
+        description: 'Assign a triage task to endpoints based on filter criteria',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            caseId: { type: 'string', description: 'Case ID for the triage task' },
+            triageRuleIds: { type: 'array', items: { type: 'string' }, description: 'Array of triage rule IDs to apply' },
+            taskConfig: { 
+              type: 'object', 
+              properties: {
+                choice: { type: 'string', description: 'Configuration choice, e.g., "use-custom-options"' }
+              },
+              required: ['choice'],
+              description: 'Task configuration options'
+            },
+            mitreAttack: { 
+              type: 'object', 
+              properties: {
+                enabled: { type: 'boolean', description: 'Whether to enable MITRE ATT&CK framework' }
+              },
+              required: ['enabled'],
+              description: 'MITRE ATT&CK configuration'
+            },
+            filter: {
+              type: 'object',
+              properties: {
+                searchTerm: { type: 'string', description: 'Optional search term' },
+                name: { type: 'string', description: 'Filter by asset name' },
+                ipAddress: { type: 'string', description: 'Filter by IP address' },
+                groupId: { type: 'string', description: 'Filter by group ID' },
+                groupFullPath: { type: 'string', description: 'Filter by full group path' },
+                managedStatus: { type: 'array', items: { type: 'string' }, description: 'Filter by managed status (e.g., ["managed"])' },
+                isolationStatus: { type: 'array', items: { type: 'string' }, description: 'Filter by isolation status' },
+                platform: { type: 'array', items: { type: 'string' }, description: 'Filter by platform (e.g., ["windows"])' },
+                issue: { type: 'string', description: 'Filter by issue' },
+                onlineStatus: { type: 'array', items: { type: 'string' }, description: 'Filter by online status' },
+                tags: { type: 'array', items: { type: 'string' }, description: 'Filter by tags' },
+                version: { type: 'string', description: 'Filter by agent version' },
+                policy: { type: 'string', description: 'Filter by policy' },
+                includedEndpointIds: { type: 'array', items: { type: 'string' }, description: 'Array of endpoint IDs to include' },
+                excludedEndpointIds: { type: 'array', items: { type: 'string' }, description: 'Array of endpoint IDs to exclude' },
+                organizationIds: { type: 'array', items: { oneOf: [{ type: 'number' }, { type: 'string' }] }, description: 'Organization IDs filter' }
+              },
+              description: 'Filter criteria for selecting endpoints'
+            }
+          },
+          required: ['caseId', 'triageRuleIds', 'taskConfig', 'mitreAttack', 'filter'],
+        },
+      },
+      {
+        name: 'add_note_to_case',
+        description: 'Add a note to a specific case by its ID',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            caseId: {
+              type: 'string',
+              description: 'The ID of the case to add a note to (e.g., "C-2022-0002")',
+            },
+            note: {
+              type: 'string',
+              description: 'The content of the note to add to the case',
+            },
+          },
+          required: ['caseId', 'note'],
+        },
+      },
     ],
   };
 });
@@ -1711,6 +1780,14 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       validateAirApiToken();
       const parsedArgs = ValidateTriageRuleArgsSchema.parse(args);
       return await triageTools.validateTriageRule(parsedArgs);
+    } else if (name === 'assign_triage_task') {
+      validateAirApiToken();
+      const parsedArgs = AssignTriageTaskArgsSchema.parse(args);
+      return await triageTools.assignTriageTask(parsedArgs);
+    } else if (name === 'add_note_to_case') {
+      validateAirApiToken();
+      const parsedArgs = AddNoteToCaseArgsSchema.parse(args);
+      return await caseNotesTools.addNoteToCase(parsedArgs);
     } else {
       throw new Error(`Unknown tool: ${name}`);
     }
