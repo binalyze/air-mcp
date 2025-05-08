@@ -40,10 +40,11 @@ import { DownloadCasePpcArgsSchema, DownloadTaskReportArgsSchema, evidenceTools,
 import { AssignUsersToOrganizationArgsSchema, GetOrganizationUsersArgsSchema, organizationUsersTools, RemoveUserFromOrganizationArgsSchema } from './tools/organizations-users';
 import { UpdateOrganizationArgsSchema } from './tools/organizations';
 import { CallWebhookArgsSchema, GetTaskAssignmentsArgsSchema, PostWebhookArgsSchema, webhookTools } from './tools/webhooks';
+import { settingsTools, UpdateBannerMessageArgsSchema } from './tools/settings';
 
 const server = new Server({
   name: 'air-mcp',
-  version: '11.2.0'
+  version: '12.0.0'
 }, {
   capabilities: {
     tools: {}
@@ -2597,6 +2598,20 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: ['slug', 'taskId', 'token'],
         },
       },
+      {
+        name: 'update_banner_message',
+        description: 'Update the system banner message settings',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            enabled: {
+              type: 'boolean',
+              description: 'Whether the banner message is enabled or disabled',
+            },
+          },
+          required: ['enabled'],
+        },
+      },
     ],
   };
 });
@@ -3062,6 +3077,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       validateAirApiToken();
       const parsedArgs = GetTaskAssignmentsArgsSchema.parse(args);
       return await webhookTools.getTaskAssignments(parsedArgs);
+    } else if (name === 'update_banner_message') {
+      validateAirApiToken();
+      const parsedArgs = UpdateBannerMessageArgsSchema.parse(args);
+      return await settingsTools.updateBannerMessage(parsedArgs);
     } else {
       throw new Error(`Unknown tool: ${name}`);
     }
