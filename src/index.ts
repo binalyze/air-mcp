@@ -35,11 +35,11 @@ import { CreateTriageTagArgsSchema, triageTagTools } from './tools/triage-tags';
 import { ListTriageTagsArgsSchema } from './tools/triage-tags';
 import { AddNoteToCaseArgsSchema, caseNotesTools, DeleteNoteFromCaseArgsSchema, UpdateNoteCaseArgsSchema } from './tools/cases-notes';
 import { casesExportTools, ExportCaseActivitiesArgsSchema, ExportCaseEndpointsArgsSchema, ExportCaseNotesArgsSchema, ExportCasesArgsSchema } from './tools/cases-export';
-import { ListRepositoriesArgsSchema, repositoryTools } from './tools/evidence-repositories';
+import { CreateSmbRepositoryArgsSchema, ListRepositoriesArgsSchema, repositoryTools } from './tools/evidence-repositories';
 
 const server = new Server({
   name: 'air-mcp',
-  version: '8.0.0'
+  version: '8.1.0'
 }, {
   capabilities: {
     tools: {}
@@ -1959,6 +1959,37 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: ['id'],
         },
       },
+      {
+        name: 'create_smb_repository',
+        description: 'Create a new SMB evidence repository',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            name: {
+              type: 'string',
+              description: 'Name for the SMB repository',
+            },
+            path: {
+              type: 'string',
+              description: 'Network share path (e.g. \\\\Network\\Share)',
+            },
+            username: {
+              type: 'string',
+              description: 'Username for SMB authentication',
+            },
+            password: {
+              type: 'string',
+              description: 'Password for SMB authentication',
+            },
+            organizationIds: {
+              type: 'array',
+              items: { type: 'number' },
+              description: 'Organization IDs to associate the repository with. Defaults to empty array.',
+            },
+          },
+          required: ['name', 'path', 'username', 'password'],
+        },
+      },
     ],
   };
 });
@@ -2284,6 +2315,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       validateAirApiToken();
       const parsedArgs = ListRepositoriesArgsSchema.parse(args);
       return await repositoryTools.listRepositories(parsedArgs);
+    } else if (name === 'create_smb_repository') {
+      validateAirApiToken();
+      const parsedArgs = CreateSmbRepositoryArgsSchema.parse(args);
+      return await repositoryTools.createSmbRepository(parsedArgs);
     } else {
       throw new Error(`Unknown tool: ${name}`);
     }

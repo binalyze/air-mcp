@@ -74,4 +74,28 @@ export const api = {
       throw error;
     }
   },
+  async createSmbRepository(data: {
+    name: string;
+    path: string;
+    username: string;
+    password: string;
+    organizationIds: number[];
+  }): Promise<Repository> {
+    try {
+      const response = await axios.post(
+        `${config.airHost}/api/public/evidences/repositories/smb`,
+        data,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${config.airApiToken}`
+          }
+        }
+      );
+      return response.data.result;
+    } catch (error) {
+      console.error('Error creating SMB repository:', error);
+      throw error;
+    }
+  }
 };

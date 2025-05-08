@@ -82,6 +82,7 @@ A Node.js server implementing **Model Context Protocol (MCP)** for Binalyze AIR,
 - **Remove Task Assignment from Case** - Remove a specific task assignment from a case.
 - **Import Task Assignments to Case** - Import task assignments to a specific case.
 - **List Repositories** - List all evidence repositories in the organization.
+- **Create SMB Repository** - Create a new SMB evidence repository.
 
 ## Overview
 
@@ -264,3 +265,4 @@ In Claude Desktop, or any MCP Client, you can use natural language commands:
 | `Remove task assignment with ID "f04666c9-62c7-4cb0-8638-967f05eb7936" from case "C-2022-0001"` | Removes a specific task assignment from a case |
 | `Import task assignments to case with ID "C-2022-0001"` | Imports task assignments to a specific case |
 | `List repositories` | Lists all evidence repositories in the organization |
+| `Create SMB repository` |  Creates a new SMB evidence repository with specified credentials |

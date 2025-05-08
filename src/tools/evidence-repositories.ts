@@ -6,6 +6,15 @@ export const ListRepositoriesArgsSchema = z.object({
   organizationIds: z.string().optional().describe('Organization IDs to filter repositories by. Leave empty to use default (0).')
 }).optional();
 
+// Schema for create SMB repository arguments
+export const CreateSmbRepositoryArgsSchema = z.object({
+  name: z.string().describe('Name for the SMB repository'),
+  path: z.string().describe('Network share path (e.g. \\\\Network\\Share)'),
+  username: z.string().describe('Username for SMB authentication'),
+  password: z.string().describe('Password for SMB authentication'),
+  organizationIds: z.array(z.number()).optional().default([]).describe('Organization IDs to associate the repository with')
+});
+
 // Format repository for display
 function formatRepository(repo: Repository): string {
   return `
@@ -67,6 +76,36 @@ export const repositoryTools = {
           {
             type: 'text',
             text: `Failed to fetch repositories: ${errorMessage}`
+          }
+        ]
+      };
+    }
+  },
+  async createSmbRepository(args: z.infer<typeof CreateSmbRepositoryArgsSchema>) {
+    try {
+      const repository = await api.createSmbRepository({
+        name: args.name,
+        path: args.path,
+        username: args.username,
+        password: args.password,
+        organizationIds: args.organizationIds || []
+      });
+      
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Successfully created SMB repository:\n${formatRepository(repository)}`
+          }
+        ]
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Failed to create SMB repository: ${errorMessage}`
           }
         ]
       };
