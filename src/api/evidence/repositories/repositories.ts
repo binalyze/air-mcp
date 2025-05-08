@@ -74,6 +74,50 @@ export const api = {
       throw error;
     }
   },
+  async createAzureStorageRepository(data: {
+    name: string;
+    SASUrl: string;
+    organizationIds: number[];
+  }): Promise<Repository> {
+    try {
+      const response = await axios.post(
+        `${config.airHost}/api/public/evidences/repositories/azure-storage`,
+        data,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${config.airApiToken}`
+          }
+        }
+      );
+      return response.data.result;
+    } catch (error) {
+      console.error('Error creating Azure Storage repository:', error);
+      throw error;
+    }
+  },
+  async updateAzureStorageRepository(id: string, data: {
+    name: string;
+    SASUrl: string;
+    organizationIds: number[];
+  }): Promise<Repository> {
+    try {
+      const response = await axios.put(
+        `${config.airHost}/api/public/evidences/repositories/azure-storage/${id}`,
+        data,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${config.airApiToken}`
+          }
+        }
+      );
+      return response.data.result;
+    } catch (error) {
+      console.error('Error updating Azure Storage repository:', error);
+      throw error;
+    }
+  },
   async createSmbRepository(data: {
     name: string;
     path: string;

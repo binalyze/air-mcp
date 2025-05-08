@@ -35,11 +35,11 @@ import { CreateTriageTagArgsSchema, triageTagTools } from './tools/triage-tags';
 import { ListTriageTagsArgsSchema } from './tools/triage-tags';
 import { AddNoteToCaseArgsSchema, caseNotesTools, DeleteNoteFromCaseArgsSchema, UpdateNoteCaseArgsSchema } from './tools/cases-notes';
 import { casesExportTools, ExportCaseActivitiesArgsSchema, ExportCaseEndpointsArgsSchema, ExportCaseNotesArgsSchema, ExportCasesArgsSchema } from './tools/cases-export';
-import { CreateFtpsRepositoryArgsSchema, CreateSftpRepositoryArgsSchema, CreateSmbRepositoryArgsSchema, ListRepositoriesArgsSchema, repositoryTools, UpdateFtpsRepositoryArgsSchema, UpdateSftpRepositoryArgsSchema, UpdateSmbRepositoryArgsSchema, ValidateFtpsRepositoryArgsSchema } from './tools/evidence-repositories';
+import { CreateAzureStorageRepositoryArgsSchema, CreateFtpsRepositoryArgsSchema, CreateSftpRepositoryArgsSchema, CreateSmbRepositoryArgsSchema, ListRepositoriesArgsSchema, repositoryTools, UpdateAzureStorageRepositoryArgsSchema, UpdateFtpsRepositoryArgsSchema, UpdateSftpRepositoryArgsSchema, UpdateSmbRepositoryArgsSchema, ValidateFtpsRepositoryArgsSchema } from './tools/evidence-repositories';
 
 const server = new Server({
   name: 'air-mcp',
-  version: '8.6.0'
+  version: '8.7.0'
 }, {
   capabilities: {
     tools: {}
@@ -2098,6 +2098,33 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: ['name', 'host', 'path', 'username', 'password'],
         },
       },
+      {
+        name: 'create_azure_storage_repository',
+        description: 'Create a new Azure Storage repository',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            name: { type: 'string', description: 'Name for the Azure Storage repository' },
+            SASUrl: { type: 'string', description: 'SAS URL for Azure Storage access' },
+            organizationIds: { type: 'array', items: { type: 'number' }, description: 'Organization IDs to associate the repository with. Defaults to empty array.' },
+          },
+          required: ['name', 'SASUrl'],
+        },
+      },
+      {
+        name: 'update_azure_storage_repository',
+        description: 'Update an existing Azure Storage repository',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            id: { type: 'string', description: 'ID of the Azure Storage repository to update' },
+            name: { type: 'string', description: 'Updated name for the Azure Storage repository' },
+            SASUrl: { type: 'string', description: 'Updated SAS URL for Azure Storage access' },
+            organizationIds: { type: 'array', items: { type: 'number' }, description: 'Updated organization IDs to associate the repository with. Defaults to empty array.' },
+          },
+          required: ['id', 'name', 'SASUrl'],
+        },
+      },
     ],
   };
 });
@@ -2451,6 +2478,14 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       validateAirApiToken();
       const parsedArgs = ValidateFtpsRepositoryArgsSchema.parse(args);
       return await repositoryTools.validateFtpsRepository(parsedArgs);
+    } else if (name === 'create_azure_storage_repository') {
+      validateAirApiToken();
+      const parsedArgs = CreateAzureStorageRepositoryArgsSchema.parse(args);
+      return await repositoryTools.createAzureStorageRepository(parsedArgs);
+    } else if (name === 'update_azure_storage_repository') {
+      validateAirApiToken();
+      const parsedArgs = UpdateAzureStorageRepositoryArgsSchema.parse(args);
+      return await repositoryTools.updateAzureStorageRepository(parsedArgs);
     } else {
       throw new Error(`Unknown tool: ${name}`);
     }

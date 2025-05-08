@@ -87,6 +87,21 @@ export const ValidateFtpsRepositoryArgsSchema = z.object({
   publicKey: z.string().nullable().default(null).describe('Public key for FTPS authentication (optional)')
 });
 
+// Schema for create Azure Storage repository arguments
+export const CreateAzureStorageRepositoryArgsSchema = z.object({
+  name: z.string().describe('Name for the Azure Storage repository'),
+  SASUrl: z.string().describe('SAS URL for Azure Storage access'),
+  organizationIds: z.array(z.number()).optional().default([]).describe('Organization IDs to associate the repository with')
+});
+
+// Schema for update Azure Storage repository arguments
+export const UpdateAzureStorageRepositoryArgsSchema = z.object({
+  id: z.string().describe('ID of the Azure Storage repository to update'),
+  name: z.string().describe('Updated name for the Azure Storage repository'),
+  SASUrl: z.string().describe('Updated SAS URL for Azure Storage access'),
+  organizationIds: z.array(z.number()).optional().default([]).describe('Updated organization IDs to associate the repository with')
+});
+
 // Format repository for display
 function formatRepository(repo: Repository): string {
   return `
@@ -384,6 +399,62 @@ export const repositoryTools = {
           {
             type: 'text',
             text: `Failed to validate FTPS repository: ${errorMessage}`
+          }
+        ]
+      };
+    }
+  },
+  async createAzureStorageRepository(args: z.infer<typeof CreateAzureStorageRepositoryArgsSchema>) {
+    try {
+      const repository = await api.createAzureStorageRepository({
+        name: args.name,
+        SASUrl: args.SASUrl,
+        organizationIds: args.organizationIds || []
+      });
+      
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Successfully created Azure Storage repository:\n${formatRepository(repository)}`
+          }
+        ]
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Failed to create Azure Storage repository: ${errorMessage}`
+          }
+        ]
+      };
+    }
+  },
+  async updateAzureStorageRepository(args: z.infer<typeof UpdateAzureStorageRepositoryArgsSchema>) {
+    try {
+      const repository = await api.updateAzureStorageRepository(args.id, {
+        name: args.name,
+        SASUrl: args.SASUrl,
+        organizationIds: args.organizationIds || []
+      });
+      
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Successfully updated Azure Storage repository:\n${formatRepository(repository)}`
+          }
+        ]
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Failed to update Azure Storage repository: ${errorMessage}`
           }
         ]
       };
