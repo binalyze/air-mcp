@@ -48,6 +48,33 @@ export const UpdateSftpRepositoryArgsSchema = z.object({
   organizationIds: z.array(z.number()).optional().default([]).describe('Updated organization IDs to associate the repository with')
 });
 
+// Schema for create FTPS repository arguments
+export const CreateFtpsRepositoryArgsSchema = z.object({
+  name: z.string().describe('Name for the FTPS repository'),
+  host: z.string().describe('FTPS server hostname or IP address'),
+  port: z.number().default(22).describe('FTPS server port (default: 22)'),
+  path: z.string().describe('Path on the FTPS server (e.g. /)'),
+  username: z.string().describe('Username for FTPS authentication'),
+  password: z.string().describe('Password for FTPS authentication'),
+  allowSelfSignedSSL: z.boolean().default(false).describe('Whether to allow self-signed SSL certificates'),
+  publicKey: z.string().nullable().default(null).describe('Public key for FTPS authentication (optional)'),
+  organizationIds: z.array(z.number()).optional().default([]).describe('Organization IDs to associate the repository with')
+});
+
+// Schema for update FTPS repository arguments
+export const UpdateFtpsRepositoryArgsSchema = z.object({
+  id: z.string().describe('ID of the FTPS repository to update'),
+  name: z.string().describe('Updated name for the FTPS repository'),
+  host: z.string().describe('Updated FTPS server hostname or IP address'),
+  port: z.number().default(22).describe('Updated FTPS server port (default: 22)'),
+  path: z.string().describe('Updated path on the FTPS server (e.g. /)'),
+  username: z.string().describe('Updated username for FTPS authentication'),
+  password: z.string().describe('Updated password for FTPS authentication'),
+  allowSelfSignedSSL: z.boolean().default(false).describe('Whether to allow self-signed SSL certificates'),
+  publicKey: z.string().nullable().default(null).describe('Public key for FTPS authentication (optional)'),
+  organizationIds: z.array(z.number()).optional().default([]).describe('Updated organization IDs to associate the repository with')
+});
+
 // Format repository for display
 function formatRepository(repo: Repository): string {
   return `
@@ -233,6 +260,74 @@ export const repositoryTools = {
           {
             type: 'text',
             text: `Failed to update SFTP repository: ${errorMessage}`
+          }
+        ]
+      };
+    }
+  },
+  async createFtpsRepository(args: z.infer<typeof CreateFtpsRepositoryArgsSchema>) {
+    try {
+      const repository = await api.createFtpsRepository({
+        name: args.name,
+        host: args.host,
+        port: args.port,
+        path: args.path,
+        username: args.username,
+        password: args.password,
+        allowSelfSignedSSL: args.allowSelfSignedSSL,
+        publicKey: args.publicKey,
+        organizationIds: args.organizationIds || []
+      });
+      
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Successfully created FTPS repository:\n${formatRepository(repository)}`
+          }
+        ]
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Failed to create FTPS repository: ${errorMessage}`
+          }
+        ]
+      };
+    }
+  },
+  async updateFtpsRepository(args: z.infer<typeof UpdateFtpsRepositoryArgsSchema>) {
+    try {
+      const repository = await api.updateFtpsRepository(args.id, {
+        name: args.name,
+        host: args.host,
+        port: args.port,
+        path: args.path,
+        username: args.username,
+        password: args.password,
+        allowSelfSignedSSL: args.allowSelfSignedSSL,
+        publicKey: args.publicKey,
+        organizationIds: args.organizationIds || []
+      });
+      
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Successfully updated FTPS repository:\n${formatRepository(repository)}`
+          }
+        ]
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Failed to update FTPS repository: ${errorMessage}`
           }
         ]
       };

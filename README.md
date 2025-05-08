@@ -86,6 +86,8 @@ A Node.js server implementing **Model Context Protocol (MCP)** for Binalyze AIR,
 - **Update SMB Repository** - Update an existing SMB evidence repository.
 - **Create SFTP Repository** - Create a new SFTP evidence repository.
 - **Update SFTP Repository** - Update an existing SFTP evidence repository.
+- **Create FTPS Repository** - Create a new FTPS evidence repository.
+- **Update FTPS Repository** - Update an existing FTPS evidence repository.
 
 ## Overview
 
@@ -268,7 +270,7 @@ In Claude Desktop, or any MCP Client, you can use natural language commands:
 | `Remove task assignment with ID "f04666c9-62c7-4cb0-8638-967f05eb7936" from case "C-2022-0001"` | Removes a specific task assignment from a case |
 | `Import task assignments to case with ID "C-2022-0001"` | Imports task assignments to a specific case |
 | `List repositories` | Lists all evidence repositories in the organization |
-| `Create SMB repository` |  Creates a new SMB evidence repository with specified credentials |
+| `Create SMB repository with name "My SMB Repository"` | Creates a new SMB evidence repository with specified credentials |
 | `Update SMB repository with ID "abc123"` | Updates an existing SMB repository's configuration |
-| `Create SFTP repository` | Creates a new SFTP evidence repository with specified credentials |
+| `Create SFTP repository with name "My SFTP Repository"` | Creates a new SFTP evidence repository with specified credentials |
 | `Update SFTP repository with ID "abc123"` | Updates an existing SFTP repository's configuration |

@@ -173,5 +173,61 @@ export const api = {
       console.error('Error updating SFTP repository:', error);
       throw error;
     }
+  },
+  async createFtpsRepository(data: {
+    name: string;
+    host: string;
+    port: number;
+    path: string;
+    username: string;
+    password: string;
+    allowSelfSignedSSL: boolean;
+    publicKey: string | null;
+    organizationIds: number[];
+  }): Promise<Repository> {
+    try {
+      const response = await axios.post(
+        `${config.airHost}/api/public/evidences/repositories/ftps`,
+        data,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${config.airApiToken}`
+          }
+        }
+      );
+      return response.data.result;
+    } catch (error) {
+      console.error('Error creating FTPS repository:', error);
+      throw error;
+    }
+  },
+  async updateFtpsRepository(id: string, data: {
+    name: string;
+    host: string;
+    port: number;
+    path: string;
+    username: string;
+    password: string;
+    allowSelfSignedSSL: boolean;
+    publicKey: string | null;
+    organizationIds: number[];
+  }): Promise<Repository> {
+    try {
+      const response = await axios.put(
+        `${config.airHost}/api/public/evidences/repositories/ftps/${id}`,
+        data,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${config.airApiToken}`
+          }
+        }
+      );
+      return response.data.result;
+    } catch (error) {
+      console.error('Error updating FTPS repository:', error);
+      throw error;
+    }
   }
 };
