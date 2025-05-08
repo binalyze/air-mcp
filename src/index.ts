@@ -35,11 +35,11 @@ import { CreateTriageTagArgsSchema, triageTagTools } from './tools/triage-tags';
 import { ListTriageTagsArgsSchema } from './tools/triage-tags';
 import { AddNoteToCaseArgsSchema, caseNotesTools, DeleteNoteFromCaseArgsSchema, UpdateNoteCaseArgsSchema } from './tools/cases-notes';
 import { casesExportTools, ExportCaseActivitiesArgsSchema, ExportCaseEndpointsArgsSchema, ExportCaseNotesArgsSchema, ExportCasesArgsSchema } from './tools/cases-export';
-import { CreateSftpRepositoryArgsSchema, CreateSmbRepositoryArgsSchema, ListRepositoriesArgsSchema, repositoryTools, UpdateSmbRepositoryArgsSchema } from './tools/evidence-repositories';
+import { CreateSftpRepositoryArgsSchema, CreateSmbRepositoryArgsSchema, ListRepositoriesArgsSchema, repositoryTools, UpdateSftpRepositoryArgsSchema, UpdateSmbRepositoryArgsSchema } from './tools/evidence-repositories';
 
 const server = new Server({
   name: 'air-mcp',
-  version: '8.3.0'
+  version: '8.4.0'
 }, {
   capabilities: {
     tools: {}
@@ -2023,6 +2023,24 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: ['name', 'host', 'path', 'username', 'password'],
         },
       },
+      {
+        name: 'update_sftp_repository',
+        description: 'Update an existing SFTP repository',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            id: { type: 'string', description: 'ID of the SFTP repository to update' },
+            name: { type: 'string', description: 'Updated name for the SFTP repository' },
+            host: { type: 'string', description: 'Updated SFTP server hostname or IP address' },
+            port: { type: 'number', description: 'Updated SFTP server port (default: 22)' },
+            path: { type: 'string', description: 'Updated path on the SFTP server (e.g. /)' },
+            username: { type: 'string', description: 'Updated username for SFTP authentication' },
+            password: { type: 'string', description: 'Updated password for SFTP authentication' },
+            organizationIds: { type: 'array', items: { type: 'number' }, description: 'Updated organization IDs to associate the repository with' },
+          },
+          required: ['id', 'name', 'host', 'path', 'username', 'password'],
+        },
+      },
     ],
   };
 });
@@ -2356,11 +2374,15 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       validateAirApiToken();
       const parsedArgs = UpdateSmbRepositoryArgsSchema.parse(args);
       return await repositoryTools.updateSmbRepository(parsedArgs);
-    }else if (name === 'create_sftp_repository') {
+    } else if (name === 'create_sftp_repository') {
       validateAirApiToken();
       const parsedArgs = CreateSftpRepositoryArgsSchema.parse(args);
       return await repositoryTools.createSftpRepository(parsedArgs);
-    }else {
+    } else if (name === 'update_sftp_repository') {
+      validateAirApiToken();
+      const parsedArgs = UpdateSftpRepositoryArgsSchema.parse(args);
+      return await repositoryTools.updateSftpRepository(parsedArgs);
+    } else {
       throw new Error(`Unknown tool: ${name}`);
     }
   } catch (error) {

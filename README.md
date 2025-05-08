@@ -85,6 +85,7 @@ A Node.js server implementing **Model Context Protocol (MCP)** for Binalyze AIR,
 - **Create SMB Repository** - Create a new SMB evidence repository.
 - **Update SMB Repository** - Update an existing SMB evidence repository.
 - **Create SFTP Repository** - Create a new SFTP evidence repository.
+- **Update SFTP Repository** - Update an existing SFTP evidence repository.
 
 ## Overview
 
@@ -270,3 +271,4 @@ In Claude Desktop, or any MCP Client, you can use natural language commands:
 | `Create SMB repository` |  Creates a new SMB evidence repository with specified credentials |
 | `Update SMB repository with ID "abc123"` | Updates an existing SMB repository's configuration |
 | `Create SFTP repository` | Creates a new SFTP evidence repository with specified credentials |
+| `Update SFTP repository with ID "abc123"` | Updates an existing SFTP repository's configuration |

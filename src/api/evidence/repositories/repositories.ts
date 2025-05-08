@@ -147,5 +147,31 @@ export const api = {
       console.error('Error creating SFTP repository:', error);
       throw error;
     }
+  },
+  async updateSftpRepository(id: string, data: {
+    name: string;
+    host: string;
+    port: number;
+    path: string;
+    username: string;
+    password: string;
+    organizationIds: number[];
+  }): Promise<Repository> {
+    try {
+      const response = await axios.put(
+        `${config.airHost}/api/public/evidences/repositories/sftp/${id}`,
+        data,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${config.airApiToken}`
+          }
+        }
+      );
+      return response.data.result;
+    } catch (error) {
+      console.error('Error updating SFTP repository:', error);
+      throw error;
+    }
   }
 };

@@ -36,6 +36,18 @@ export const CreateSftpRepositoryArgsSchema = z.object({
   organizationIds: z.array(z.number()).optional().default([]).describe('Organization IDs to associate the repository with')
 });
 
+// Schema for update SFTP repository arguments
+export const UpdateSftpRepositoryArgsSchema = z.object({
+  id: z.string().describe('ID of the SFTP repository to update'),
+  name: z.string().describe('Updated name for the SFTP repository'),
+  host: z.string().describe('Updated SFTP server hostname or IP address'),
+  port: z.number().default(22).describe('Updated SFTP server port (default: 22)'),
+  path: z.string().describe('Updated path on the SFTP server (e.g. /)'),
+  username: z.string().describe('Updated username for SFTP authentication'),
+  password: z.string().describe('Updated password for SFTP authentication'),
+  organizationIds: z.array(z.number()).optional().default([]).describe('Updated organization IDs to associate the repository with')
+});
+
 // Format repository for display
 function formatRepository(repo: Repository): string {
   return `
@@ -189,6 +201,38 @@ export const repositoryTools = {
           {
             type: 'text',
             text: `Failed to create SFTP repository: ${errorMessage}`
+          }
+        ]
+      };
+    }
+  },
+  async updateSftpRepository(args: z.infer<typeof UpdateSftpRepositoryArgsSchema>) {
+    try {
+      const repository = await api.updateSftpRepository(args.id, {
+        name: args.name,
+        host: args.host,
+        port: args.port,
+        path: args.path,
+        username: args.username,
+        password: args.password,
+        organizationIds: args.organizationIds || []
+      });
+      
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Successfully updated SFTP repository:\n${formatRepository(repository)}`
+          }
+        ]
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Failed to update SFTP repository: ${errorMessage}`
           }
         ]
       };
