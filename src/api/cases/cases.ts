@@ -53,6 +53,39 @@ export interface CasesResponse {
   errors: string[];
 }
 
+export interface CaseActivity {
+  _id: number;
+  createdAt: string;
+  updatedAt: string;
+  type: string;
+  performedBy: string;
+  data: any;
+  organizationIds: number[];
+  description: string;
+}
+
+export interface CaseActivitiesResponse {
+  success: boolean;
+  result: {
+    entities: CaseActivity[];
+    filters: Array<{
+      name: string;
+      type: string;
+      options: string[];
+      filterUrl: string | null;
+    }>;
+    sortables: string[];
+    totalEntityCount: number;
+    currentPage: number;
+    pageSize: number;
+    previousPage: number;
+    totalPageCount: number;
+    nextPage: number;
+  };
+  statusCode: number;
+  errors: string[];
+}
+
 export const api = {
   async getCases(organizationIds: string | string[] = '0'): Promise<CasesResponse> {
     try {
@@ -233,6 +266,23 @@ export const api = {
       return response.data;
     } catch (error) {
       console.error('Error checking case name:', error);
+      throw error;
+    }
+  },
+  async getCaseActivities(id: string): Promise<CaseActivitiesResponse> {
+    try {
+      const response = await axios.get(
+        `${config.airHost}/api/public/cases/${id}/activities`,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${config.airApiToken}`
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching activities for case with ID ${id}:`, error);
       throw error;
     }
   }

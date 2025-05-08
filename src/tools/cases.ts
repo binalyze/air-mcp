@@ -52,6 +52,10 @@ export const CheckCaseNameArgsSchema = z.object({
   name: z.string().describe('Name to check for availability'),
 });
 
+export const GetCaseActivitiesArgsSchema = z.object({
+  id: z.string().describe('ID of the case to retrieve activities for'),
+});
+
 // Format case for display
 function formatCase(caseItem: Case): string {
   return `
@@ -417,6 +421,58 @@ export const caseTools = {
           {
             type: 'text',
             text: `Failed to check case name: ${errorMessage}`
+          }
+        ]
+      };
+    }
+  },
+  async getCaseActivities(args: z.infer<typeof GetCaseActivitiesArgsSchema>) {
+    try {
+      const response = await api.getCaseActivities(args.id);
+      
+      if (!response.success) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Error fetching case activities: ${response.errors.join(', ')}`
+            }
+          ]
+        };
+      }
+      
+      if (response.result.entities.length === 0) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `No activities found for case with ID ${args.id}.`
+            }
+          ]
+        };
+      }
+      
+      // Format activities for display
+      const activitiesList = response.result.entities.map(activity => {
+        const date = new Date(activity.createdAt).toLocaleString();
+        return `[${date}] ${activity.type} by ${activity.performedBy}: ${activity.description}`;
+      }).join('\n\n');
+      
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Case Activities for case ${args.id}:\n\n${activitiesList}\n\nTotal: ${response.result.totalEntityCount} activities`
+          }
+        ]
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Failed to fetch case activities: ${errorMessage}`
           }
         ]
       };

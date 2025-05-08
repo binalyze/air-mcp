@@ -17,7 +17,7 @@ import {
   CreateAcquisitionProfileArgsSchema
 } from './tools/acquisitions';
 import { organizationTools } from './tools/organizations';
-import { ArchiveCaseArgsSchema, caseTools, ChangeCaseOwnerArgsSchema, CheckCaseNameArgsSchema, CloseCaseArgsSchema, CreateCaseArgsSchema, GetCaseByIdArgsSchema, ListCasesArgsSchema, OpenCaseArgsSchema, UpdateCaseArgsSchema } from './tools/cases';
+import { ArchiveCaseArgsSchema, caseTools, ChangeCaseOwnerArgsSchema, CheckCaseNameArgsSchema, CloseCaseArgsSchema, CreateCaseArgsSchema, GetCaseActivitiesArgsSchema, GetCaseByIdArgsSchema, ListCasesArgsSchema, OpenCaseArgsSchema, UpdateCaseArgsSchema } from './tools/cases';
 import { policyTools, ListPoliciesArgsSchema, CreatePolicyArgsSchema, UpdatePolicyArgsSchema, GetPolicyByIdArgsSchema, UpdatePolicyPrioritiesArgsSchema, PolicyMatchStatsArgsSchema, DeletePolicyByIdArgsSchema } from './tools/policies';
 import { taskTools, ListTasksArgsSchema, GetTaskByIdArgsSchema, CancelTaskByIdArgsSchema, DeleteTaskByIdArgsSchema } from './tools/tasks';
 import { triageTools, ListTriageRulesArgsSchema, CreateTriageRuleArgsSchema, UpdateTriageRuleArgsSchema, DeleteTriageRuleArgsSchema, GetTriageRuleByIdArgsSchema, ValidateTriageRuleArgsSchema, AssignTriageTaskArgsSchema } from './tools/triages';
@@ -38,7 +38,7 @@ import { casesExportTools, ExportCaseActivitiesArgsSchema, ExportCaseEndpointsAr
 
 const server = new Server({
   name: 'air-mcp',
-  version: '7.14.0'
+  version: '7.15.0'
 }, {
   capabilities: {
     tools: {}
@@ -1788,6 +1788,20 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: ['name'],
         },
       },
+      {
+        name: 'get_case_activities',
+        description: 'Get activity history for a specific case by its ID',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            id: {
+              type: 'string',
+              description: 'The ID of the case to retrieve activities for',
+            },
+          },
+          required: ['id'],
+        },
+      },
     ],
   };
 });
@@ -2081,6 +2095,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       validateAirApiToken();
       const parsedArgs = CheckCaseNameArgsSchema.parse(args);
       return await caseTools.checkCaseName(parsedArgs);
+    } else if (name === 'get_case_activities') {
+      validateAirApiToken();
+      const parsedArgs = GetCaseActivitiesArgsSchema.parse(args);
+      return await caseTools.getCaseActivities(parsedArgs);
     } else {
       throw new Error(`Unknown tool: ${name}`);
     }

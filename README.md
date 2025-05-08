@@ -74,6 +74,7 @@ A Node.js server implementing **Model Context Protocol (MCP)** for Binalyze AIR,
 - **Open Case by ID** - Open a specific case by its ID.
 - **Archive Case by ID** - Archive a specific case by its ID.
 - **Check Case Name** - Check if a case name is already in use.
+- **Get Case Activities** - Get activity history for a specific case by its ID.
 
 ## Overview
 
@@ -248,3 +249,4 @@ In Claude Desktop, or any MCP Client, you can use natural language commands:
 | `Archive case with ID "C-2022-0003"` | Archives a specific case by its ID |
 | `Change case owner with ID "C-2022-0003" to user with ID "user123"` | Changes the owner of a specific case by its ID |
 | `Check if case name "Incident 2023-05" is available` | Checks if a case name is already in use |
+| `Get case activities for case with ID "C-2022-0003"` | Displays the activity history for a specific case by its ID |
