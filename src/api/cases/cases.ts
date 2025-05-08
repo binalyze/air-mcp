@@ -126,5 +126,22 @@ export const api = {
       console.error('Error updating case:', error);
       throw error;
     }
+  },
+  async getCase(id: string): Promise<{ success: boolean; result: Case; statusCode: number; errors: string[] }> {
+    try {
+      const response = await axios.get(
+        `${config.airHost}/api/public/cases/${id}`,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${config.airApiToken}`
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching case with ID ${id}:`, error);
+      throw error;
+    }
   }
 };

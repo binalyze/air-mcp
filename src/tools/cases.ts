@@ -27,6 +27,10 @@ export const UpdateCaseArgsSchema = z.object({
   notes: z.array(z.any()).optional().describe('New notes for the case'),
 });
 
+export const GetCaseByIdArgsSchema = z.object({
+  id: z.string().describe('ID of the case to retrieve'),
+});
+
 // Format case for display
 function formatCase(caseItem: Case): string {
   return `
@@ -179,6 +183,41 @@ export const caseTools = {
           {
             type: 'text',
             text: `Failed to update case: ${errorMessage}`
+          }
+        ]
+      };
+    }
+  },
+  async getCaseById(args: z.infer<typeof GetCaseByIdArgsSchema>) {
+    try {
+      const response = await api.getCase(args.id);
+      
+      if (!response.success) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Error fetching case: ${response.errors.join(', ')}`
+            }
+          ]
+        };
+      }
+      
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Case details:\n${formatCase(response.result)}`
+          }
+        ]
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Failed to fetch case: ${errorMessage}`
           }
         ]
       };
