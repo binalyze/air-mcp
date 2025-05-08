@@ -70,6 +70,7 @@ A Node.js server implementing **Model Context Protocol (MCP)** for Binalyze AIR,
 - **Create Case** - Create a new case in the system.
 - **Update Case** - Update an existing case by ID.
 - **Get Case by ID** - Get detailed information about a specific case by its ID.
+- **Close Case by ID** - Close a specific case by its ID.
 
 ## Overview
 
@@ -239,4 +240,5 @@ In Claude Desktop, or any MCP Client, you can use natural language commands:
 | `Create a new case named "Incident Response"` | Creates a new case in the system |
 | `Update case with ID "C-2022-0003" to have name "Updated Case"` | Updates an existing case by ID |
 | `Get case with ID "C-2022-0003"` | Retrieves the details of a specific case by its ID |
+| `Close case with ID "C-2022-0003"` | Closes a specific case by its ID |
 

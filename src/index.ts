@@ -17,7 +17,7 @@ import {
   CreateAcquisitionProfileArgsSchema
 } from './tools/acquisitions';
 import { organizationTools } from './tools/organizations';
-import { caseTools, CreateCaseArgsSchema, GetCaseByIdArgsSchema, ListCasesArgsSchema, UpdateCaseArgsSchema } from './tools/cases';
+import { caseTools, CloseCaseArgsSchema, CreateCaseArgsSchema, GetCaseByIdArgsSchema, ListCasesArgsSchema, UpdateCaseArgsSchema } from './tools/cases';
 import { policyTools, ListPoliciesArgsSchema, CreatePolicyArgsSchema, UpdatePolicyArgsSchema, GetPolicyByIdArgsSchema, UpdatePolicyPrioritiesArgsSchema, PolicyMatchStatsArgsSchema, DeletePolicyByIdArgsSchema } from './tools/policies';
 import { taskTools, ListTasksArgsSchema, GetTaskByIdArgsSchema, CancelTaskByIdArgsSchema, DeleteTaskByIdArgsSchema } from './tools/tasks';
 import { triageTools, ListTriageRulesArgsSchema, CreateTriageRuleArgsSchema, UpdateTriageRuleArgsSchema, DeleteTriageRuleArgsSchema, GetTriageRuleByIdArgsSchema, ValidateTriageRuleArgsSchema, AssignTriageTaskArgsSchema } from './tools/triages';
@@ -38,7 +38,7 @@ import { casesExportTools, ExportCaseActivitiesArgsSchema, ExportCaseEndpointsAr
 
 const server = new Server({
   name: 'air-mcp',
-  version: '7.9.0'
+  version: '7.10.0'
 }, {
   capabilities: {
     tools: {}
@@ -1714,6 +1714,21 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: ['id'],
         },
       },
+      {
+        name: 'close_case_by_id',
+        description: 'Close a case by its ID',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            id: {
+              type: 'string',
+              description: 'The ID of the case to close',
+            },
+          },
+          required: ['id'],
+        },
+      },
+      
     ],
   };
 });
@@ -1987,6 +2002,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       validateAirApiToken();
       const parsedArgs = GetCaseByIdArgsSchema.parse(args);
       return await caseTools.getCaseById(parsedArgs);
+    } else if (name === 'close_case_by_id') {
+      validateAirApiToken();
+      const parsedArgs = CloseCaseArgsSchema.parse(args);
+      return await caseTools.closeCase(parsedArgs);
     } else {
       throw new Error(`Unknown tool: ${name}`);
     }

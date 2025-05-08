@@ -143,5 +143,23 @@ export const api = {
       console.error(`Error fetching case with ID ${id}:`, error);
       throw error;
     }
+  },
+  async closeCase(id: string): Promise<{ success: boolean; result: Case; statusCode: number; errors: string[] }> {
+    try {
+      const response = await axios.post(
+        `${config.airHost}/api/public/cases/${id}/close`,
+        {},
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${config.airApiToken}`
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error(`Error closing case with ID ${id}:`, error);
+      throw error;
+    }
   }
 };
