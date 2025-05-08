@@ -39,10 +39,11 @@ import { CreateAmazonS3RepositoryArgsSchema, CreateAzureStorageRepositoryArgsSch
 import { DownloadCasePpcArgsSchema, DownloadTaskReportArgsSchema, evidenceTools, GetReportFileInfoArgsSchema } from './tools/evidence';
 import { AssignUsersToOrganizationArgsSchema, GetOrganizationUsersArgsSchema, organizationUsersTools, RemoveUserFromOrganizationArgsSchema } from './tools/organizations-users';
 import { UpdateOrganizationArgsSchema } from './tools/organizations';
+import { CallWebhookArgsSchema, webhookTools } from './tools/webhooks';
 
 const server = new Server({
   name: 'air-mcp',
-  version: '10.0.0'
+  version: '11.0.0'
 }, {
   capabilities: {
     tools: {}
@@ -2530,6 +2531,28 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: ['id'],
         },
       },
+      {
+        name: 'call_webhook',
+        description: 'Call a webhook with the specified parameters',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            slug: {
+              type: 'string',
+              description: 'The webhook slug (e.g., "air-generic-url-webhook")',
+            },
+            data: {
+              type: 'string',
+              description: 'The data parameter for the webhook (e.g., IP address like "192.168.1.100")',
+            },
+            token: {
+              type: 'string',
+              description: 'The webhook token for authentication',
+            },
+          },
+          required: ['slug', 'data', 'token'],
+        },
+      },
     ],
   };
 });
@@ -2983,6 +3006,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       validateAirApiToken();
       const parsedArgs = GetUserByIdArgsSchema.parse(args);
       return await userTools.getUserById(parsedArgs);
+    } else if (name === 'call_webhook') {
+      validateAirApiToken();
+      const parsedArgs = CallWebhookArgsSchema.parse(args);
+      return await webhookTools.callWebhook(parsedArgs);
     } else {
       throw new Error(`Unknown tool: ${name}`);
     }
