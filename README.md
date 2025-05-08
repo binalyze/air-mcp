@@ -97,6 +97,7 @@ A Node.js server implementing **Model Context Protocol (MCP)** for Binalyze AIR,
 - **Validate Amazon S3 Repository** - Validate Amazon S3 repository configuration without creating it.
 - **Get Repository by ID** - Get detailed information about a specific evidence repository by its ID.
 - **Delete Repository** - Delete an evidence repository by its ID.
+- **Download Case PPC** - Download a PPC file for a specific endpoint and task.
 
 ## Overview
 
@@ -292,4 +293,4 @@ In Claude Desktop, or any MCP Client, you can use natural language commands:
 | `Validate Amazon S3 repository configuration` | Checks if S3 credentials and bucket are valid |
 | `Get details about repository with ID "abc123"` | Displays detailed information about a specific evidence repository |
 | `Delete repository with ID "abc123"` | Deletes a specific evidence repository |
-
+| `Download PPC file for endpoint "ep-1" and task "task-1"` | Downloads a PPC file for the specified endpoint and task |

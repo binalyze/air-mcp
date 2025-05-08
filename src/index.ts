@@ -36,10 +36,11 @@ import { ListTriageTagsArgsSchema } from './tools/triage-tags';
 import { AddNoteToCaseArgsSchema, caseNotesTools, DeleteNoteFromCaseArgsSchema, UpdateNoteCaseArgsSchema } from './tools/cases-notes';
 import { casesExportTools, ExportCaseActivitiesArgsSchema, ExportCaseEndpointsArgsSchema, ExportCaseNotesArgsSchema, ExportCasesArgsSchema } from './tools/cases-export';
 import { CreateAmazonS3RepositoryArgsSchema, CreateAzureStorageRepositoryArgsSchema, CreateFtpsRepositoryArgsSchema, CreateSftpRepositoryArgsSchema, CreateSmbRepositoryArgsSchema, DeleteRepositoryArgsSchema, GetRepositoryByIdArgsSchema, ListRepositoriesArgsSchema, repositoryTools, UpdateAmazonS3RepositoryArgsSchema, UpdateAzureStorageRepositoryArgsSchema, UpdateFtpsRepositoryArgsSchema, UpdateSftpRepositoryArgsSchema, UpdateSmbRepositoryArgsSchema, ValidateAmazonS3RepositoryArgsSchema, ValidateAzureStorageRepositoryArgsSchema, ValidateFtpsRepositoryArgsSchema } from './tools/evidence-repositories';
+import { DownloadCasePpcArgsSchema, evidenceTools } from './tools/evidence';
 
 const server = new Server({
   name: 'air-mcp',
-  version: '8.11.0'
+  version: '8.12.0'
 }, {
   capabilities: {
     tools: {}
@@ -2216,6 +2217,24 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: ['id'],
         },
       },
+      {
+        name: 'download_case_ppc',
+        description: 'Download a PPC file for a specific endpoint and task',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            endpointId: {
+              type: 'string',
+              description: 'The ID of the endpoint to download the PPC file for',
+            },
+            taskId: {
+              type: 'string',
+              description: 'The ID of the task to download the PPC file for',
+            },
+          },
+          required: ['endpointId', 'taskId'],
+        },
+      }
     ],
   };
 });
@@ -2601,6 +2620,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       validateAirApiToken();
       const parsedArgs = DeleteRepositoryArgsSchema.parse(args);
       return await repositoryTools.deleteRepository(parsedArgs);
+    } else if (name === 'download_case_ppc') {
+      validateAirApiToken();
+      const parsedArgs = DownloadCasePpcArgsSchema.parse(args);
+      return await evidenceTools.downloadCasePpc(parsedArgs);
     } else {
       throw new Error(`Unknown tool: ${name}`);
     }
