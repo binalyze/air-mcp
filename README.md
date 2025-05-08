@@ -96,6 +96,7 @@ A Node.js server implementing **Model Context Protocol (MCP)** for Binalyze AIR,
 - **Update Amazon S3 Repository** - Update an existing Amazon S3 evidence repository.
 - **Validate Amazon S3 Repository** - Validate Amazon S3 repository configuration without creating it.
 - **Get Repository by ID** - Get detailed information about a specific evidence repository by its ID.
+- **Delete Repository** - Delete an evidence repository by its ID.
 
 ## Overview
 
@@ -290,3 +291,5 @@ In Claude Desktop, or any MCP Client, you can use natural language commands:
 | `Update Amazon S3 repository with ID "abc123"` | Modifies an existing S3 repository configuration |
 | `Validate Amazon S3 repository configuration` | Checks if S3 credentials and bucket are valid |
 | `Get details about repository with ID "abc123"` | Displays detailed information about a specific evidence repository |
+| `Delete repository with ID "abc123"` | Deletes a specific evidence repository |
+

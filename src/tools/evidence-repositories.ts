@@ -142,6 +142,10 @@ export const GetRepositoryByIdArgsSchema = z.object({
   id: z.string().describe('ID of the repository to retrieve')
 });
 
+export const DeleteRepositoryArgsSchema = z.object({
+  id: z.string().describe('ID of the repository to delete')
+});
+
 // Format repository for display
 function formatRepository(repo: Repository): string {
   return `
@@ -660,6 +664,41 @@ export const repositoryTools = {
           {
             type: 'text',
             text: `Failed to fetch repository: ${errorMessage}`
+          }
+        ]
+      };
+    }
+  },
+  async deleteRepository(args: z.infer<typeof DeleteRepositoryArgsSchema>) {
+    try {
+      const result = await api.deleteRepository(args.id);
+      
+      if (result.success) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Successfully deleted repository with ID: ${args.id}`
+            }
+          ]
+        };
+      } else {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Failed to delete repository: ${result.errors.join(', ')}`
+            }
+          ]
+        };
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Failed to delete repository: ${errorMessage}`
           }
         ]
       };

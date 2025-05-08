@@ -424,5 +424,26 @@ export const api = {
       console.error('Error fetching repository by ID:', error);
       throw error;
     }
+  },
+  async deleteRepository(id: string): Promise<{ success: boolean; statusCode: number; errors: string[] }> {
+    try {
+      const response = await axios.delete(
+        `${config.airHost}/api/public/evidences/repositories/${id}`,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${config.airApiToken}`
+          }
+        }
+      );
+      return {
+        success: response.data.success,
+        statusCode: response.data.statusCode,
+        errors: response.data.errors
+      };
+    } catch (error) {
+      console.error('Error deleting repository:', error);
+      throw error;
+    }
   }
 };
