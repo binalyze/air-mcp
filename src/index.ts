@@ -17,7 +17,7 @@ import {
   CreateAcquisitionProfileArgsSchema
 } from './tools/acquisitions';
 import { organizationTools } from './tools/organizations';
-import { caseTools, CreateCaseArgsSchema, ListCasesArgsSchema } from './tools/cases';
+import { caseTools, CreateCaseArgsSchema, ListCasesArgsSchema, UpdateCaseArgsSchema } from './tools/cases';
 import { policyTools, ListPoliciesArgsSchema, CreatePolicyArgsSchema, UpdatePolicyArgsSchema, GetPolicyByIdArgsSchema, UpdatePolicyPrioritiesArgsSchema, PolicyMatchStatsArgsSchema, DeletePolicyByIdArgsSchema } from './tools/policies';
 import { taskTools, ListTasksArgsSchema, GetTaskByIdArgsSchema, CancelTaskByIdArgsSchema, DeleteTaskByIdArgsSchema } from './tools/tasks';
 import { triageTools, ListTriageRulesArgsSchema, CreateTriageRuleArgsSchema, UpdateTriageRuleArgsSchema, DeleteTriageRuleArgsSchema, GetTriageRuleByIdArgsSchema, ValidateTriageRuleArgsSchema, AssignTriageTaskArgsSchema } from './tools/triages';
@@ -38,7 +38,7 @@ import { casesExportTools, ExportCaseActivitiesArgsSchema, ExportCaseEndpointsAr
 
 const server = new Server({
   name: 'air-mcp',
-  version: '7.7.0'
+  version: '7.8.0'
 }, {
   capabilities: {
     tools: {}
@@ -1683,6 +1683,23 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: ['name', 'ownerUserId'],
         },
       },
+      {
+        name: 'update_case',
+        description: 'Update an existing case by ID',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            id: { type: 'string', description: 'ID of the case to update' },
+            name: { type: 'string', description: 'New name for the case' },
+            ownerUserId: { type: 'string', description: 'New owner user ID for the case' },
+            visibility: { type: 'string', description: 'New visibility setting for the case' },
+            assignedUserIds: { type: 'array', items: { type: 'string' }, description: 'New array of user IDs to assign to the case' },
+            status: { type: 'string', enum: ['open', 'closed', 'archived'], description: 'New status for the case' },
+            notes: { type: 'array', description: 'New notes for the case' },
+          },
+          required: ['id'],
+        },
+      },
     ],
   };
 });
@@ -1948,6 +1965,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       validateAirApiToken();
       const parsedArgs = CreateCaseArgsSchema.parse(args);
       return await caseTools.createCase(parsedArgs);
+    } else if (name === 'update_case') {
+      validateAirApiToken();
+      const parsedArgs = UpdateCaseArgsSchema.parse(args);
+      return await caseTools.updateCase(parsedArgs);
     } else {
       throw new Error(`Unknown tool: ${name}`);
     }

@@ -17,6 +17,15 @@ export const CreateCaseArgsSchema = z.object({
   assignedUserIds: z.array(z.string()).default([]).describe('Array of user IDs to assign to the case. Defaults to empty array.'),
 });
 
+export const UpdateCaseArgsSchema = z.object({
+  id: z.string().describe('ID of the case to update'),
+  name: z.string().optional().describe('New name for the case'),
+  ownerUserId: z.string().optional().describe('New owner user ID for the case'),
+  visibility: z.string().optional().describe('New visibility setting for the case'),
+  assignedUserIds: z.array(z.string()).optional().describe('New array of user IDs to assign to the case'),
+  status: z.enum(['open', 'closed', 'archived']).optional().describe('New status for the case'),
+  notes: z.array(z.any()).optional().describe('New notes for the case'),
+});
 
 // Format case for display
 function formatCase(caseItem: Case): string {
@@ -125,6 +134,51 @@ export const caseTools = {
           {
             type: 'text',
             text: `Failed to create case: ${errorMessage}`
+          }
+        ]
+      };
+    }
+  },
+  async updateCase(args: z.infer<typeof UpdateCaseArgsSchema>) {
+    try {
+      const updateData: Record<string, any> = {};
+      
+      // Only include fields that are provided
+      if (args.name !== undefined) updateData.name = args.name;
+      if (args.ownerUserId !== undefined) updateData.ownerUserId = args.ownerUserId;
+      if (args.visibility !== undefined) updateData.visibility = args.visibility;
+      if (args.assignedUserIds !== undefined) updateData.assignedUserIds = args.assignedUserIds;
+      if (args.status !== undefined) updateData.status = args.status;
+      if (args.notes !== undefined) updateData.notes = args.notes;
+      
+      const response = await api.updateCase(args.id, updateData);
+      
+      if (!response.success) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Error updating case: ${response.errors.join(', ')}`
+            }
+          ]
+        };
+      }
+      
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Case updated successfully:\n${formatCase(response.result)}`
+          }
+        ]
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Failed to update case: ${errorMessage}`
           }
         ]
       };

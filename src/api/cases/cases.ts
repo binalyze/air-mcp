@@ -98,5 +98,33 @@ export const api = {
       console.error('Error creating case:', error);
       throw error;
     }
+  },
+  async updateCase(
+    id: string, 
+    updateData: Partial<{
+      name: string;
+      ownerUserId: string;
+      visibility: string;
+      assignedUserIds: string[];
+      status: 'open' | 'closed' | 'archived';
+      notes: any[];
+    }>
+  ): Promise<{ success: boolean; result: Case; statusCode: number; errors: string[] }> {
+    try {
+      const response = await axios.patch(
+        `${config.airHost}/api/public/cases/${id}`,
+        updateData,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${config.airApiToken}`
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error updating case:', error);
+      throw error;
+    }
   }
 };
