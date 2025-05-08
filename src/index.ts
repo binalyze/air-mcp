@@ -33,11 +33,11 @@ import { assignmentTools, CancelTaskAssignmentArgsSchema, DeleteTaskAssignmentAr
 import { GetTaskAssignmentsByIdArgsSchema } from './tools/assignments';
 import { CreateTriageTagArgsSchema, triageTagTools } from './tools/triage-tags';
 import { ListTriageTagsArgsSchema } from './tools/triage-tags';
-import { AddNoteToCaseArgsSchema, caseNotesTools } from './tools/cases-notes';
+import { AddNoteToCaseArgsSchema, caseNotesTools, UpdateNoteCaseArgsSchema } from './tools/cases-notes';
 
 const server = new Server({
   name: 'air-mcp',
-  version: '7.0.0'
+  version: '7.1.0'
 }, {
   capabilities: {
     tools: {}
@@ -1551,6 +1551,28 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: ['caseId', 'note'],
         },
       },
+      {
+        name: 'update_note_in_case',
+        description: 'Update an existing note in a specific case',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            caseId: {
+              type: 'string',
+              description: 'The ID of the case containing the note (e.g., "C-2022-0002")',
+            },
+            noteId: {
+              type: 'string',
+              description: 'The ID of the note to update (e.g., "8d9baa16-9aa3-4e4f-a08e-a74341ce2f90")',
+            },
+            note: {
+              type: 'string',
+              description: 'The new content for the note',
+            },
+          },
+          required: ['caseId', 'noteId', 'note'],
+        },
+      },
     ],
   };
 });
@@ -1788,6 +1810,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       validateAirApiToken();
       const parsedArgs = AddNoteToCaseArgsSchema.parse(args);
       return await caseNotesTools.addNoteToCase(parsedArgs);
+    } else if (name === 'update_note_in_case') {
+      validateAirApiToken();
+      const parsedArgs = UpdateNoteCaseArgsSchema.parse(args);
+      return await caseNotesTools.updateNoteInCase(parsedArgs);
     } else {
       throw new Error(`Unknown tool: ${name}`);
     }

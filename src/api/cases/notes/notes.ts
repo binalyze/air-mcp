@@ -16,6 +16,13 @@ export interface AddNoteResponse {
   errors: string[];
 }
 
+export interface UpdateNoteResponse {
+  success: boolean;
+  result: Note;
+  statusCode: number;
+  errors: string[];
+}
+
 export const notesApi = {
   async addNote(caseId: string, noteValue: string): Promise<AddNoteResponse> {
     try {
@@ -35,4 +42,22 @@ export const notesApi = {
       throw error;
     }
   },
+  async updateNote(caseId: string, noteId: string, noteValue: string): Promise<UpdateNoteResponse> {
+    try {
+      const response = await axios.patch(
+        `${config.airHost}/api/public/cases/${caseId}/notes/${noteId}`,
+        { value: noteValue },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${config.airApiToken}`
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error updating note in case:', error);
+      throw error;
+    }
+  }
 };
