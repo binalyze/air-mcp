@@ -19,6 +19,20 @@ export const CreateOrganizationArgsSchema = z.object({
   note: z.string().optional().describe('Additional notes about the organization')
 });
 
+export const UpdateOrganizationArgsSchema = z.object({
+  id: z.number().describe('ID of the organization to update'),
+  name: z.string().optional().describe('Updated name of the organization'),
+  shareableDeploymentEnabled: z.boolean().optional().describe('Whether shareable deployment is enabled'),
+  contact: z.object({
+    name: z.string().describe('Contact name'),
+    title: z.string().optional().describe('Contact title'),
+    phone: z.string().optional().describe('Contact phone number'),
+    mobile: z.string().optional().describe('Contact mobile number'),
+    email: z.string().describe('Contact email address')
+  }).optional().describe('Updated contact information for the organization'),
+  note: z.string().optional().describe('Additional notes about the organization')
+});
+
 // Format organization for display
 function formatOrganization(org: Organization): string {
   return `
@@ -109,4 +123,41 @@ export const organizationTools = {
       };
     }
   },
+  async updateOrganization(args: z.infer<typeof UpdateOrganizationArgsSchema>) {
+    try {
+      const { id, ...updateData } = args;
+      const response = await api.updateOrganization(id, updateData);
+      
+      if (!response.success) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Error updating organization: ${response.errors.join(', ')}`
+            }
+          ]
+        };
+      }
+      
+      const org = response.result;
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Successfully updated organization:\n${formatOrganization(org)}`
+          }
+        ]
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Failed to update organization: ${errorMessage}`
+          }
+        ]
+      };
+    }
+  }
 };

@@ -99,4 +99,22 @@ export const api = {
       throw error;
     }
   },
+  async updateOrganization(id: number, data: Partial<CreateOrganizationRequest>): Promise<{ success: boolean; result: Organization; statusCode: number; errors: string[] }> {
+    try {
+      const response = await axios.patch(
+        `${config.airHost}/api/public/organizations/${id}`,
+        data,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${config.airApiToken}`
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error updating organization:', error);
+      throw error;
+    }
+  }
 };

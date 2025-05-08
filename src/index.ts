@@ -38,10 +38,11 @@ import { casesExportTools, ExportCaseActivitiesArgsSchema, ExportCaseEndpointsAr
 import { CreateAmazonS3RepositoryArgsSchema, CreateAzureStorageRepositoryArgsSchema, CreateFtpsRepositoryArgsSchema, CreateSftpRepositoryArgsSchema, CreateSmbRepositoryArgsSchema, DeleteRepositoryArgsSchema, GetRepositoryByIdArgsSchema, ListRepositoriesArgsSchema, repositoryTools, UpdateAmazonS3RepositoryArgsSchema, UpdateAzureStorageRepositoryArgsSchema, UpdateFtpsRepositoryArgsSchema, UpdateSftpRepositoryArgsSchema, UpdateSmbRepositoryArgsSchema, ValidateAmazonS3RepositoryArgsSchema, ValidateAzureStorageRepositoryArgsSchema, ValidateFtpsRepositoryArgsSchema } from './tools/evidence-repositories';
 import { DownloadCasePpcArgsSchema, DownloadTaskReportArgsSchema, evidenceTools, GetReportFileInfoArgsSchema } from './tools/evidence';
 import { AssignUsersToOrganizationArgsSchema, GetOrganizationUsersArgsSchema, organizationUsersTools, RemoveUserFromOrganizationArgsSchema } from './tools/organizations-users';
+import { UpdateOrganizationArgsSchema } from './tools/organizations';
 
 const server = new Server({
   name: 'air-mcp',
-  version: '9.3.0'
+  version: '9.4.0'
 }, {
   capabilities: {
     tools: {}
@@ -2348,6 +2349,43 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: ['name', 'contact'],
         },
       },
+      {
+        name: 'update_organization_by_id',
+        description: 'Update an existing organization by ID',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            id: {
+              type: 'number',
+              description: 'The ID of the organization to update',
+            },
+            name: {
+              type: 'string',
+              description: 'Updated name of the organization',
+            },
+            shareableDeploymentEnabled: {
+              type: 'boolean',
+              description: 'Whether shareable deployment is enabled',
+            },
+            contact: {
+              type: 'object',
+              properties: {
+                name: { type: 'string', description: 'Contact name' },
+                title: { type: 'string', description: 'Contact title' },
+                phone: { type: 'string', description: 'Contact phone number' },
+                mobile: { type: 'string', description: 'Contact mobile number' },
+                email: { type: 'string', description: 'Contact email address' }
+              },
+              description: 'Updated contact information for the organization',
+            },
+            note: {
+              type: 'string',
+              description: 'Additional notes about the organization',
+            },
+          },
+          required: ['id'],
+        },
+      },
     ],
   };
 });
@@ -2761,6 +2799,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       validateAirApiToken();
       const parsedArgs = CreateOrganizationArgsSchema.parse(args);
       return await organizationTools.createOrganization(parsedArgs);
+    } else if (name === 'update_organization_by_id') {
+      validateAirApiToken();
+      const parsedArgs = UpdateOrganizationArgsSchema.parse(args);
+      return await organizationTools.updateOrganization(parsedArgs);
     } else {
       throw new Error(`Unknown tool: ${name}`);
     }
