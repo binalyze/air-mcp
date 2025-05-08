@@ -21,7 +21,7 @@ import { ArchiveCaseArgsSchema, caseTools, ChangeCaseOwnerArgsSchema, CheckCaseN
 import { policyTools, ListPoliciesArgsSchema, CreatePolicyArgsSchema, UpdatePolicyArgsSchema, GetPolicyByIdArgsSchema, UpdatePolicyPrioritiesArgsSchema, PolicyMatchStatsArgsSchema, DeletePolicyByIdArgsSchema } from './tools/policies';
 import { taskTools, ListTasksArgsSchema, GetTaskByIdArgsSchema, CancelTaskByIdArgsSchema, DeleteTaskByIdArgsSchema } from './tools/tasks';
 import { triageTools, ListTriageRulesArgsSchema, CreateTriageRuleArgsSchema, UpdateTriageRuleArgsSchema, DeleteTriageRuleArgsSchema, GetTriageRuleByIdArgsSchema, ValidateTriageRuleArgsSchema, AssignTriageTaskArgsSchema } from './tools/triages';
-import { userTools, ListUsersArgsSchema } from './tools/users';
+import { userTools, ListUsersArgsSchema, GetUserByIdArgsSchema } from './tools/users';
 import { droneAnalyzerTools, acquisitionArtifactTools, eDiscoveryTools } from './tools/params';
 import { auditTools, ExportAuditLogsArgsSchema, ListAuditLogsArgsSchema } from './tools/audit';
 import { assignTaskTools, AssignRebootTaskArgsSchema, AssignShutdownTaskArgsSchema, AssignIsolationTaskArgsSchema, AssignLogRetrievalTaskArgsSchema, AssignVersionUpdateTaskArgsSchema } from './tools/assign-task';
@@ -42,7 +42,7 @@ import { UpdateOrganizationArgsSchema } from './tools/organizations';
 
 const server = new Server({
   name: 'air-mcp',
-  version: '9.12.0'
+  version: '10.0.0'
 }, {
   capabilities: {
     tools: {}
@@ -2516,6 +2516,20 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: ['id', 'tags'],
         },
       },
+      {
+        name: 'get_user_by_id',
+        description: 'Get detailed information about a specific user by their ID',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            id: {
+              type: 'string',
+              description: 'The ID of the user to retrieve',
+            },
+          },
+          required: ['id'],
+        },
+      },
     ],
   };
 });
@@ -2965,6 +2979,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       validateAirApiToken();
       const parsedArgs = DeleteTagsFromOrganizationArgsSchema.parse(args);
       return await organizationTools.deleteTagsFromOrganization(parsedArgs);
+    } else if (name === 'get_user_by_id') {
+      validateAirApiToken();
+      const parsedArgs = GetUserByIdArgsSchema.parse(args);
+      return await userTools.getUserById(parsedArgs);
     } else {
       throw new Error(`Unknown tool: ${name}`);
     }

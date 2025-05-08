@@ -29,6 +29,13 @@ export interface User {
   updatedAt: string;
 }
 
+export interface UserResponse {
+  success: boolean;
+  result: User;
+  statusCode: number;
+  errors: string[];
+}
+
 export interface UsersResponse {
   success: boolean;
   result: {
@@ -73,4 +80,21 @@ export const api = {
       throw error;
     }
   },
+  async getUserById(id: string): Promise<UserResponse> {
+    try {
+      const response = await axios.get(
+        `${config.airHost}/api/public/user-management/users/${id}`,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${config.airApiToken}`
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching user with ID ${id}:`, error);
+      throw error;
+    }
+  }
 }; 

@@ -40,6 +40,7 @@ A Node.js server implementing **Model Context Protocol (MCP)** for Binalyze AIR,
 - **Task Management** - Track forensic collection tasks and their statuses.
 - **Triage Rules** - View YARA, Osquery and Sigma rules for threat detection.
 - **User Management** - List users in your organization.
+- **User Details** - Get detailed information about a specific user by their ID.
 - **Drone Analyzers** - View available drone analyzers with supported operating systems.
 - **Audit Log Export** - Initiate an export of audit logs.
 - **List Audit Logs** - View audit logs from the system.
@@ -233,6 +234,7 @@ In Claude Desktop, or any MCP Client, you can use natural language commands:
 | `List all tasks` | Lists all tasks with their statuses |
 | `List all triage rules` | Shows YARA, OSQuery and Sigma rules for threat detection |
 | `List all users` | Shows all users in the system with their details |
+| `Get user by ID` | Retrieves the details of a specific user by their ID |
 | `List all drone analyzers` | Shows available drone analyzers with supported operating systems |
 | `Export audit logs` | Initiates the export of audit logs. The export runs in the background on the AIR server. |
 | `List audit logs` | Shows audit logs with details like timestamp, user, action, entity |

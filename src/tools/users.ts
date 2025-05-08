@@ -9,6 +9,10 @@ export const ListUsersArgsSchema = z.object({
   ]).optional().describe('Organization IDs to filter users by. Defaults to "0" or specific IDs like "123" or ["123", "456"]'),
 });
 
+export const GetUserByIdArgsSchema = z.object({
+  id: z.string().describe('The ID of the user to retrieve'),
+});
+
 // Format user for display
 function formatUser(user: User): string {
   return `
@@ -67,4 +71,40 @@ export const userTools = {
       };
     }
   },
+  async getUserById(args: z.infer<typeof GetUserByIdArgsSchema>) {
+    try {
+      const response = await api.getUserById(args.id);
+      
+      if (!response.success) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Error fetching user: ${response.errors.join(', ')}`
+            }
+          ]
+        };
+      }
+      
+      const user = response.result;
+      return {
+        content: [
+          {
+            type: 'text',
+            text: formatUser(user)
+          }
+        ]
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Failed to fetch user: ${errorMessage}`
+          }
+        ]
+      };
+    }
+  }
 }; 
