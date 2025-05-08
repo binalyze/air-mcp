@@ -39,11 +39,11 @@ import { CreateAmazonS3RepositoryArgsSchema, CreateAzureStorageRepositoryArgsSch
 import { DownloadCasePpcArgsSchema, DownloadTaskReportArgsSchema, evidenceTools, GetReportFileInfoArgsSchema } from './tools/evidence';
 import { AssignUsersToOrganizationArgsSchema, GetOrganizationUsersArgsSchema, organizationUsersTools, RemoveUserFromOrganizationArgsSchema } from './tools/organizations-users';
 import { UpdateOrganizationArgsSchema } from './tools/organizations';
-import { CallWebhookArgsSchema, PostWebhookArgsSchema, webhookTools } from './tools/webhooks';
+import { CallWebhookArgsSchema, GetTaskAssignmentsArgsSchema, PostWebhookArgsSchema, webhookTools } from './tools/webhooks';
 
 const server = new Server({
   name: 'air-mcp',
-  version: '11.1.0'
+  version: '11.2.0'
 }, {
   capabilities: {
     tools: {}
@@ -2575,6 +2575,28 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: ['slug', 'data', 'token'],
         },
       },
+      {
+        name: 'get_task_assignments',
+        description: 'Get all assignments for a specific task by its ID',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            slug: {
+              type: 'string',
+              description: 'The webhook slug (e.g., "air-generic-url-webhook")',
+            },
+            taskId: {
+              type: 'string',
+              description: 'The ID of the task to retrieve assignments for',
+            },
+            token: {
+              type: 'string',
+              description: 'The webhook token for authentication',
+            },
+          },
+          required: ['slug', 'taskId', 'token'],
+        },
+      },
     ],
   };
 });
@@ -3036,6 +3058,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       validateAirApiToken();
       const parsedArgs = PostWebhookArgsSchema.parse(args);
       return await webhookTools.postWebhook(parsedArgs);
+    } else if (name === 'get_task_assignments') {
+      validateAirApiToken();
+      const parsedArgs = GetTaskAssignmentsArgsSchema.parse(args);
+      return await webhookTools.getTaskAssignments(parsedArgs);
     } else {
       throw new Error(`Unknown tool: ${name}`);
     }

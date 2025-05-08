@@ -116,6 +116,7 @@ A Node.js server implementing **Model Context Protocol (MCP)** for Binalyze AIR,
 - **Delete Tags from Organization** - Delete tags from an organization.
 - **Call Webhook** - Call a webhook with the specified parameters.
 - **Post Webhook** - Post data to a webhook.
+- **Get Task Assignments** - Get all assignments for a specific task by its ID.
 
 ## Overview
 
@@ -330,3 +331,4 @@ In Claude Desktop, or any MCP Client, you can use natural language commands:
 | `Delete tags ["tag1", "tag2" ] from organization with ID "123"` | Removes tags from an organization |
 | `Call webhook with slug "air-generic-url-webhook" and data "192.168.1.100" and token "token123"` | Calls a webhook with the specified parameters |
 | `Post data to webhook with slug "air-generic-url-webhook"` | Sends a POST request to a webhook with provided data |
+| `Get task assignments for task with ID "task123"` | Retrieves all assignments for a specific task by its ID |

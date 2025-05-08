@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { api, WebhookResponse } from '../api/webhooks/webhooks';
+import { api, AssignmentResponse, WebhookResponse } from '../api/webhooks/webhooks';
 
 // Schema for call webhook arguments
 export const CallWebhookArgsSchema = z.object({
@@ -14,6 +14,12 @@ export const PostWebhookArgsSchema = z.object({
   token: z.string().describe('The webhook token for authentication'),
 });
 
+export const GetTaskAssignmentsArgsSchema = z.object({
+  slug: z.string().describe('The webhook slug (e.g., "air-generic-url-webhook")'),
+  taskId: z.string().describe('The ID of the task to retrieve assignments for'),
+  token: z.string().describe('The webhook token for authentication'),
+});
+
 // Format webhook response for display
 function formatWebhookResponse(response: WebhookResponse): string {
   return `
@@ -22,6 +28,29 @@ Task Details View URL: ${response.taskDetailsViewUrl}
 Task Details Data URL: ${response.taskDetailsDataUrl}
 Status Code: ${response.statusCode}
 `;
+}
+
+function formatAssignmentResponse(assignments: AssignmentResponse[]): string {
+  if (assignments.length === 0) {
+    return 'No assignments found for this task.';
+  }
+
+  return assignments.map(assignment => `
+Assignment ID: ${assignment.assignmentId}
+Task ID: ${assignment.taskId}
+Task Name: ${assignment.taskName}
+Endpoint ID: ${assignment.endpointId}
+Endpoint Name: ${assignment.endpointName}
+Organization ID: ${assignment.organizationId}
+Status: ${assignment.assignmentStatus}
+Progress: ${assignment.progress}%
+Started At: ${assignment.startedAt}
+Has Drone Data: ${assignment.hasDroneData}
+Has Case PPC: ${assignment.hasCasePpc}
+Report Status: ${assignment.reportStatus}
+Report ID: ${assignment.reportId}
+Report URL: ${assignment.reportUrl}
+`).join('\n---\n');
 }
 
 export const webhookTools = {
@@ -69,6 +98,30 @@ export const webhookTools = {
           {
             type: 'text',
             text: `Failed to post to webhook: ${errorMessage}`
+          }
+        ]
+      };
+    }
+  },
+  async getTaskAssignments(args: z.infer<typeof GetTaskAssignmentsArgsSchema>) {
+    try {
+      const assignments = await api.getTaskAssignments(args.slug, args.token, args.taskId);
+      
+      return {
+        content: [
+          {
+            type: 'text',
+            text: formatAssignmentResponse(assignments)
+          }
+        ]
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Failed to get task assignments: ${errorMessage}`
           }
         ]
       };
