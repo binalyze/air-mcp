@@ -98,6 +98,7 @@ A Node.js server implementing **Model Context Protocol (MCP)** for Binalyze AIR,
 - **Get Repository by ID** - Get detailed information about a specific evidence repository by its ID.
 - **Delete Repository** - Delete an evidence repository by its ID.
 - **Download Case PPC** - Download a PPC file for a specific endpoint and task.
+- **Download Task Report** - Download a task report for a specific endpoint and task.
 
 ## Overview
 
@@ -294,3 +295,4 @@ In Claude Desktop, or any MCP Client, you can use natural language commands:
 | `Get details about repository with ID "abc123"` | Displays detailed information about a specific evidence repository |
 | `Delete repository with ID "abc123"` | Deletes a specific evidence repository |
 | `Download PPC file for endpoint "ep-1" and task "task-1"` | Downloads a PPC file for the specified endpoint and task |
+| `Download task report for endpoint "123" and task "456"` | Downloads a task report for the specified endpoint and task |
