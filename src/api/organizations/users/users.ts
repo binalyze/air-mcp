@@ -92,5 +92,27 @@ export const api = {
       console.error(`Error assigning users to organization ${organizationId}:`, error);
       throw error;
     }
+  },
+  async removeUserFromOrganization(organizationId: number | string, userId: string): Promise<{
+    success: boolean;
+    result: null;
+    statusCode: number;
+    errors: string[];
+  }> {
+    try {
+      const response = await axios.delete(
+        `${config.airHost}/api/public/organizations/${organizationId}/remove-user/${userId}`,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${config.airApiToken}`
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error(`Error removing user ${userId} from organization ${organizationId}:`, error);
+      throw error;
+    }
   }
 };

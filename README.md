@@ -102,6 +102,7 @@ A Node.js server implementing **Model Context Protocol (MCP)** for Binalyze AIR,
 - **Get Report File Info** - Get information about a PPC file for a specific endpoint and task.
 - **Get Organization Users** - Get users for a specific organization by its ID.
 - **Assign Users to Organization** - Assign users to a specific organization.
+- **Remove User from Organization** - Remove a user from a specific organization.
 
 ## Overview
 
@@ -302,3 +303,4 @@ In Claude Desktop, or any MCP Client, you can use natural language commands:
 | `Get report file information for endpoint "123" and task "456"` | Retrieves information about a PPC file for a specific endpoint and task |
 | `Get users for organization with ID "2"` | Displays all users belonging to the specified organization |
 | `Assign users with IDs ["user1", "user2"] to organization "123"` | Assigns users to the specified organization |
+| `Remove user with ID "user1" from organization "123"` | Removes a user from the specified organization |

@@ -37,11 +37,11 @@ import { AddNoteToCaseArgsSchema, caseNotesTools, DeleteNoteFromCaseArgsSchema, 
 import { casesExportTools, ExportCaseActivitiesArgsSchema, ExportCaseEndpointsArgsSchema, ExportCaseNotesArgsSchema, ExportCasesArgsSchema } from './tools/cases-export';
 import { CreateAmazonS3RepositoryArgsSchema, CreateAzureStorageRepositoryArgsSchema, CreateFtpsRepositoryArgsSchema, CreateSftpRepositoryArgsSchema, CreateSmbRepositoryArgsSchema, DeleteRepositoryArgsSchema, GetRepositoryByIdArgsSchema, ListRepositoriesArgsSchema, repositoryTools, UpdateAmazonS3RepositoryArgsSchema, UpdateAzureStorageRepositoryArgsSchema, UpdateFtpsRepositoryArgsSchema, UpdateSftpRepositoryArgsSchema, UpdateSmbRepositoryArgsSchema, ValidateAmazonS3RepositoryArgsSchema, ValidateAzureStorageRepositoryArgsSchema, ValidateFtpsRepositoryArgsSchema } from './tools/evidence-repositories';
 import { DownloadCasePpcArgsSchema, DownloadTaskReportArgsSchema, evidenceTools, GetReportFileInfoArgsSchema } from './tools/evidence';
-import { AssignUsersToOrganizationArgsSchema, GetOrganizationUsersArgsSchema, organizationUsersTools } from './tools/organizations-users';
+import { AssignUsersToOrganizationArgsSchema, GetOrganizationUsersArgsSchema, organizationUsersTools, RemoveUserFromOrganizationArgsSchema } from './tools/organizations-users';
 
 const server = new Server({
   name: 'air-mcp',
-  version: '9.0.0'
+  version: '9.2.0'
 }, {
   capabilities: {
     tools: {}
@@ -2305,6 +2305,24 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: ['id', 'userIds'],
         },
       },
+      {
+        name: 'remove_user_from_organization',
+        description: 'Remove a user from an organization',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            organizationId: {
+              type: 'string',
+              description: 'The ID of the organization to remove the user from',
+            },
+            userId: {
+              type: 'string',
+              description: 'The ID of the user to remove from the organization',
+            },
+          },
+          required: ['organizationId', 'userId'],
+        },
+      },
     ],
   };
 });
@@ -2702,7 +2720,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       validateAirApiToken();
       const parsedArgs = GetReportFileInfoArgsSchema.parse(args);
       return await evidenceTools.getReportFileInfo(parsedArgs);
-    } else if (name === 'get_organization_users') {
+    } else if (name === 'get_organization_users') { 
       validateAirApiToken();
       const parsedArgs = GetOrganizationUsersArgsSchema.parse(args);
       return await organizationUsersTools.getOrganizationUsers(parsedArgs);
@@ -2710,6 +2728,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       validateAirApiToken();
       const parsedArgs = AssignUsersToOrganizationArgsSchema.parse(args);
       return await organizationUsersTools.assignUsersToOrganization(parsedArgs);
+    } else if (name === 'remove_user_from_organization') {
+      validateAirApiToken();
+      const parsedArgs = RemoveUserFromOrganizationArgsSchema.parse(args);
+      return await organizationUsersTools.removeUserFromOrganization(parsedArgs);
     } else {
       throw new Error(`Unknown tool: ${name}`);
     }

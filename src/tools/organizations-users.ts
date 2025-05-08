@@ -12,6 +12,12 @@ export const AssignUsersToOrganizationArgsSchema = z.object({
   userIds: z.array(z.string()).describe('Array of user IDs to assign to the organization'),
 });
 
+// Schema for remove user from organization arguments
+export const RemoveUserFromOrganizationArgsSchema = z.object({
+  organizationId: z.union([z.string(), z.number()]).describe('The ID of the organization to remove the user from'),
+  userId: z.string().describe('The ID of the user to remove from the organization'),
+});
+
 // Format user for display
 function formatUser(user: User): string {
   return `
@@ -97,6 +103,41 @@ export const organizationUsersTools = {
           {
             type: 'text',
             text: `Failed to assign users to organization: ${errorMessage}`
+          }
+        ]
+      };
+    }
+  },
+  async removeUserFromOrganization(args: z.infer<typeof RemoveUserFromOrganizationArgsSchema>) {
+    try {
+      const response = await api.removeUserFromOrganization(args.organizationId, args.userId);
+      
+      if (!response.success) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Error removing user from organization: ${response.errors.join(', ')}`
+            }
+          ]
+        };
+      }
+      
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Successfully removed user ${args.userId} from organization ${args.organizationId}`
+          }
+        ]
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Failed to remove user from organization: ${errorMessage}`
           }
         ]
       };
