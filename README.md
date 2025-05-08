@@ -78,6 +78,7 @@ A Node.js server implementing **Model Context Protocol (MCP)** for Binalyze AIR,
 - **Get Case Endpoints** - Get all endpoints associated with a specific case by its ID.
 - **Get Case Tasks by ID** - Get all tasks associated with a specific case by its ID.
 - **Get Case Users** - Get all users associated with a specific case by its ID.
+- **Remove Endpoints from Case** - Remove endpoints from a case based on specified filters.
 
 ## Overview
 
@@ -256,3 +257,4 @@ In Claude Desktop, or any MCP Client, you can use natural language commands:
 | `Get endpoints for case with ID "C-2022-0001"` | Retrieves all endpoints associated with a specific case by its ID |
 | `Get tasks for case with ID "C-2022-0001"` | Displays all tasks associated with the specified case |
 | `Get users for case with ID "C-2022-0001"` | Retrieves all users associated with a specific case by its ID |
+| `Remove endpoints from case with ID "C-2022-0001"` | Removes endpoints from a case based on specified filters |

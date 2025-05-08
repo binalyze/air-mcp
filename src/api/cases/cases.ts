@@ -484,4 +484,39 @@ export const api = {
       throw error;
     }
   },
+  async removeEndpointsFromCase(id: string, filter: {
+    searchTerm?: string;
+    name?: string;
+    ipAddress?: string;
+    groupId?: string;
+    groupFullPath?: string;
+    managedStatus?: string[];
+    isolationStatus?: string[];
+    platform?: string[];
+    issue?: string;
+    onlineStatus?: string[];
+    tags?: string[];
+    version?: string;
+    policy?: string;
+    includedEndpointIds?: string[];
+    excludedEndpointIds?: string[];
+    organizationIds?: number[];
+  }): Promise<{ success: boolean; result: null; statusCode: number; errors: string[] }> {
+    try {
+      const response = await axios.delete(
+        `${config.airHost}/api/public/cases/${id}/endpoints`,
+        {
+          data: { filter },
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${config.airApiToken}`
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error(`Error removing endpoints from case with ID ${id}:`, error);
+      throw error;
+    }
+  }
 };

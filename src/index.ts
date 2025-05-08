@@ -17,7 +17,7 @@ import {
   CreateAcquisitionProfileArgsSchema
 } from './tools/acquisitions';
 import { organizationTools } from './tools/organizations';
-import { ArchiveCaseArgsSchema, caseTools, ChangeCaseOwnerArgsSchema, CheckCaseNameArgsSchema, CloseCaseArgsSchema, CreateCaseArgsSchema, GetCaseActivitiesArgsSchema, GetCaseByIdArgsSchema, GetCaseEndpointsArgsSchema, GetCaseTasksByIdArgsSchema, GetCaseUsersArgsSchema, ListCasesArgsSchema, OpenCaseArgsSchema, UpdateCaseArgsSchema } from './tools/cases';
+import { ArchiveCaseArgsSchema, caseTools, ChangeCaseOwnerArgsSchema, CheckCaseNameArgsSchema, CloseCaseArgsSchema, CreateCaseArgsSchema, GetCaseActivitiesArgsSchema, GetCaseByIdArgsSchema, GetCaseEndpointsArgsSchema, GetCaseTasksByIdArgsSchema, GetCaseUsersArgsSchema, ListCasesArgsSchema, OpenCaseArgsSchema, RemoveEndpointsFromCaseArgsSchema, UpdateCaseArgsSchema } from './tools/cases';
 import { policyTools, ListPoliciesArgsSchema, CreatePolicyArgsSchema, UpdatePolicyArgsSchema, GetPolicyByIdArgsSchema, UpdatePolicyPrioritiesArgsSchema, PolicyMatchStatsArgsSchema, DeletePolicyByIdArgsSchema } from './tools/policies';
 import { taskTools, ListTasksArgsSchema, GetTaskByIdArgsSchema, CancelTaskByIdArgsSchema, DeleteTaskByIdArgsSchema } from './tools/tasks';
 import { triageTools, ListTriageRulesArgsSchema, CreateTriageRuleArgsSchema, UpdateTriageRuleArgsSchema, DeleteTriageRuleArgsSchema, GetTriageRuleByIdArgsSchema, ValidateTriageRuleArgsSchema, AssignTriageTaskArgsSchema } from './tools/triages';
@@ -38,7 +38,7 @@ import { casesExportTools, ExportCaseActivitiesArgsSchema, ExportCaseEndpointsAr
 
 const server = new Server({
   name: 'air-mcp',
-  version: '7.18.0'
+  version: '7.19.0'
 }, {
   capabilities: {
     tools: {}
@@ -1856,6 +1856,43 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: ['id'],
         },
       },
+      {
+        name: 'remove_endpoints_from_case',
+        description: 'Remove endpoints from a case based on specified filters',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            id: {
+              type: 'string',
+              description: 'ID of the case to remove endpoints from',
+            },
+            filter: {
+              type: 'object',
+              properties: {
+                searchTerm: { type: 'string', description: 'Optional search term' },
+                name: { type: 'string', description: 'Filter by asset name' },
+                ipAddress: { type: 'string', description: 'Filter by IP address' },
+                groupId: { type: 'string', description: 'Filter by group ID' },
+                groupFullPath: { type: 'string', description: 'Filter by full group path' },
+                managedStatus: { type: 'array', items: { type: 'string' }, description: 'Filter by managed status (e.g., ["managed"])' },
+                isolationStatus: { type: 'array', items: { type: 'string' }, description: 'Filter by isolation status (e.g., ["isolated"])' },
+                platform: { type: 'array', items: { type: 'string' }, description: 'Filter by platform (e.g., ["windows"])' },
+                issue: { type: 'string', description: 'Filter by issue' },
+                onlineStatus: { type: 'array', items: { type: 'string' }, description: 'Filter by online status (e.g., ["online"])' },
+                tags: { type: 'array', items: { type: 'string' }, description: 'Filter by tags' },
+                version: { type: 'string', description: 'Filter by agent version' },
+                policy: { type: 'string', description: 'Filter by policy' },
+                includedEndpointIds: { type: 'array', items: { type: 'string' }, description: 'Array of endpoint IDs to remove' },
+                excludedEndpointIds: { type: 'array', items: { type: 'string' }, description: 'Array of endpoint IDs to exclude' },
+                organizationIds: { type: 'array', items: { oneOf: [{ type: 'number' }, { type: 'string' }] }, description: 'Organization IDs filter. Defaults to [0]' },
+              },
+              required: [],
+              description: 'Filter object to specify which endpoints to remove'
+            },
+          },
+          required: ['id'],
+        },
+      },
     ],
   };
 });
@@ -2165,6 +2202,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       validateAirApiToken();
       const parsedArgs = GetCaseUsersArgsSchema.parse(args);
       return await caseTools.getCaseUsers(parsedArgs);
+    } else if (name === 'remove_endpoints_from_case') {
+      validateAirApiToken();
+      const parsedArgs = RemoveEndpointsFromCaseArgsSchema.parse(args);
+      return await caseTools.removeEndpointsFromCase(parsedArgs);
     } else {
       throw new Error(`Unknown tool: ${name}`);
     }

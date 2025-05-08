@@ -96,34 +96,27 @@ export const GetCaseTasksByIdArgsSchema = z.object({
   ]).default(0).describe('Organization IDs to filter tasks by. Defaults to 0.')
 });
 
-function formatTask(task: CaseTask): string {
-  return `
-Task: ${task.name} (ID: ${task._id})
-Type: ${task.type}
-Endpoint: ${task.endpointName} (ID: ${task.endpointId})
-Status: ${task.status}
-Progress: ${task.progress}%
-Comparable: ${task.isComparable ? 'Yes' : 'No'}
-Created: ${new Date(task.createdAt).toLocaleString()}
-Last Updated: ${new Date(task.updatedAt).toLocaleString()}
-`;
-}
-
-function formatEndpoint(endpoint: CaseEndpoint): string {
-  return `
-Endpoint: ${endpoint.name} (ID: ${endpoint._id})
-Platform: ${endpoint.platform}
-OS: ${endpoint.os}
-IP Address: ${endpoint.ipAddress}
-Group: ${endpoint.groupFullPath}
-Status: ${endpoint.onlineStatus} (${endpoint.isolationStatus})
-Last Seen: ${new Date(endpoint.lastSeen).toLocaleString()}
-Version: ${endpoint.version}
-Managed: ${endpoint.isManaged ? 'Yes' : 'No'}
-Server: ${endpoint.isServer ? 'Yes' : 'No'}
-Tags: ${endpoint.tags.length > 0 ? endpoint.tags.join(', ') : 'None'}
-`;
-}
+export const RemoveEndpointsFromCaseArgsSchema = z.object({
+  id: z.string().describe('ID of the case to remove endpoints from'),
+  filter: z.object({
+    searchTerm: z.string().optional().describe('Optional search term'),
+    name: z.string().optional().describe('Filter by asset name'),
+    ipAddress: z.string().optional().describe('Filter by IP address'),
+    groupId: z.string().optional().describe('Filter by group ID'),
+    groupFullPath: z.string().optional().describe('Filter by full group path'),
+    managedStatus: z.array(z.string()).optional().describe('Filter by managed status (e.g., ["managed"])'),
+    isolationStatus: z.array(z.string()).optional().describe('Filter by isolation status (e.g., ["isolated"])'),
+    platform: z.array(z.string()).optional().describe('Filter by platform (e.g., ["windows"])'),
+    issue: z.string().optional().describe('Filter by issue'),
+    onlineStatus: z.array(z.string()).optional().describe('Filter by online status (e.g., ["online"])'),
+    tags: z.array(z.string()).optional().describe('Filter by tags'),
+    version: z.string().optional().describe('Filter by agent version'),
+    policy: z.string().optional().describe('Filter by policy'),
+    includedEndpointIds: z.array(z.string()).optional().describe('Array of endpoint IDs to remove'),
+    excludedEndpointIds: z.array(z.string()).optional().describe('Array of endpoint IDs to exclude'),
+    organizationIds: z.array(z.union([z.number(), z.string().transform(val => parseInt(val))])).optional().describe('Organization IDs filter. Defaults to [0]'),
+  }).describe('Filter object to specify which endpoints to remove')
+});
 
 // Format case for display
 function formatCase(caseItem: Case): string {
@@ -731,6 +724,61 @@ export const caseTools = {
           {
             type: 'text',
             text: `Failed to fetch case users: ${errorMessage}`
+          }
+        ]
+      };
+    }
+  },
+  async removeEndpointsFromCase(args: z.infer<typeof RemoveEndpointsFromCaseArgsSchema>) {
+    try {
+      // Convert string organizationIds to numbers if needed
+      if (args.filter.organizationIds) {
+        args.filter.organizationIds = args.filter.organizationIds.map(id => 
+          typeof id === 'string' ? parseInt(id) : id
+        );
+      }
+      
+      const response = await api.removeEndpointsFromCase(args.id, args.filter);
+      
+      if (!response.success) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Error removing endpoints from case: ${response.errors.join(', ')}`
+            }
+          ]
+        };
+      }
+      
+      // Create a summary of the filter that was applied
+      const filterSummary = Object.entries(args.filter)
+        .filter(([_, value]) => value !== undefined && (
+          !Array.isArray(value) || value.length > 0
+        ))
+        .map(([key, value]) => {
+          if (Array.isArray(value)) {
+            return `${key}: ${value.join(', ')}`;
+          }
+          return `${key}: ${value}`;
+        })
+        .join('\n');
+      
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Successfully removed endpoints from case ${args.id} with the following filter:\n\n${filterSummary}`
+          }
+        ]
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Failed to remove endpoints from case: ${errorMessage}`
           }
         ]
       };
