@@ -38,6 +38,11 @@ export const CloseCaseArgsSchema = z.object({
 export const OpenCaseArgsSchema = z.object({
   id: z.string().describe('ID of the case to open'),
 });
+
+export const ArchiveCaseArgsSchema = z.object({
+  id: z.string().describe('ID of the case to archive'),
+});
+
 // Format case for display
 function formatCase(caseItem: Case): string {
   return `
@@ -299,5 +304,41 @@ export const caseTools = {
         ]
       };
     }
+  },
+  async archiveCase(args: z.infer<typeof ArchiveCaseArgsSchema>) {
+    try {
+      const response = await api.archiveCase(args.id);
+      
+      if (!response.success) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Error archiving case: ${response.errors.join(', ')}`
+            }
+          ]
+        };
+      }
+      
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Case archived successfully:\n${formatCase(response.result)}`
+          }
+        ]
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Failed to archive case: ${errorMessage}`
+          }
+        ]
+      };
+    }
   }
+  
 };
