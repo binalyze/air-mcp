@@ -97,5 +97,29 @@ export const api = {
       console.error('Error creating SMB repository:', error);
       throw error;
     }
+  },
+  async updateSmbRepository(id: string, data: {
+    name: string;
+    path: string;
+    username: string;
+    password: string;
+    organizationIds: number[];
+  }): Promise<Repository> {
+    try {
+      const response = await axios.put(
+        `${config.airHost}/api/public/evidences/repositories/smb/${id}`,
+        data,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${config.airApiToken}`
+          }
+        }
+      );
+      return response.data.result;
+    } catch (error) {
+      console.error('Error updating SMB repository:', error);
+      throw error;
+    }
   }
 };

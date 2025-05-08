@@ -35,11 +35,11 @@ import { CreateTriageTagArgsSchema, triageTagTools } from './tools/triage-tags';
 import { ListTriageTagsArgsSchema } from './tools/triage-tags';
 import { AddNoteToCaseArgsSchema, caseNotesTools, DeleteNoteFromCaseArgsSchema, UpdateNoteCaseArgsSchema } from './tools/cases-notes';
 import { casesExportTools, ExportCaseActivitiesArgsSchema, ExportCaseEndpointsArgsSchema, ExportCaseNotesArgsSchema, ExportCasesArgsSchema } from './tools/cases-export';
-import { CreateSmbRepositoryArgsSchema, ListRepositoriesArgsSchema, repositoryTools } from './tools/evidence-repositories';
+import { CreateSmbRepositoryArgsSchema, ListRepositoriesArgsSchema, repositoryTools, UpdateSmbRepositoryArgsSchema } from './tools/evidence-repositories';
 
 const server = new Server({
   name: 'air-mcp',
-  version: '8.1.0'
+  version: '8.2.0'
 }, {
   capabilities: {
     tools: {}
@@ -1990,6 +1990,22 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: ['name', 'path', 'username', 'password'],
         },
       },
+      {
+        name: 'update_smb_repository',
+        description: 'Update an existing SMB repository by ID',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            id: { type: 'string', description: 'ID of the SMB repository to update' },
+            name: { type: 'string', description: 'Updated name for the SMB repository' },
+            path: { type: 'string', description: 'Updated network share path (e.g. \\\\Network\\Share)' },
+            username: { type: 'string', description: 'Updated username for SMB authentication' },
+            password: { type: 'string', description: 'Updated password for SMB authentication' },
+            organizationIds: { type: 'array', items: { type: 'number' }, description: 'Updated organization IDs to associate the repository with' },
+          },
+          required: ['id', 'name', 'path', 'username', 'password'],
+        },
+      },
     ],
   };
 });
@@ -2319,7 +2335,11 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       validateAirApiToken();
       const parsedArgs = CreateSmbRepositoryArgsSchema.parse(args);
       return await repositoryTools.createSmbRepository(parsedArgs);
-    } else {
+    } else if (name === 'update_smb_repository') {
+      validateAirApiToken();
+      const parsedArgs = UpdateSmbRepositoryArgsSchema.parse(args);
+      return await repositoryTools.updateSmbRepository(parsedArgs);
+    }else {
       throw new Error(`Unknown tool: ${name}`);
     }
   } catch (error) {

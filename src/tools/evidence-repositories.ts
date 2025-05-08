@@ -15,6 +15,16 @@ export const CreateSmbRepositoryArgsSchema = z.object({
   organizationIds: z.array(z.number()).optional().default([]).describe('Organization IDs to associate the repository with')
 });
 
+// Schema for update SMB repository arguments
+export const UpdateSmbRepositoryArgsSchema = z.object({
+  id: z.string().describe('ID of the SMB repository to update'),
+  name: z.string().describe('Updated name for the SMB repository'),
+  path: z.string().describe('Updated network share path (e.g. \\\\Network\\Share)'),
+  username: z.string().describe('Updated username for SMB authentication'),
+  password: z.string().describe('Updated password for SMB authentication'),
+  organizationIds: z.array(z.number()).optional().default([]).describe('Updated organization IDs to associate the repository with')
+});
+
 // Format repository for display
 function formatRepository(repo: Repository): string {
   return `
@@ -106,6 +116,36 @@ export const repositoryTools = {
           {
             type: 'text',
             text: `Failed to create SMB repository: ${errorMessage}`
+          }
+        ]
+      };
+    }
+  },
+  async updateSmbRepository(args: z.infer<typeof UpdateSmbRepositoryArgsSchema>) {
+    try {
+      const repository = await api.updateSmbRepository(args.id, {
+        name: args.name,
+        path: args.path,
+        username: args.username,
+        password: args.password,
+        organizationIds: args.organizationIds || []
+      });
+      
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Successfully updated SMB repository:\n${formatRepository(repository)}`
+          }
+        ]
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Failed to update SMB repository: ${errorMessage}`
           }
         ]
       };

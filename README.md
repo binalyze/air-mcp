@@ -83,6 +83,7 @@ A Node.js server implementing **Model Context Protocol (MCP)** for Binalyze AIR,
 - **Import Task Assignments to Case** - Import task assignments to a specific case.
 - **List Repositories** - List all evidence repositories in the organization.
 - **Create SMB Repository** - Create a new SMB evidence repository.
+- **Update SMB Repository** - Update an existing SMB evidence repository.
 
 ## Overview
 
@@ -266,3 +267,4 @@ In Claude Desktop, or any MCP Client, you can use natural language commands:
 | `Import task assignments to case with ID "C-2022-0001"` | Imports task assignments to a specific case |
 | `List repositories` | Lists all evidence repositories in the organization |
 | `Create SMB repository` |  Creates a new SMB evidence repository with specified credentials |
+| `Update SMB repository with ID "abc123"` | Updates an existing SMB repository's configuration |
