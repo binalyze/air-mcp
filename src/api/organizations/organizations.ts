@@ -47,6 +47,22 @@ export interface OrganizationsResponse {
   errors: string[];
 }
 
+export interface OrganizationContact {
+  name: string;
+  title?: string;
+  phone?: string;
+  mobile?: string;
+  email: string;
+}
+
+// Interface for create organization request
+export interface CreateOrganizationRequest {
+  name: string;
+  shareableDeploymentEnabled: boolean;
+  contact: OrganizationContact;
+  note?: string;
+}
+
 export const api = {
   async getOrganizations(): Promise<OrganizationsResponse> {
     try {
@@ -62,6 +78,24 @@ export const api = {
       return response.data;
     } catch (error) {
       console.error('Error fetching organizations:', error);
+      throw error;
+    }
+  },
+  async createOrganization(data: CreateOrganizationRequest): Promise<{ success: boolean; result: Organization; statusCode: number; errors: string[] }> {
+    try {
+      const response = await axios.post(
+        `${config.airHost}/api/public/organizations`,
+        data,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${config.airApiToken}`
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error creating organization:', error);
       throw error;
     }
   },

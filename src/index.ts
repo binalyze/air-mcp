@@ -16,7 +16,7 @@ import {
   AssignImageAcquisitionTaskArgsSchema,
   CreateAcquisitionProfileArgsSchema
 } from './tools/acquisitions';
-import { organizationTools } from './tools/organizations';
+import { CreateOrganizationArgsSchema, organizationTools } from './tools/organizations';
 import { ArchiveCaseArgsSchema, caseTools, ChangeCaseOwnerArgsSchema, CheckCaseNameArgsSchema, CloseCaseArgsSchema, CreateCaseArgsSchema, GetCaseActivitiesArgsSchema, GetCaseByIdArgsSchema, GetCaseEndpointsArgsSchema, GetCaseTasksByIdArgsSchema, GetCaseUsersArgsSchema, ImportTaskAssignmentsToCaseArgsSchema, ListCasesArgsSchema, OpenCaseArgsSchema, RemoveEndpointsFromCaseArgsSchema, RemoveTaskAssignmentFromCaseArgsSchema, UpdateCaseArgsSchema } from './tools/cases';
 import { policyTools, ListPoliciesArgsSchema, CreatePolicyArgsSchema, UpdatePolicyArgsSchema, GetPolicyByIdArgsSchema, UpdatePolicyPrioritiesArgsSchema, PolicyMatchStatsArgsSchema, DeletePolicyByIdArgsSchema } from './tools/policies';
 import { taskTools, ListTasksArgsSchema, GetTaskByIdArgsSchema, CancelTaskByIdArgsSchema, DeleteTaskByIdArgsSchema } from './tools/tasks';
@@ -41,7 +41,7 @@ import { AssignUsersToOrganizationArgsSchema, GetOrganizationUsersArgsSchema, or
 
 const server = new Server({
   name: 'air-mcp',
-  version: '9.2.0'
+  version: '9.3.0'
 }, {
   capabilities: {
     tools: {}
@@ -2323,6 +2323,31 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: ['organizationId', 'userId'],
         },
       },
+      {
+        name: 'create_organization',
+        description: 'Create a new organization',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            name: { type: 'string', description: 'Name of the organization' },
+            shareableDeploymentEnabled: { type: 'boolean', description: 'Whether shareable deployment is enabled. Defaults to false.' },
+            contact: {
+              type: 'object',
+              properties: {
+                name: { type: 'string', description: 'Contact name' },
+                title: { type: 'string', description: 'Contact title (optional)' },
+                phone: { type: 'string', description: 'Contact phone number (optional)' },
+                mobile: { type: 'string', description: 'Contact mobile number (optional)' },
+                email: { type: 'string', description: 'Contact email address' }
+              },
+              required: ['name', 'email'],
+              description: 'Contact information for the organization'
+            },
+            note: { type: 'string', description: 'Additional notes about the organization (optional)' }
+          },
+          required: ['name', 'contact'],
+        },
+      },
     ],
   };
 });
@@ -2732,6 +2757,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       validateAirApiToken();
       const parsedArgs = RemoveUserFromOrganizationArgsSchema.parse(args);
       return await organizationUsersTools.removeUserFromOrganization(parsedArgs);
+    } else if (name === 'create_organization') {
+      validateAirApiToken();
+      const parsedArgs = CreateOrganizationArgsSchema.parse(args);
+      return await organizationTools.createOrganization(parsedArgs);
     } else {
       throw new Error(`Unknown tool: ${name}`);
     }

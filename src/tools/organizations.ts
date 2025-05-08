@@ -6,6 +6,19 @@ export const ListOrganizationsArgsSchema = z.object({
   // No arguments needed for this endpoint, but adding an empty schema for consistency
 }).optional();
 
+export const CreateOrganizationArgsSchema = z.object({
+  name: z.string().describe('Name of the organization'),
+  shareableDeploymentEnabled: z.boolean().default(false).describe('Whether shareable deployment is enabled'),
+  contact: z.object({
+    name: z.string().describe('Contact name'),
+    title: z.string().optional().describe('Contact title'),
+    phone: z.string().optional().describe('Contact phone number'),
+    mobile: z.string().optional().describe('Contact mobile number'),
+    email: z.string().describe('Contact email address')
+  }).describe('Contact information for the organization'),
+  note: z.string().optional().describe('Additional notes about the organization')
+});
+
 // Format organization for display
 function formatOrganization(org: Organization): string {
   return `
@@ -55,6 +68,42 @@ export const organizationTools = {
           {
             type: 'text',
             text: `Failed to fetch organizations: ${errorMessage}`
+          }
+        ]
+      };
+    }
+  },
+  async createOrganization(args: z.infer<typeof CreateOrganizationArgsSchema>) {
+    try {
+      const response = await api.createOrganization(args);
+      
+      if (!response.success) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Error creating organization: ${response.errors.join(', ')}`
+            }
+          ]
+        };
+      }
+      
+      const org = response.result;
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Successfully created organization:\n${formatOrganization(org)}`
+          }
+        ]
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Failed to create organization: ${errorMessage}`
           }
         ]
       };
