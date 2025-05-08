@@ -88,6 +88,7 @@ A Node.js server implementing **Model Context Protocol (MCP)** for Binalyze AIR,
 - **Update SFTP Repository** - Update an existing SFTP evidence repository.
 - **Create FTPS Repository** - Create a new FTPS evidence repository.
 - **Update FTPS Repository** - Update an existing FTPS evidence repository.
+- **Validate FTPS Repository** - Validate FTPS repository configuration without creating it.
 
 ## Overview
 
@@ -274,3 +275,4 @@ In Claude Desktop, or any MCP Client, you can use natural language commands:
 | `Update SMB repository with ID "abc123"` | Updates an existing SMB repository's configuration |
 | `Create SFTP repository with name "My SFTP Repository"` | Creates a new SFTP evidence repository with specified credentials |
 | `Update SFTP repository with ID "abc123"` | Updates an existing SFTP repository's configuration |
+| `Validate FTPS repository configuration` | Tests if a FTPS repository configuration is valid without creating it |

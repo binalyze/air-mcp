@@ -229,5 +229,36 @@ export const api = {
       console.error('Error updating FTPS repository:', error);
       throw error;
     }
+  },
+  async validateFtpsRepository(data: {
+    name: string;
+    host: string;
+    port: number;
+    path: string;
+    username: string;
+    password: string;
+    allowSelfSignedSSL: boolean;
+    publicKey: string | null;
+  }): Promise<{ success: boolean; errors: string[]; statusCode: number }> {
+    try {
+      const response = await axios.post(
+        `${config.airHost}/api/public/evidences/repositories/validate/ftps`,
+        data,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${config.airApiToken}`
+          }
+        }
+      );
+      return {
+        success: response.data.success,
+        errors: response.data.errors,
+        statusCode: response.data.statusCode
+      };
+    } catch (error) {
+      console.error('Error validating FTPS repository:', error);
+      throw error;
+    }
   }
 };

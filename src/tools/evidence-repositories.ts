@@ -75,6 +75,18 @@ export const UpdateFtpsRepositoryArgsSchema = z.object({
   organizationIds: z.array(z.number()).optional().default([]).describe('Updated organization IDs to associate the repository with')
 });
 
+// Schema for validate FTPS repository arguments
+export const ValidateFtpsRepositoryArgsSchema = z.object({
+  name: z.string().describe('Name for the FTPS repository'),
+  host: z.string().describe('FTPS server hostname or IP address'),
+  port: z.number().default(22).describe('FTPS server port (default: 22)'),
+  path: z.string().describe('Path on the FTPS server (e.g. /)'),
+  username: z.string().describe('Username for FTPS authentication'),
+  password: z.string().describe('Password for FTPS authentication'),
+  allowSelfSignedSSL: z.boolean().default(false).describe('Whether to allow self-signed SSL certificates'),
+  publicKey: z.string().nullable().default(null).describe('Public key for FTPS authentication (optional)')
+});
+
 // Format repository for display
 function formatRepository(repo: Repository): string {
   return `
@@ -328,6 +340,50 @@ export const repositoryTools = {
           {
             type: 'text',
             text: `Failed to update FTPS repository: ${errorMessage}`
+          }
+        ]
+      };
+    }
+  },
+  async validateFtpsRepository(args: z.infer<typeof ValidateFtpsRepositoryArgsSchema>) {
+    try {
+      const result = await api.validateFtpsRepository({
+        name: args.name,
+        host: args.host,
+        port: args.port,
+        path: args.path,
+        username: args.username,
+        password: args.password,
+        allowSelfSignedSSL: args.allowSelfSignedSSL,
+        publicKey: args.publicKey
+      });
+      
+      if (result.success) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: 'FTPS repository configuration is valid.'
+            }
+          ]
+        };
+      } else {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `FTPS repository validation failed: ${result.errors.join(', ')}`
+            }
+          ]
+        };
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Failed to validate FTPS repository: ${errorMessage}`
           }
         ]
       };

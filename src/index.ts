@@ -35,11 +35,11 @@ import { CreateTriageTagArgsSchema, triageTagTools } from './tools/triage-tags';
 import { ListTriageTagsArgsSchema } from './tools/triage-tags';
 import { AddNoteToCaseArgsSchema, caseNotesTools, DeleteNoteFromCaseArgsSchema, UpdateNoteCaseArgsSchema } from './tools/cases-notes';
 import { casesExportTools, ExportCaseActivitiesArgsSchema, ExportCaseEndpointsArgsSchema, ExportCaseNotesArgsSchema, ExportCasesArgsSchema } from './tools/cases-export';
-import { CreateFtpsRepositoryArgsSchema, CreateSftpRepositoryArgsSchema, CreateSmbRepositoryArgsSchema, ListRepositoriesArgsSchema, repositoryTools, UpdateFtpsRepositoryArgsSchema, UpdateSftpRepositoryArgsSchema, UpdateSmbRepositoryArgsSchema } from './tools/evidence-repositories';
+import { CreateFtpsRepositoryArgsSchema, CreateSftpRepositoryArgsSchema, CreateSmbRepositoryArgsSchema, ListRepositoriesArgsSchema, repositoryTools, UpdateFtpsRepositoryArgsSchema, UpdateSftpRepositoryArgsSchema, UpdateSmbRepositoryArgsSchema, ValidateFtpsRepositoryArgsSchema } from './tools/evidence-repositories';
 
 const server = new Server({
   name: 'air-mcp',
-  version: '8.5.0'
+  version: '8.6.0'
 }, {
   capabilities: {
     tools: {}
@@ -2080,6 +2080,24 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: ['id', 'name', 'host', 'path', 'username', 'password'],
         },
       },
+      {
+        name: 'validate_ftps_repository',
+        description: 'Validate FTPS repository configuration without creating it',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            name: { type: 'string', description: 'Name for the FTPS repository' },
+            host: { type: 'string', description: 'FTPS server hostname or IP address' },
+            port: { type: 'number', description: 'FTPS server port (default: 22)' },
+            path: { type: 'string', description: 'Path on the FTPS server (e.g. /)' },
+            username: { type: 'string', description: 'Username for FTPS authentication' },
+            password: { type: 'string', description: 'Password for FTPS authentication' },
+            allowSelfSignedSSL: { type: 'boolean', description: 'Whether to allow self-signed SSL certificates' },
+            publicKey: { type: 'string', description: 'Public key for FTPS authentication (optional)' }
+          },
+          required: ['name', 'host', 'path', 'username', 'password'],
+        },
+      },
     ],
   };
 });
@@ -2429,6 +2447,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       validateAirApiToken();
       const parsedArgs = UpdateFtpsRepositoryArgsSchema.parse(args);
       return await repositoryTools.updateFtpsRepository(parsedArgs);
+    } else if (name === 'validate_ftps_repository') {
+      validateAirApiToken();
+      const parsedArgs = ValidateFtpsRepositoryArgsSchema.parse(args);
+      return await repositoryTools.validateFtpsRepository(parsedArgs);
     } else {
       throw new Error(`Unknown tool: ${name}`);
     }
