@@ -106,6 +106,7 @@ A Node.js server implementing **Model Context Protocol (MCP)** for Binalyze AIR,
 - **Create Organization** - Create a new organization.
 - **Update Organization** - Update an existing organization.
 - **Get Organization by ID** - Get detailed information about a specific organization by its ID.
+- **Check Organization Name Exists** - Check if an organization name already exists in the system.
 
 ## Overview
 
@@ -310,3 +311,4 @@ In Claude Desktop, or any MCP Client, you can use natural language commands:
 | `Create organization with name "My Organization" and contact information` | Creates a new organization with the specified name and contact information |
 | `Update organization with ID "123"` | Updates an existing organization with new settings |
 | `Get details about organization with ID 2` | Displays detailed information about a specific organization |
+| `Check if organization name "My Organization" already exists` | Checks if an organization name is already in use |

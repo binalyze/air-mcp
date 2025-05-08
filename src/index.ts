@@ -16,7 +16,7 @@ import {
   AssignImageAcquisitionTaskArgsSchema,
   CreateAcquisitionProfileArgsSchema
 } from './tools/acquisitions';
-import { CreateOrganizationArgsSchema, GetOrganizationByIdArgsSchema, organizationTools } from './tools/organizations';
+import { CheckOrganizationNameExistsArgsSchema, CreateOrganizationArgsSchema, GetOrganizationByIdArgsSchema, organizationTools } from './tools/organizations';
 import { ArchiveCaseArgsSchema, caseTools, ChangeCaseOwnerArgsSchema, CheckCaseNameArgsSchema, CloseCaseArgsSchema, CreateCaseArgsSchema, GetCaseActivitiesArgsSchema, GetCaseByIdArgsSchema, GetCaseEndpointsArgsSchema, GetCaseTasksByIdArgsSchema, GetCaseUsersArgsSchema, ImportTaskAssignmentsToCaseArgsSchema, ListCasesArgsSchema, OpenCaseArgsSchema, RemoveEndpointsFromCaseArgsSchema, RemoveTaskAssignmentFromCaseArgsSchema, UpdateCaseArgsSchema } from './tools/cases';
 import { policyTools, ListPoliciesArgsSchema, CreatePolicyArgsSchema, UpdatePolicyArgsSchema, GetPolicyByIdArgsSchema, UpdatePolicyPrioritiesArgsSchema, PolicyMatchStatsArgsSchema, DeletePolicyByIdArgsSchema } from './tools/policies';
 import { taskTools, ListTasksArgsSchema, GetTaskByIdArgsSchema, CancelTaskByIdArgsSchema, DeleteTaskByIdArgsSchema } from './tools/tasks';
@@ -42,7 +42,7 @@ import { UpdateOrganizationArgsSchema } from './tools/organizations';
 
 const server = new Server({
   name: 'air-mcp',
-  version: '9.5.0'
+  version: '9.6.0'
 }, {
   capabilities: {
     tools: {}
@@ -2400,6 +2400,20 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: ['id'],
         },
       },
+      {
+        name: 'check_organization_name_exists',
+        description: 'Check if an organization name already exists in the system',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            name: {
+              type: 'string',
+              description: 'Name of the organization to check',
+            },
+          },
+          required: ['name'],
+        },
+      },
     ],
   };
 });
@@ -2821,6 +2835,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       validateAirApiToken();
       const parsedArgs = GetOrganizationByIdArgsSchema.parse(args);
       return await organizationTools.getOrganizationById(parsedArgs);
+    } else if (name === 'check_organization_name_exists') {
+      validateAirApiToken();
+      const parsedArgs = CheckOrganizationNameExistsArgsSchema.parse(args);
+      return await organizationTools.checkOrganizationNameExists(parsedArgs);
     } else {
       throw new Error(`Unknown tool: ${name}`);
     }

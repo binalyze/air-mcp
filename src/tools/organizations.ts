@@ -37,6 +37,10 @@ export const GetOrganizationByIdArgsSchema = z.object({
   id: z.number().describe('ID of the organization to retrieve')
 });
 
+export const CheckOrganizationNameExistsArgsSchema = z.object({
+  name: z.string().describe('Name of the organization to check')
+});
+
 // Format organization for display
 function formatOrganization(org: Organization): string {
   return `
@@ -227,6 +231,41 @@ export const organizationTools = {
           {
             type: 'text',
             text: `Failed to fetch organization: ${errorMessage}`
+          }
+        ]
+      };
+    }
+  },
+  async checkOrganizationNameExists(args: z.infer<typeof CheckOrganizationNameExistsArgsSchema>) {
+    try {
+      const response = await api.checkOrganizationNameExists(args.name);
+      
+      if (!response.success) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Error checking organization name: ${response.errors.join(', ')}`
+            }
+          ]
+        };
+      }
+      
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Organization name "${args.name}" ${response.result ? 'already exists' : 'does not exist'}.`
+          }
+        ]
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Failed to check organization name: ${errorMessage}`
           }
         ]
       };

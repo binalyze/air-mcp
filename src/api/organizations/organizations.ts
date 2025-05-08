@@ -133,5 +133,23 @@ export const api = {
       console.error(`Error fetching organization with ID ${id}:`, error);
       throw error;
     }
+  },
+  async checkOrganizationNameExists(name: string): Promise<{ success: boolean; result: boolean; statusCode: number; errors: string[] }> {
+    try {
+      const response = await axios.get(
+        `${config.airHost}/api/public/organizations/check`,
+        {
+          params: { name },
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${config.airApiToken}`
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error checking organization name:', error);
+      throw error;
+    }
   }
 };
