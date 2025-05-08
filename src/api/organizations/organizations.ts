@@ -195,5 +195,23 @@ export const api = {
       console.error(`Error updating organization ${id} shareable deployment:`, error);
       throw error;
     }
+  },
+  async updateOrganizationDeploymentToken(id: number, deploymentToken: string): Promise<{ success: boolean; result: null; statusCode: number; errors: string[] }> {
+    try {
+      const response = await axios.post(
+        `${config.airHost}/api/public/organizations/${id}/deployment-token`,
+        { deploymentToken },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${config.airApiToken}`
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error(`Error updating organization ${id} deployment token:`, error);
+      throw error;
+    }
   }
 };

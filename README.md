@@ -109,6 +109,7 @@ A Node.js server implementing **Model Context Protocol (MCP)** for Binalyze AIR,
 - **Check Organization Name Exists** - Check if an organization name already exists in the system.
 - **Get Shareable Deployment Info** - Get information about a shareable deployment using a deployment token.
 - **Update Organization Shareable Deployment** - Update an organization's shareable deployment settings.
+- **Update Organization Deployment Token** - Update the deployment token for a specific organization.
 
 ## Overview
 
@@ -316,3 +317,4 @@ In Claude Desktop, or any MCP Client, you can use natural language commands:
 | `Check if organization name "My Organization" already exists` | Checks if an organization name is already in use |
 | `Get shareable deployment information using deployment token "token123"` | Retrieves information about a shareable deployment using a deployment token |
 | `Update organization shareable deployment with ID "123" to be enabled` | Updates an organization's shareable deployment settings |
+| `Update deployment token for organization with ID 2` | Updates the deployment token for a specific organization |
