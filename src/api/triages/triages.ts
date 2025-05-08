@@ -98,6 +98,17 @@ export interface GetTriageRuleResponse {
   errors: string[];
 }
 
+export interface ValidateTriageRuleRequest {
+  rule: string;
+}
+
+export interface ValidateTriageRuleResponse {
+  success: boolean;
+  result: null;
+  statusCode: number;
+  errors: string[];
+}
+
 export const api = {
   async getTriageRules(organizationIds: string | string[] = '0'): Promise<TriageRulesResponse> {
     try {
@@ -187,6 +198,24 @@ export const api = {
       return response.data;
     } catch (error) {
       console.error(`Error fetching triage rule with ID ${id}:`, error);
+      throw error;
+    }
+  },
+  async validateTriageRule(data: ValidateTriageRuleRequest): Promise<ValidateTriageRuleResponse> {
+    try {
+      const response = await axios.post(
+        `${config.airHost}/api/public/triages/rules/validate`,
+        data,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${config.airApiToken}`
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error validating triage rule:', error);
       throw error;
     }
   }

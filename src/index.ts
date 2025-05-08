@@ -20,7 +20,7 @@ import { organizationTools } from './tools/organizations';
 import { caseTools, ListCasesArgsSchema } from './tools/cases';
 import { policyTools, ListPoliciesArgsSchema, CreatePolicyArgsSchema, UpdatePolicyArgsSchema, GetPolicyByIdArgsSchema, UpdatePolicyPrioritiesArgsSchema, PolicyMatchStatsArgsSchema, DeletePolicyByIdArgsSchema } from './tools/policies';
 import { taskTools, ListTasksArgsSchema, GetTaskByIdArgsSchema, CancelTaskByIdArgsSchema, DeleteTaskByIdArgsSchema } from './tools/tasks';
-import { triageTools, ListTriageRulesArgsSchema, CreateTriageRuleArgsSchema, UpdateTriageRuleArgsSchema, DeleteTriageRuleArgsSchema, GetTriageRuleByIdArgsSchema } from './tools/triages';
+import { triageTools, ListTriageRulesArgsSchema, CreateTriageRuleArgsSchema, UpdateTriageRuleArgsSchema, DeleteTriageRuleArgsSchema, GetTriageRuleByIdArgsSchema, ValidateTriageRuleArgsSchema } from './tools/triages';
 import { userTools, ListUsersArgsSchema } from './tools/users';
 import { droneAnalyzerTools, acquisitionArtifactTools, eDiscoveryTools } from './tools/params';
 import { auditTools, ExportAuditLogsArgsSchema, ListAuditLogsArgsSchema } from './tools/audit';
@@ -36,7 +36,7 @@ import { ListTriageTagsArgsSchema } from './tools/triage-tags';
 
 const server = new Server({
   name: 'air-mcp',
-  version: '6.5.0'
+  version: '6.6.0'
 }, {
   capabilities: {
     tools: {}
@@ -1471,6 +1471,17 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: ['id'],
         },
       },
+      {
+        name: 'validate_triage_rule',
+        description: 'Validate a triage rule syntax without creating it',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            rule: { type: 'string', description: 'The YARA rule content to validate' },
+          },
+          required: ['rule'],
+        },
+      },
     ],
   };
 });
@@ -1696,6 +1707,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       validateAirApiToken();
       const parsedArgs = GetTriageRuleByIdArgsSchema.parse(args);
       return await triageTools.getTriageRuleById(parsedArgs);
+    } else if (name === 'validate_triage_rule') {
+      validateAirApiToken();
+      const parsedArgs = ValidateTriageRuleArgsSchema.parse(args);
+      return await triageTools.validateTriageRule(parsedArgs);
     } else {
       throw new Error(`Unknown tool: ${name}`);
     }

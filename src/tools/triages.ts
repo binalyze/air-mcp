@@ -36,6 +36,10 @@ export const GetTriageRuleByIdArgsSchema = z.object({
   id: z.string().describe('ID of the triage rule to retrieve'),
 });
 
+export const ValidateTriageRuleArgsSchema = z.object({
+  rule: z.string().describe('The YARA rule content to validate'),
+});
+
 // Format triage rule for display
 function formatTriageRule(rule: TriageRule): string {
   return `
@@ -253,6 +257,43 @@ export const triageTools = {
           {
             type: 'text',
             text: `Failed to fetch triage rule: ${errorMessage}`
+          }
+        ]
+      };
+    }
+  },
+  async validateTriageRule(args: z.infer<typeof ValidateTriageRuleArgsSchema>) {
+    try {
+      const response = await api.validateTriageRule({
+        rule: args.rule
+      });
+      
+      if (!response.success) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Error validating triage rule: ${response.errors.join(', ')}`
+            }
+          ]
+        };
+      }
+      
+      return {
+        content: [
+          {
+            type: 'text',
+            text: 'Triage rule validation successful! The rule syntax is valid.'
+          }
+        ]
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Failed to validate triage rule: ${errorMessage}`
           }
         ]
       };
