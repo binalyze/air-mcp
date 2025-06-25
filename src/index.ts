@@ -44,7 +44,7 @@ import { settingsTools, UpdateBannerMessageArgsSchema } from './tools/settings';
 
 const server = new Server({
   name: 'air-mcp',
-  version: '12.0.0'
+  version: '12.1.0'
 }, {
   capabilities: {
     tools: {}
@@ -1122,7 +1122,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
               type: 'object',
               properties: {
                 operator: { type: 'string', description: 'Logical operator for combining conditions (e.g., "and", "or")' },
-                conditions: { type: 'array', description: 'Array of conditions for policy filtering' }
+                conditions: { type: 'array', items: { type: 'object' }, description: 'Array of conditions for policy filtering' }
               },
               description: 'Filter conditions to determine which endpoints the policy applies to'
             },
@@ -1701,7 +1701,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
             visibility: { type: 'string', description: 'New visibility setting for the case' },
             assignedUserIds: { type: 'array', items: { type: 'string' }, description: 'New array of user IDs to assign to the case' },
             status: { type: 'string', enum: ['open', 'closed', 'archived'], description: 'New status for the case' },
-            notes: { type: 'array', description: 'New notes for the case' },
+            notes: { type: 'array', items: { type: 'object' }, description: 'New notes for the case' },
           },
           required: ['id'],
         },
