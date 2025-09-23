@@ -14,7 +14,7 @@ export const api = {
   // Download PPC file for a specific endpoint and task
   async downloadCasePpc(endpointId: string, taskId: string): Promise<EvidenceCasePpcResponse> {
     try {
-      const url = `http://${config.airHost}/api/public/evidence/case/ppc/${endpointId}/${taskId}`;
+      const url = `${config.airHost}/api/public/evidence/case/ppc/${endpointId}/${taskId}`;
       const response = await axios.get(url, {
         headers: {
           'Content-Type': 'application/json',
@@ -41,7 +41,7 @@ export const api = {
   // Download task report for a specific endpoint and task
   async downloadTaskReport(endpointId: string, taskId: string): Promise<EvidenceCasePpcResponse> {
     try {
-      const url = `http://${config.airHost}/api/public/evidence/case/report/${endpointId}/${taskId}`;
+      const url = `${config.airHost}/api/public/evidence/case/report/${endpointId}/${taskId}`;
       const response = await axios.get(url, {
         headers: {
           'Content-Type': 'application/json',
@@ -67,7 +67,7 @@ export const api = {
   },
   async getReportFileInfo(endpointId: string, taskId: string): Promise<EvidenceCasePpcResponse> {
     try {
-      const url = `http://${config.airHost}/api/public/evidence/case/report-file-info/${endpointId}/${taskId}`;
+      const url = `${config.airHost}/api/public/evidence/case/report-file-info/${endpointId}/${taskId}`;
       const response = await axios.get(url, {
         headers: {
           'Content-Type': 'application/json',
