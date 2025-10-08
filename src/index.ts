@@ -44,7 +44,7 @@ import { settingsTools, UpdateBannerMessageArgsSchema } from './tools/settings';
 
 const server = new Server({
   name: 'air-mcp',
-  version: '12.3.0'
+  version: '12.4.0'
 }, {
   capabilities: {
     tools: {}
