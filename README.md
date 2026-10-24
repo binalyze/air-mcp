@@ -1,6 +1,6 @@
 # Binalyze AIR MCP Server
 
-[![smithery badge](https://smithery.ai/badge/@binalyze/air-mcp)](https://smithery.ai/server/@binalyze/air-mcp)
+[![LightNow capabilities](https://lightnow.ai/badge/io.github.binalyze/air-mcp)](https://lightnow.ai/servers/io.github.binalyze/air-mcp)
 [![Node.js](https://img.shields.io/badge/Node.js-18+-green)](https://nodejs.org/)
 [![MCP](https://img.shields.io/badge/MCP-Protocol-blue)](https://modelcontextprotocol.ai/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
